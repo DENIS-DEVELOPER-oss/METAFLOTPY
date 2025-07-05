@@ -122,3 +122,154 @@
     </div>
 </div>
 {% endblock %}
+{% extends "base.html" %}
+
+{% block titulo %}MetaFlotPy - Inicio{% endblock %}
+
+{% block contenido %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <!-- Hero Section -->
+            <div class="jumbotron bg-primary text-white p-5 rounded mb-4">
+                <div class="container">
+                    <h1 class="display-4">
+                        <i class="bi bi-gear-fill"></i> MetaFlotPy
+                    </h1>
+                    <p class="lead">Aplicación web profesional para cálculos metalúrgicos</p>
+                    <p>Inspirada en el software Promitech, diseñada para ingenieros metalúrgicos y profesionales de la minería.</p>
+                    <a class="btn btn-light btn-lg" href="{{ url_for('principal.dashboard') }}" role="button">
+                        <i class="bi bi-speedometer2"></i> Ir al Dashboard
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Módulos Disponibles -->
+    <div class="row">
+        <div class="col-12">
+            <h2 class="mb-4">Módulos Disponibles</h2>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-6 col-lg-4 mb-4">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h5 class="card-title">
+                        <i class="bi bi-grid text-primary"></i> Análisis de tamaño de partícula
+                    </h5>
+                    <p class="card-text">Curvas granulométricas acumulativas y análisis de distribución de tamaños.</p>
+                    <a href="{{ url_for('tamizado.analisis_granulometrico') }}" class="btn btn-primary">Acceder</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6 col-lg-4 mb-4">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h5 class="card-title">
+                        <i class="bi bi-diagram-3 text-success"></i> Balance de masa de circuito de molienda
+                    </h5>
+                    <p class="card-text">Cálculos de flujos másicos, carga circulante y eficiencias de clasificación.</p>
+                    <a href="{{ url_for('balance_masa.balance_masa') }}" class="btn btn-success">Acceder</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6 col-lg-4 mb-4">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h5 class="card-title">
+                        <i class="bi bi-graph-up text-info"></i> Balance metalúrgico
+                    </h5>
+                    <p class="card-text">Recuperaciones metalúrgicas, leyes y distribución de elementos valiosos.</p>
+                    <a href="{{ url_for('balance_metalurgico.balance_metalurgico') }}" class="btn btn-info">Acceder</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6 col-lg-4 mb-4">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h5 class="card-title">
+                        <i class="bi bi-rulers text-warning"></i> Dimensionamiento de equipos
+                    </h5>
+                    <p class="card-text">Estimación de dimensiones de molinos, celdas de flotación y espesadores.</p>
+                    <a href="{{ url_for('dimensionamiento.dimensionamiento') }}" class="btn btn-warning">Acceder</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6 col-lg-4 mb-4">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h5 class="card-title">
+                        <i class="bi bi-cash-coin text-danger"></i> Valorización de concentrados
+                    </h5>
+                    <p class="card-text">Cálculo del valor económico de concentrados y evaluación financiera.</p>
+                    <a href="{{ url_for('valorizacion.valorizacion') }}" class="btn btn-danger">Acceder</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6 col-lg-4 mb-4">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h5 class="card-title">
+                        <i class="bi bi-tools text-secondary"></i> Utilitarios
+                    </h5>
+                    <p class="card-text">Herramientas de conversión y cálculos auxiliares para metalurgia.</p>
+                    <a href="{{ url_for('utilitarios.utilitarios') }}" class="btn btn-secondary">Acceder</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Características -->
+    <div class="row mt-5">
+        <div class="col-12">
+            <h2 class="mb-4">Características Principales</h2>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-4 mb-3">
+            <div class="d-flex">
+                <div class="flex-shrink-0">
+                    <i class="bi bi-calculator-fill text-primary fs-3"></i>
+                </div>
+                <div class="flex-grow-1 ms-3">
+                    <h5>Cálculos Especializados</h5>
+                    <p>Algoritmos específicos para la industria metalúrgica y minera.</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4 mb-3">
+            <div class="d-flex">
+                <div class="flex-shrink-0">
+                    <i class="bi bi-graph-up-arrow text-success fs-3"></i>
+                </div>
+                <div class="flex-grow-1 ms-3">
+                    <h5>Visualizaciones Interactivas</h5>
+                    <p>Gráficos dinámicos con Plotly para análisis detallado.</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4 mb-3">
+            <div class="d-flex">
+                <div class="flex-shrink-0">
+                    <i class="bi bi-shield-check text-info fs-3"></i>
+                </div>
+                <div class="flex-grow-1 ms-3">
+                    <h5>Interfaz Profesional</h5>
+                    <p>Diseño moderno y responsivo para uso en cualquier dispositivo.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

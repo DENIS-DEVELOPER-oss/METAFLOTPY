@@ -32,3 +32,55 @@
     </div>
 </div>
 {% endblock %}
+{% extends "base.html" %}
+
+{% block titulo %}Utilitarios - MetaFlotPy{% endblock %}
+
+{% block contenido %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <h1><i class="bi bi-tools"></i> Utilitarios</h1>
+            <p class="lead">Herramientas de conversión y cálculos auxiliares</p>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-6 col-lg-4 mb-4">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">
+                        <i class="bi bi-arrow-repeat text-primary"></i> Conversores
+                    </h5>
+                    <p class="card-text">Conversión de unidades comunes en metalurgia.</p>
+                    <a href="{{ url_for('utilitarios.conversores') }}" class="btn btn-primary">Acceder</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6 col-lg-4 mb-4">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">
+                        <i class="bi bi-calculator text-success"></i> Calculadora Metalúrgica
+                    </h5>
+                    <p class="card-text">Cálculos rápidos para operaciones básicas.</p>
+                    <button class="btn btn-success" disabled>Próximamente</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6 col-lg-4 mb-4">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">
+                        <i class="bi bi-table text-info"></i> Tablas de Referencia
+                    </h5>
+                    <p class="card-text">Datos técnicos y propiedades de materiales.</p>
+                    <button class="btn btn-info" disabled>Próximamente</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

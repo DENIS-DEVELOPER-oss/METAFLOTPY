@@ -10,7 +10,3 @@ def utilitarios():
 @bp_utilitarios.route('/conversores')
 def conversores():
     return render_template('utilitarios/conversores.html')
-
-@bp_utilitarios.route('/conversores')
-def conversores():
-    return render_template('utilitarios/conversores.html')

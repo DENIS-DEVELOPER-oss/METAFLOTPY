@@ -43,3 +43,55 @@
     </div>
 </div>
 {% endblock %}
+{% extends "base.html" %}
+
+{% block titulo %}Dimensionamiento - MetaFlotPy{% endblock %}
+
+{% block contenido %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <h1><i class="bi bi-rulers"></i> Dimensionamiento de Equipos</h1>
+            <p class="lead">Cálculo de dimensiones y capacidades de equipos metalúrgicos</p>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-6 col-lg-4 mb-4">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">
+                        <i class="bi bi-circle text-primary"></i> Molinos
+                    </h5>
+                    <p class="card-text">Dimensionamiento de molinos de bolas y SAG.</p>
+                    <a href="{{ url_for('dimensionamiento.molinos') }}" class="btn btn-primary">Acceder</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6 col-lg-4 mb-4">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">
+                        <i class="bi bi-droplet text-info"></i> Celdas de Flotación
+                    </h5>
+                    <p class="card-text">Cálculo de volumen y número de celdas requeridas.</p>
+                    <button class="btn btn-info" disabled>Próximamente</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6 col-lg-4 mb-4">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">
+                        <i class="bi bi-funnel text-success"></i> Espesadores
+                    </h5>
+                    <p class="card-text">Dimensionamiento de espesadores y clarificadores.</p>
+                    <button class="btn btn-success" disabled>Próximamente</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
