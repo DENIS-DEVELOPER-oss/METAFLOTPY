@@ -4,18 +4,73 @@
 
 {% block contenido %}
 <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-    <h1 class="h2"><i class="bi bi-diagram-3"></i> Balance de Masa</h1>
+    <h1 class="h2"><i class="bi bi-diagram-3"></i> Balance de Masa de Circuito de Molienda</h1>
 </div>
 
-<div class="row">
+<!-- Selector de Tipo de Circuito -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="bi bi-list-ul"></i> Seleccionar Tipo de Circuito</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6 col-lg-3 mb-3">
+                        <div class="card circuit-card" onclick="selectCircuit('directo')">
+                            <div class="card-body text-center">
+                                <i class="bi bi-arrow-right-circle text-primary fs-2"></i>
+                                <h6 class="mt-2">Circuito cerrado directo</h6>
+                                <p class="small text-muted">Clasificador en serie con el molino</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6 col-lg-3 mb-3">
+                        <div class="card circuit-card" onclick="selectCircuit('inverso')">
+                            <div class="card-body text-center">
+                                <i class="bi bi-arrow-left-circle text-success fs-2"></i>
+                                <h6 class="mt-2">Circuito cerrado inverso</h6>
+                                <p class="small text-muted">Alimentación directa al clasificador</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6 col-lg-3 mb-3">
+                        <div class="card circuit-card" onclick="selectCircuit('sabc1')">
+                            <div class="card-body text-center">
+                                <i class="bi bi-gear-fill text-warning fs-2"></i>
+                                <h6 class="mt-2">Circuito SABC-1</h6>
+                                <p class="small text-muted">Semi-autógeno + molino de bolas</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6 col-lg-3 mb-3">
+                        <div class="card circuit-card" onclick="selectCircuit('sabc2')">
+                            <div class="card-body text-center">
+                                <i class="bi bi-gear text-info fs-2"></i>
+                                <h6 class="mt-2">Circuito SABC-2</h6>
+                                <p class="small text-muted">Semi-autógeno + 2 molinos de bolas</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Formulario de Cálculo -->
+<div class="row" id="calculation-section" style="display: none;">
     <div class="col-md-4">
         <div class="card">
             <div class="card-header">
                 <h5>Parámetros de Entrada</h5>
+                <small class="text-muted" id="circuit-type-label"></small>
             </div>
             <div class="card-body">
                 <form method="POST">
                     {{ formulario.hidden_tag() }}
+                    
+                    <input type="hidden" id="tipo_circuito" name="tipo_circuito" value="">
                     
                     <div class="mb-3">
                         {{ formulario.alimentacion_fresca.label(class="form-label") }}
@@ -100,10 +155,63 @@
 {% endblock %}
 
 {% block scripts %}
-{% if grafico %}
+<style>
+.circuit-card {
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border: 2px solid #e9ecef;
+}
+
+.circuit-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    border-color: #007bff;
+}
+
+.circuit-card.selected {
+    border-color: #007bff;
+    background-color: #f8f9fa;
+}
+
+.circuit-card .card-body {
+    padding: 1.5rem;
+}
+</style>
+
 <script>
-    var graficoData = {{ grafico|safe }};
-    Plotly.newPlot('grafico-balance', graficoData.data, graficoData.layout);
-</script>
+function selectCircuit(type) {
+    // Remover selección anterior
+    document.querySelectorAll('.circuit-card').forEach(card => {
+        card.classList.remove('selected');
+    });
+    
+    // Seleccionar nueva tarjeta
+    event.currentTarget.classList.add('selected');
+    
+    // Actualizar tipo de circuito
+    document.getElementById('tipo_circuito').value = type;
+    
+    // Actualizar etiqueta
+    const labels = {
+        'directo': 'Circuito Cerrado Directo',
+        'inverso': 'Circuito Cerrado Inverso', 
+        'sabc1': 'Circuito SABC-1',
+        'sabc2': 'Circuito SABC-2'
+    };
+    document.getElementById('circuit-type-label').textContent = labels[type];
+    
+    // Mostrar sección de cálculo
+    document.getElementById('calculation-section').style.display = 'block';
+    
+    // Scroll suave hacia la sección de cálculo
+    document.getElementById('calculation-section').scrollIntoView({ 
+        behavior: 'smooth' 
+    });
+}
+
+{% if grafico %}
+var graficoData = {{ grafico|safe }};
+Plotly.newPlot('grafico-balance', graficoData.data, graficoData.layout);
 {% endif %}
+</script>
 {% endblock %}
