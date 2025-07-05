@@ -1,0 +1,108 @@
+
+{% extends "base.html" %}
+
+{% block titulo %}Dashboard - MetaFlotPy{% endblock %}
+
+{% block contenido %}
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h1 class="h2">Dashboard</h1>
+    <div class="btn-toolbar mb-2 mb-md-0">
+        <div class="btn-group me-2">
+            <button type="button" class="btn btn-sm btn-outline-secondary">Exportar</button>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-3 mb-4">
+        <div class="card border-primary">
+            <div class="card-body text-center">
+                <i class="bi bi-bar-chart display-4 text-primary"></i>
+                <h5 class="card-title">Tamizado</h5>
+                <p class="card-text">Análisis granulométrico completo</p>
+                <a href="{{ url_for('tamizado.analisis_granulometrico') }}" class="btn btn-primary">Acceder</a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3 mb-4">
+        <div class="card border-success">
+            <div class="card-body text-center">
+                <i class="bi bi-diagram-3 display-4 text-success"></i>
+                <h5 class="card-title">Balance de Masa</h5>
+                <p class="card-text">Cálculos de flujos y cargas</p>
+                <a href="{{ url_for('balance_masa.balance_masa') }}" class="btn btn-success">Acceder</a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3 mb-4">
+        <div class="card border-warning">
+            <div class="card-body text-center">
+                <i class="bi bi-pie-chart display-4 text-warning"></i>
+                <h5 class="card-title">Balance Metalúrgico</h5>
+                <p class="card-text">Recuperaciones y leyes</p>
+                <a href="{{ url_for('balance_metalurgico.balance_metalurgico') }}" class="btn btn-warning">Acceder</a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3 mb-4">
+        <div class="card border-info">
+            <div class="card-body text-center">
+                <i class="bi bi-tools display-4 text-info"></i>
+                <h5 class="card-title">Dimensionamiento</h5>
+                <p class="card-text">Diseño de equipos</p>
+                <a href="{{ url_for('dimensionamiento.dimensionamiento') }}" class="btn btn-info">Acceder</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="bi bi-graph-up"></i> Módulos Más Utilizados</h5>
+            </div>
+            <div class="card-body">
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        Análisis Granulométrico
+                        <span class="badge bg-primary rounded-pill">85%</span>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        Balance de Masa
+                        <span class="badge bg-primary rounded-pill">78%</span>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        Balance Metalúrgico
+                        <span class="badge bg-primary rounded-pill">65%</span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="bi bi-clock-history"></i> Accesos Rápidos</h5>
+            </div>
+            <div class="card-body">
+                <div class="d-grid gap-2">
+                    <a href="{{ url_for('valorizacion.valorizacion') }}" class="btn btn-outline-danger">
+                        <i class="bi bi-currency-dollar"></i> Valorización de Concentrados
+                    </a>
+                    <a href="{{ url_for('utilitarios.conversores') }}" class="btn btn-outline-secondary">
+                        <i class="bi bi-calculator"></i> Conversores de Unidades
+                    </a>
+                    <a href="{{ url_for('dimensionamiento.molinos') }}" class="btn btn-outline-info">
+                        <i class="bi bi-gear"></i> Dimensionamiento de Molinos
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

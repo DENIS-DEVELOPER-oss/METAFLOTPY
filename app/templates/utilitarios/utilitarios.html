@@ -1,0 +1,34 @@
+
+{% extends "base.html" %}
+
+{% block titulo %}Utilitarios - MetaFlotPy{% endblock %}
+
+{% block contenido %}
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h1 class="h2"><i class="bi bi-calculator"></i> Herramientas Utilitarias</h1>
+</div>
+
+<div class="row">
+    <div class="col-md-6 mb-4">
+        <div class="card">
+            <div class="card-body text-center">
+                <i class="bi bi-arrows-expand display-4 text-primary"></i>
+                <h5 class="card-title">Conversores de Unidades</h5>
+                <p class="card-text">Herramientas de conversión para diferentes unidades</p>
+                <a href="{{ url_for('utilitarios.conversores') }}" class="btn btn-primary">Acceder</a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6 mb-4">
+        <div class="card">
+            <div class="card-body text-center">
+                <i class="bi bi-calculator display-4 text-success"></i>
+                <h5 class="card-title">Calculadoras Auxiliares</h5>
+                <p class="card-text">Cálculos auxiliares para operaciones mineras</p>
+                <a href="#" class="btn btn-success">Próximamente</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

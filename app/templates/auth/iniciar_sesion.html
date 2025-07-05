@@ -1,0 +1,59 @@
+
+{% extends "base.html" %}
+
+{% block titulo %}Iniciar Sesión - MetaFlotPy{% endblock %}
+
+{% block contenido %}
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header text-center">
+                <h3><i class="bi bi-box-arrow-in-right"></i> Iniciar Sesión</h3>
+            </div>
+            <div class="card-body">
+                <form method="POST">
+                    {{ formulario.hidden_tag() }}
+                    
+                    <div class="mb-3">
+                        {{ formulario.nombre_usuario.label(class="form-label") }}
+                        {{ formulario.nombre_usuario(class="form-control") }}
+                        {% if formulario.nombre_usuario.errors %}
+                            <div class="text-danger">
+                                {% for error in formulario.nombre_usuario.errors %}
+                                    <small>{{ error }}</small>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="mb-3">
+                        {{ formulario.contrasena.label(class="form-label") }}
+                        {{ formulario.contrasena(class="form-control") }}
+                        {% if formulario.contrasena.errors %}
+                            <div class="text-danger">
+                                {% for error in formulario.contrasena.errors %}
+                                    <small>{{ error }}</small>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="d-grid">
+                        {{ formulario.enviar(class="btn btn-primary btn-lg") }}
+                    </div>
+                </form>
+                
+                <hr>
+                <div class="text-center">
+                    <p>¿No tienes cuenta? <a href="{{ url_for('auth.registro') }}">Regístrate aquí</a></p>
+                    <div class="alert alert-info mt-3">
+                        <small>
+                            <strong>Demo:</strong> Usuario: admin, Contraseña: admin123
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

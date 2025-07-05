@@ -1,0 +1,110 @@
+
+{% extends "base.html" %}
+
+{% block titulo %}Balance de Masa - MetaFlotPy{% endblock %}
+
+{% block contenido %}
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h1 class="h2"><i class="bi bi-diagram-3"></i> Balance de Masa</h1>
+</div>
+
+<div class="row">
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h5>Parámetros de Entrada</h5>
+            </div>
+            <div class="card-body">
+                <form method="POST">
+                    {{ formulario.hidden_tag() }}
+                    
+                    <div class="mb-3">
+                        {{ formulario.alimentacion_fresca.label(class="form-label") }}
+                        {{ formulario.alimentacion_fresca(class="form-control") }}
+                    </div>
+                    
+                    <div class="mb-3">
+                        {{ formulario.razon_carga_circulante.label(class="form-label") }}
+                        {{ formulario.razon_carga_circulante(class="form-control") }}
+                    </div>
+                    
+                    <div class="mb-3">
+                        {{ formulario.eficiencia_clasificador.label(class="form-label") }}
+                        {{ formulario.eficiencia_clasificador(class="form-control") }}
+                    </div>
+                    
+                    <div class="d-grid">
+                        {{ formulario.calcular(class="btn btn-primary") }}
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-8">
+        {% if resultados %}
+        <div class="card mb-3">
+            <div class="card-header">
+                <h5>Diagrama de Flujos</h5>
+            </div>
+            <div class="card-body">
+                <div id="grafico-balance"></div>
+            </div>
+        </div>
+        
+        <div class="card">
+            <div class="card-header">
+                <h5>Resultados del Balance</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6>Flujos Principales:</h6>
+                        <ul class="list-group list-group-flush">
+                            <li class="list-group-item d-flex justify-content-between">
+                                <strong>Alimentación Fresca:</strong>
+                                <span>{{ resultados.alimentacion_fresca }} t/h</span>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between">
+                                <strong>Carga Circulante:</strong>
+                                <span>{{ resultados.carga_circulante }} t/h</span>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between">
+                                <strong>Alimentación al Molino:</strong>
+                                <span>{{ resultados.alimentacion_molino }} t/h</span>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="col-md-6">
+                        <h6>Productos del Clasificador:</h6>
+                        <ul class="list-group list-group-flush">
+                            <li class="list-group-item d-flex justify-content-between">
+                                <strong>Descarga (gruesos):</strong>
+                                <span>{{ resultados.descarga_clasificador }} t/h</span>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between">
+                                <strong>Rebose (finos):</strong>
+                                <span>{{ resultados.rebose_clasificador }} t/h</span>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between">
+                                <strong>Eficiencia:</strong>
+                                <span>{{ resultados.eficiencia_clasificador }}%</span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+{% if grafico %}
+<script>
+    var graficoData = {{ grafico|safe }};
+    Plotly.newPlot('grafico-balance', graficoData.data, graficoData.layout);
+</script>
+{% endif %}
+{% endblock %}

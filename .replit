@@ -14,3 +14,15 @@ deploymentTarget = "cloudrun"
 [[ports]]
 localPort = 5000
 externalPort = 80
+
+[workflows]
+runButton = "Ejecutar MetaFlotPy"
+
+[[workflows.workflow]]
+name = "Ejecutar MetaFlotPy"
+author = 44574688
+mode = "sequential"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "python main.py"
