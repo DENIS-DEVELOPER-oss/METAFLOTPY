@@ -1,37 +1,3 @@
-
-{% extends "base.html" %}
-
-{% block titulo %}Utilitarios - MetaFlotPy{% endblock %}
-
-{% block contenido %}
-<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-    <h1 class="h2"><i class="bi bi-calculator"></i> Herramientas Utilitarias</h1>
-</div>
-
-<div class="row">
-    <div class="col-md-6 mb-4">
-        <div class="card">
-            <div class="card-body text-center">
-                <i class="bi bi-arrows-expand display-4 text-primary"></i>
-                <h5 class="card-title">Conversores de Unidades</h5>
-                <p class="card-text">Herramientas de conversión para diferentes unidades</p>
-                <a href="{{ url_for('utilitarios.conversores') }}" class="btn btn-primary">Acceder</a>
-            </div>
-        </div>
-    </div>
-    
-    <div class="col-md-6 mb-4">
-        <div class="card">
-            <div class="card-body text-center">
-                <i class="bi bi-calculator display-4 text-success"></i>
-                <h5 class="card-title">Calculadoras Auxiliares</h5>
-                <p class="card-text">Cálculos auxiliares para operaciones mineras</p>
-                <a href="#" class="btn btn-success">Próximamente</a>
-            </div>
-        </div>
-    </div>
-</div>
-{% endblock %}
 {% extends "base.html" %}
 
 {% block titulo %}Utilitarios - MetaFlotPy{% endblock %}
@@ -50,9 +16,9 @@
             <div class="card">
                 <div class="card-body">
                     <h5 class="card-title">
-                        <i class="bi bi-arrow-repeat text-primary"></i> Conversores
+                        <i class="bi bi-arrow-left-right text-primary"></i> Conversores
                     </h5>
-                    <p class="card-text">Conversión de unidades comunes en metalurgia.</p>
+                    <p class="card-text">Conversión de unidades métricas e imperiales.</p>
                     <a href="{{ url_for('utilitarios.conversores') }}" class="btn btn-primary">Acceder</a>
                 </div>
             </div>
@@ -62,10 +28,10 @@
             <div class="card">
                 <div class="card-body">
                     <h5 class="card-title">
-                        <i class="bi bi-calculator text-success"></i> Calculadora Metalúrgica
+                        <i class="bi bi-calculator text-info"></i> Calculadoras
                     </h5>
-                    <p class="card-text">Cálculos rápidos para operaciones básicas.</p>
-                    <button class="btn btn-success" disabled>Próximamente</button>
+                    <p class="card-text">Calculadoras especializadas para metalurgia.</p>
+                    <button class="btn btn-info" disabled>Próximamente</button>
                 </div>
             </div>
         </div>
@@ -74,10 +40,10 @@
             <div class="card">
                 <div class="card-body">
                     <h5 class="card-title">
-                        <i class="bi bi-table text-info"></i> Tablas de Referencia
+                        <i class="bi bi-table text-success"></i> Tablas de Referencia
                     </h5>
-                    <p class="card-text">Datos técnicos y propiedades de materiales.</p>
-                    <button class="btn btn-info" disabled>Próximamente</button>
+                    <p class="card-text">Tablas de densidades, propiedades de minerales.</p>
+                    <button class="btn btn-success" disabled>Próximamente</button>
                 </div>
             </div>
         </div>
