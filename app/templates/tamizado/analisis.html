@@ -1,3 +1,4 @@
+
 {% extends "base.html" %}
 
 {% block titulo %}Análisis Granulométrico - MetaFlotPy{% endblock %}
@@ -11,13 +12,384 @@
         </div>
     </div>
 
-    <div class="row">
-        <div class="col-12">
-            <div class="alert alert-info">
-                <i class="bi bi-info-circle"></i>
-                <strong>Módulo en Desarrollo:</strong> Esta funcionalidad estará disponible próximamente.
+    <!-- Navegación por pestañas -->
+    <ul class="nav nav-tabs" id="analisisTab" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="gates-tab" data-bs-toggle="tab" data-bs-target="#gates" type="button" role="tab">
+                <i class="bi bi-graph-up"></i> Gates Gaudin Schuhmann
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="rosin-tab" data-bs-toggle="tab" data-bs-target="#rosin" type="button" role="tab">
+                <i class="bi bi-activity"></i> Rosin Rammler
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="regresion-tab" data-bs-toggle="tab" data-bs-target="#regresion" type="button" role="tab">
+                <i class="bi bi-graph-down"></i> Regresión Lineal
+            </button>
+        </li>
+    </ul>
+
+    <div class="tab-content" id="analisisTabContent">
+        <!-- Gates Gaudin Schuhmann -->
+        <div class="tab-pane fade show active" id="gates" role="tabpanel">
+            <div class="row mt-4">
+                <div class="col-md-4">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5><i class="bi bi-calculator"></i> Datos de Entrada - Gates Gaudin Schuhmann</h5>
+                        </div>
+                        <div class="card-body">
+                            <form id="formGates" method="POST">
+                                <input type="hidden" name="modelo" value="gates">
+                                {{ formulario.hidden_tag() if formulario }}
+                                
+                                <div class="mb-3">
+                                    <label class="form-label">Peso Total de Muestra (g)</label>
+                                    <input type="number" class="form-control" name="peso_total" step="0.01" required>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label class="form-label">Datos de Mallas</label>
+                                    <div id="mallasGates">
+                                        <div class="row mb-2">
+                                            <div class="col-6">
+                                                <input type="number" class="form-control" placeholder="Abertura (mm)" name="abertura[]" step="0.001" required>
+                                            </div>
+                                            <div class="col-6">
+                                                <input type="number" class="form-control" placeholder="Peso Retenido (g)" name="peso_retenido[]" step="0.01" required>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <button type="button" class="btn btn-sm btn-outline-primary" onclick="agregarMalla('mallasGates')">
+                                        <i class="bi bi-plus"></i> Agregar Malla
+                                    </button>
+                                </div>
+
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="bi bi-graph-up"></i> Calcular Gates Gaudin Schuhmann
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-8">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5><i class="bi bi-graph-up"></i> Resultados Gates Gaudin Schuhmann</h5>
+                        </div>
+                        <div class="card-body">
+                            <div id="graficoGates">
+                                {% if grafico_gates %}
+                                <div id="plotGates"></div>
+                                <script>
+                                    var graficoGates = {{ grafico_gates|safe }};
+                                    Plotly.newPlot('plotGates', graficoGates.data, graficoGates.layout);
+                                </script>
+                                {% else %}
+                                <div class="text-center text-muted py-5">
+                                    <i class="bi bi-graph-up display-1"></i>
+                                    <p>El gráfico aparecerá aquí después del cálculo</p>
+                                </div>
+                                {% endif %}
+                            </div>
+                            
+                            {% if resultados_gates %}
+                            <div class="mt-3">
+                                <h6>Parámetros del Modelo:</h6>
+                                <ul class="list-group">
+                                    <li class="list-group-item d-flex justify-content-between">
+                                        <strong>Tamaño Máximo (k):</strong>
+                                        <span>{{ "%.3f"|format(resultados_gates.k) }} mm</span>
+                                    </li>
+                                    <li class="list-group-item d-flex justify-content-between">
+                                        <strong>Módulo de Distribución (m):</strong>
+                                        <span>{{ "%.3f"|format(resultados_gates.m) }}</span>
+                                    </li>
+                                    <li class="list-group-item d-flex justify-content-between">
+                                        <strong>Coeficiente de Correlación (R²):</strong>
+                                        <span>{{ "%.4f"|format(resultados_gates.r2) }}</span>
+                                    </li>
+                                </ul>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Rosin Rammler -->
+        <div class="tab-pane fade" id="rosin" role="tabpanel">
+            <div class="row mt-4">
+                <div class="col-md-4">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5><i class="bi bi-calculator"></i> Datos de Entrada - Rosin Rammler</h5>
+                        </div>
+                        <div class="card-body">
+                            <form id="formRosin" method="POST">
+                                <input type="hidden" name="modelo" value="rosin">
+                                
+                                <div class="mb-3">
+                                    <label class="form-label">Peso Total de Muestra (g)</label>
+                                    <input type="number" class="form-control" name="peso_total" step="0.01" required>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label class="form-label">Datos de Mallas</label>
+                                    <div id="mallasRosin">
+                                        <div class="row mb-2">
+                                            <div class="col-6">
+                                                <input type="number" class="form-control" placeholder="Abertura (mm)" name="abertura[]" step="0.001" required>
+                                            </div>
+                                            <div class="col-6">
+                                                <input type="number" class="form-control" placeholder="Peso Retenido (g)" name="peso_retenido[]" step="0.01" required>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <button type="button" class="btn btn-sm btn-outline-primary" onclick="agregarMalla('mallasRosin')">
+                                        <i class="bi bi-plus"></i> Agregar Malla
+                                    </button>
+                                </div>
+
+                                <button type="submit" class="btn btn-success">
+                                    <i class="bi bi-activity"></i> Calcular Rosin Rammler
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-8">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5><i class="bi bi-activity"></i> Resultados Rosin Rammler</h5>
+                        </div>
+                        <div class="card-body">
+                            <div id="graficoRosin">
+                                {% if grafico_rosin %}
+                                <div id="plotRosin"></div>
+                                <script>
+                                    var graficoRosin = {{ grafico_rosin|safe }};
+                                    Plotly.newPlot('plotRosin', graficoRosin.data, graficoRosin.layout);
+                                </script>
+                                {% else %}
+                                <div class="text-center text-muted py-5">
+                                    <i class="bi bi-activity display-1"></i>
+                                    <p>El gráfico aparecerá aquí después del cálculo</p>
+                                </div>
+                                {% endif %}
+                            </div>
+                            
+                            {% if resultados_rosin %}
+                            <div class="mt-3">
+                                <h6>Parámetros del Modelo:</h6>
+                                <ul class="list-group">
+                                    <li class="list-group-item d-flex justify-content-between">
+                                        <strong>Tamaño Característico (x₀):</strong>
+                                        <span>{{ "%.3f"|format(resultados_rosin.x0) }} mm</span>
+                                    </li>
+                                    <li class="list-group-item d-flex justify-content-between">
+                                        <strong>Módulo de Uniformidad (n):</strong>
+                                        <span>{{ "%.3f"|format(resultados_rosin.n) }}</span>
+                                    </li>
+                                    <li class="list-group-item d-flex justify-content-between">
+                                        <strong>Coeficiente de Correlación (R²):</strong>
+                                        <span>{{ "%.4f"|format(resultados_rosin.r2) }}</span>
+                                    </li>
+                                </ul>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Regresión Lineal -->
+        <div class="tab-pane fade" id="regresion" role="tabpanel">
+            <div class="row mt-4">
+                <div class="col-md-4">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5><i class="bi bi-calculator"></i> Datos de Entrada - Regresión Lineal</h5>
+                        </div>
+                        <div class="card-body">
+                            <form id="formRegresion" method="POST">
+                                <input type="hidden" name="modelo" value="regresion">
+                                
+                                <div class="mb-3">
+                                    <label class="form-label">Peso Total de Muestra (g)</label>
+                                    <input type="number" class="form-control" name="peso_total" step="0.01" required>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label class="form-label">Datos de Mallas</label>
+                                    <div id="mallasRegresion">
+                                        <div class="row mb-2">
+                                            <div class="col-6">
+                                                <input type="number" class="form-control" placeholder="Abertura (mm)" name="abertura[]" step="0.001" required>
+                                            </div>
+                                            <div class="col-6">
+                                                <input type="number" class="form-control" placeholder="Peso Retenido (g)" name="peso_retenido[]" step="0.01" required>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <button type="button" class="btn btn-sm btn-outline-primary" onclick="agregarMalla('mallasRegresion')">
+                                        <i class="bi bi-plus"></i> Agregar Malla
+                                    </button>
+                                </div>
+
+                                <button type="submit" class="btn btn-warning">
+                                    <i class="bi bi-graph-down"></i> Calcular Regresión Lineal
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-8">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5><i class="bi bi-graph-down"></i> Resultados Regresión Lineal</h5>
+                        </div>
+                        <div class="card-body">
+                            <div id="graficoRegresion">
+                                {% if grafico_regresion %}
+                                <div id="plotRegresion"></div>
+                                <script>
+                                    var graficoRegresion = {{ grafico_regresion|safe }};
+                                    Plotly.newPlot('plotRegresion', graficoRegresion.data, graficoRegresion.layout);
+                                </script>
+                                {% else %}
+                                <div class="text-center text-muted py-5">
+                                    <i class="bi bi-graph-down display-1"></i>
+                                    <p>El gráfico aparecerá aquí después del cálculo</p>
+                                </div>
+                                {% endif %}
+                            </div>
+                            
+                            {% if resultados_regresion %}
+                            <div class="mt-3">
+                                <h6>Parámetros del Modelo:</h6>
+                                <ul class="list-group">
+                                    <li class="list-group-item d-flex justify-content-between">
+                                        <strong>Pendiente (m):</strong>
+                                        <span>{{ "%.4f"|format(resultados_regresion.pendiente) }}</span>
+                                    </li>
+                                    <li class="list-group-item d-flex justify-content-between">
+                                        <strong>Intercepto (b):</strong>
+                                        <span>{{ "%.4f"|format(resultados_regresion.intercepto) }}</span>
+                                    </li>
+                                    <li class="list-group-item d-flex justify-content-between">
+                                        <strong>Coeficiente de Correlación (R²):</strong>
+                                        <span>{{ "%.4f"|format(resultados_regresion.r2) }}</span>
+                                    </li>
+                                    <li class="list-group-item">
+                                        <strong>Ecuación:</strong> y = {{ "%.4f"|format(resultados_regresion.pendiente) }}x + {{ "%.4f"|format(resultados_regresion.intercepto) }}
+                                    </li>
+                                </ul>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
+
+    <!-- Tabla de datos común -->
+    {% if tabla_datos %}
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5><i class="bi bi-table"></i> Tabla de Datos</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Abertura (mm)</th>
+                                    <th>Peso Retenido (g)</th>
+                                    <th>% Retenido</th>
+                                    <th>% Acumulado</th>
+                                    <th>% Pasante</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for fila in tabla_datos %}
+                                <tr>
+                                    <td>{{ "%.3f"|format(fila.abertura) }}</td>
+                                    <td>{{ "%.2f"|format(fila.peso_retenido) }}</td>
+                                    <td>{{ "%.2f"|format(fila.porcentaje_retenido) }}</td>
+                                    <td>{{ "%.2f"|format(fila.porcentaje_acumulado) }}</td>
+                                    <td>{{ "%.2f"|format(fila.porcentaje_pasante) }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
 </div>
+
+<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+<script>
+function agregarMalla(containerId) {
+    const container = document.getElementById(containerId);
+    const nuevaFila = document.createElement('div');
+    nuevaFila.className = 'row mb-2';
+    nuevaFila.innerHTML = `
+        <div class="col-5">
+            <input type="number" class="form-control" placeholder="Abertura (mm)" name="abertura[]" step="0.001" required>
+        </div>
+        <div class="col-5">
+            <input type="number" class="form-control" placeholder="Peso Retenido (g)" name="peso_retenido[]" step="0.01" required>
+        </div>
+        <div class="col-2">
+            <button type="button" class="btn btn-sm btn-outline-danger" onclick="this.parentElement.parentElement.remove()">
+                <i class="bi bi-trash"></i>
+            </button>
+        </div>
+    `;
+    container.appendChild(nuevaFila);
+}
+
+// Inicializar con algunas mallas por defecto
+document.addEventListener('DOMContentLoaded', function() {
+    const mallas_estandar = [25.4, 19.0, 12.7, 9.51, 6.35, 4.75, 2.38, 1.19];
+    
+    ['mallasGates', 'mallasRosin', 'mallasRegresion'].forEach(containerId => {
+        const container = document.getElementById(containerId);
+        container.innerHTML = ''; // Limpiar
+        
+        mallas_estandar.forEach(abertura => {
+            const nuevaFila = document.createElement('div');
+            nuevaFila.className = 'row mb-2';
+            nuevaFila.innerHTML = `
+                <div class="col-5">
+                    <input type="number" class="form-control" placeholder="Abertura (mm)" name="abertura[]" step="0.001" value="${abertura}" required>
+                </div>
+                <div class="col-5">
+                    <input type="number" class="form-control" placeholder="Peso Retenido (g)" name="peso_retenido[]" step="0.01" required>
+                </div>
+                <div class="col-2">
+                    <button type="button" class="btn btn-sm btn-outline-danger" onclick="this.parentElement.parentElement.remove()">
+                        <i class="bi bi-trash"></i>
+                    </button>
+                </div>
+            `;
+            container.appendChild(nuevaFila);
+        });
+    });
+});
+</script>
 {% endblock %}
