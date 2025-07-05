@@ -1,6 +1,5 @@
 
 from flask import Blueprint, render_template
-from flask_login import login_required
 from app.balance_masa.forms import FormularioBalanceMasa
 import plotly.graph_objs as go
 import plotly.utils
@@ -9,7 +8,6 @@ import json
 bp_balance_masa = Blueprint('balance_masa', __name__)
 
 @bp_balance_masa.route('/', methods=['GET', 'POST'])
-@login_required
 def balance_masa():
     formulario = FormularioBalanceMasa()
     resultados = None
@@ -25,50 +23,49 @@ def balance_masa():
                          grafico=grafico_json)
 
 def calcular_balance_masa(formulario):
-    F = formulario.alimentacion_fresca.data  # t/h
-    CCR = formulario.razon_carga_circulante.data
-    E = formulario.eficiencia_clasificador.data / 100
+    # Cálculos simplificados de balance de masa
+    alimentacion_fresca = formulario.alimentacion_fresca.data
+    carga_circulante = formulario.carga_circulante.data
+    eficiencia = formulario.eficiencia.data / 100
     
-    # Cálculos del balance de masa
-    L = F * CCR  # Carga circulante
-    A = F + L    # Alimentación total al molino
-    U = A * (1 - E)  # Descarga del clasificador
-    O = A * E    # Rebose del clasificador
+    # Cálculos básicos
+    carga_total = alimentacion_fresca * (1 + carga_circulante)
+    overflow = carga_total * eficiencia
+    underflow = carga_total - overflow
     
     return {
-        'alimentacion_fresca': F,
-        'carga_circulante': round(L, 2),
-        'alimentacion_molino': round(A, 2),
-        'descarga_clasificador': round(U, 2),
-        'rebose_clasificador': round(O, 2),
-        'razon_carga_circulante': CCR,
-        'eficiencia_clasificador': formulario.eficiencia_clasificador.data
+        'alimentacion_fresca': alimentacion_fresca,
+        'carga_circulante': carga_circulante * alimentacion_fresca,
+        'carga_total': carga_total,
+        'overflow': overflow,
+        'underflow': underflow,
+        'eficiencia': eficiencia * 100
     }
 
 def crear_diagrama_flujo(resultados):
-    # Crear diagrama de flujo simplificado
+    # Crear gráfico de barras simple
     fig = go.Figure()
     
-    # Datos para el gráfico de barras
-    flujos = ['Alimentación\nFresca', 'Carga\nCirculante', 'Alimentación\nMolino', 
-              'Descarga\nClasificador', 'Rebose\nClasificador']
-    valores = [resultados['alimentacion_fresca'], resultados['carga_circulante'],
-               resultados['alimentacion_molino'], resultados['descarga_clasificador'],
-               resultados['rebose_clasificador']]
+    categorias = ['Alimentación Fresca', 'Carga Circulante', 'Overflow', 'Underflow']
+    valores = [
+        resultados['alimentacion_fresca'],
+        resultados['carga_circulante'],
+        resultados['overflow'],
+        resultados['underflow']
+    ]
     
     fig.add_trace(go.Bar(
-        x=flujos,
+        x=categorias,
         y=valores,
-        marker_color=['#ff7f0e', '#2ca02c', '#1f77b4', '#d62728', '#9467bd'],
-        text=[f'{v:.1f} t/h' for v in valores],
-        textposition='auto'
+        name='Flujos (t/h)',
+        marker_color=['blue', 'green', 'orange', 'red']
     ))
     
     fig.update_layout(
         title='Diagrama de Flujos - Balance de Masa',
-        yaxis_title='Flujo Másico (t/h)',
-        template='plotly_white',
-        height=400
+        xaxis_title='Flujos',
+        yaxis_title='Toneladas por Hora (t/h)',
+        showlegend=False
     )
     
     return json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)

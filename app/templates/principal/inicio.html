@@ -1,18 +1,22 @@
 
 {% extends "base.html" %}
 
-{% block contenido_publico %}
+{% block contenido %}
 <div class="row justify-content-center">
-    <div class="col-md-8">
+    <div class="col-md-10">
         <div class="jumbotron bg-primary text-white p-5 rounded mb-4">
             <h1 class="display-4">
                 <i class="bi bi-gear-fill"></i> MetaFlotPy
             </h1>
-            <p class="lead">Software profesional para cálculos metalúrgicos inspirado en Promitech</p>
+            <p class="lead">
+                Aplicación web profesional para cálculos metalúrgicos
+            </p>
             <hr class="my-4">
-            <p>Herramientas especializadas para análisis granulométrico, balance de masa, balance metalúrgico, dimensionamiento de equipos y valorización de concentrados.</p>
-            <a class="btn btn-light btn-lg" href="{{ url_for('auth.iniciar_sesion') }}" role="button">
-                <i class="bi bi-box-arrow-in-right"></i> Comenzar
+            <p>
+                Realiza análisis granulométricos, balances de masa y metalúrgicos, dimensionamiento de equipos y valorización de concentrados.
+            </p>
+            <a class="btn btn-light btn-lg" href="{{ url_for('principal.dashboard') }}" role="button">
+                <i class="bi bi-speedometer2"></i> Ir al Dashboard
             </a>
         </div>
     </div>
@@ -21,28 +25,48 @@
 <div class="row">
     <div class="col-md-4 mb-4">
         <div class="card h-100">
-            <div class="card-body text-center">
-                <i class="bi bi-bar-chart display-4 text-primary"></i>
-                <h5 class="card-title">Análisis Granulométrico</h5>
-                <p class="card-text">Curvas granulométricas acumulativas y análisis de distribución de tamaños.</p>
+            <div class="card-body">
+                <h5 class="card-title">
+                    <i class="bi bi-grid text-primary"></i> Análisis Granulométrico
+                </h5>
+                <p class="card-text">
+                    Análisis de distribución de tamaños, curvas granulométricas y cálculos de tamizado.
+                </p>
+                <a href="{{ url_for('tamizado.analisis_granulometrico') }}" class="btn btn-primary">
+                    <i class="bi bi-arrow-right"></i> Acceder
+                </a>
             </div>
         </div>
     </div>
+    
     <div class="col-md-4 mb-4">
         <div class="card h-100">
-            <div class="card-body text-center">
-                <i class="bi bi-diagram-3 display-4 text-success"></i>
-                <h5 class="card-title">Balance de Masa</h5>
-                <p class="card-text">Cálculos de flujos másicos, carga circulante y eficiencias de clasificación.</p>
+            <div class="card-body">
+                <h5 class="card-title">
+                    <i class="bi bi-diagram-3 text-success"></i> Balance de Masa
+                </h5>
+                <p class="card-text">
+                    Cálculos de flujos másicos, carga circulante y eficiencias de clasificación.
+                </p>
+                <a href="{{ url_for('balance_masa.balance_masa') }}" class="btn btn-success">
+                    <i class="bi bi-arrow-right"></i> Acceder
+                </a>
             </div>
         </div>
     </div>
+    
     <div class="col-md-4 mb-4">
         <div class="card h-100">
-            <div class="card-body text-center">
-                <i class="bi bi-pie-chart display-4 text-warning"></i>
-                <h5 class="card-title">Balance Metalúrgico</h5>
-                <p class="card-text">Recuperaciones metalúrgicas, leyes y distribución de elementos valiosos.</p>
+            <div class="card-body">
+                <h5 class="card-title">
+                    <i class="bi bi-graph-up text-warning"></i> Balance Metalúrgico
+                </h5>
+                <p class="card-text">
+                    Recuperaciones metalúrgicas, leyes y distribución de elementos valiosos.
+                </p>
+                <a href="{{ url_for('balance_metalurgico.balance_metalurgico') }}" class="btn btn-warning">
+                    <i class="bi bi-arrow-right"></i> Acceder
+                </a>
             </div>
         </div>
     </div>
@@ -51,28 +75,48 @@
 <div class="row">
     <div class="col-md-4 mb-4">
         <div class="card h-100">
-            <div class="card-body text-center">
-                <i class="bi bi-tools display-4 text-info"></i>
-                <h5 class="card-title">Dimensionamiento</h5>
-                <p class="card-text">Cálculo de dimensiones para molinos, celdas de flotación y espesadores.</p>
+            <div class="card-body">
+                <h5 class="card-title">
+                    <i class="bi bi-rulers text-info"></i> Dimensionamiento
+                </h5>
+                <p class="card-text">
+                    Estimación de dimensiones de molinos, celdas de flotación y espesadores.
+                </p>
+                <a href="{{ url_for('dimensionamiento.dimensionamiento') }}" class="btn btn-info">
+                    <i class="bi bi-arrow-right"></i> Acceder
+                </a>
             </div>
         </div>
     </div>
+    
     <div class="col-md-4 mb-4">
         <div class="card h-100">
-            <div class="card-body text-center">
-                <i class="bi bi-currency-dollar display-4 text-danger"></i>
-                <h5 class="card-title">Valorización</h5>
-                <p class="card-text">Evaluación económica de concentrados y estimación de valores comerciales.</p>
+            <div class="card-body">
+                <h5 class="card-title">
+                    <i class="bi bi-cash-coin text-success"></i> Valorización
+                </h5>
+                <p class="card-text">
+                    Cálculo del valor económico de concentrados y análisis de rentabilidad.
+                </p>
+                <a href="{{ url_for('valorizacion.valorizacion') }}" class="btn btn-success">
+                    <i class="bi bi-arrow-right"></i> Acceder
+                </a>
             </div>
         </div>
     </div>
+    
     <div class="col-md-4 mb-4">
         <div class="card h-100">
-            <div class="card-body text-center">
-                <i class="bi bi-calculator display-4 text-secondary"></i>
-                <h5 class="card-title">Utilitarios</h5>
-                <p class="card-text">Herramientas de conversión y cálculos auxiliares para operaciones mineras.</p>
+            <div class="card-body">
+                <h5 class="card-title">
+                    <i class="bi bi-tools text-secondary"></i> Utilitarios
+                </h5>
+                <p class="card-text">
+                    Herramientas de conversión de unidades y cálculos auxiliares.
+                </p>
+                <a href="{{ url_for('utilitarios.utilitarios') }}" class="btn btn-secondary">
+                    <i class="bi bi-arrow-right"></i> Acceder
+                </a>
             </div>
         </div>
     </div>

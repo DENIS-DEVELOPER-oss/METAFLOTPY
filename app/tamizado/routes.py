@@ -1,6 +1,5 @@
 
 from flask import Blueprint, render_template, request, jsonify
-from flask_login import login_required
 from app.tamizado.forms import FormularioTamizado
 import pandas as pd
 import plotly.graph_objs as go
@@ -10,7 +9,6 @@ import json
 bp_tamizado = Blueprint('tamizado', __name__)
 
 @bp_tamizado.route('/', methods=['GET', 'POST'])
-@login_required
 def analisis_granulometrico():
     formulario = FormularioTamizado()
     
@@ -34,47 +32,47 @@ def analisis_granulometrico():
                          tabla=tabla_resultados)
 
 def calcular_granulometria(formulario):
-    peso_total = formulario.peso_total_muestra.data
-    datos = []
+    # Función de cálculo granulométrico (simplificada)
+    mallas = []
+    pesos = []
     
     for malla in formulario.mallas.data:
-        if malla['peso_retenido'] > 0:
-            datos.append({
-                'abertura': malla['abertura'],
-                'peso_retenido': malla['peso_retenido']
-            })
+        mallas.append(malla['abertura'])
+        pesos.append(malla['peso_retenido'])
     
-    df = pd.DataFrame(datos)
-    df = df.sort_values('abertura', ascending=False)
+    # Crear DataFrame
+    df = pd.DataFrame({
+        'Abertura_mm': mallas,
+        'Peso_Retenido_g': pesos
+    })
     
     # Calcular porcentajes
-    df['porcentaje_retenido'] = (df['peso_retenido'] / peso_total) * 100
-    df['porcentaje_acumulado_retenido'] = df['porcentaje_retenido'].cumsum()
-    df['porcentaje_pasante'] = 100 - df['porcentaje_acumulado_retenido']
+    peso_total = df['Peso_Retenido_g'].sum()
+    df['Porcentaje_Retenido'] = (df['Peso_Retenido_g'] / peso_total) * 100
+    df['Porcentaje_Acumulado'] = df['Porcentaje_Retenido'].cumsum()
+    df['Porcentaje_Pasante'] = 100 - df['Porcentaje_Acumulado']
     
     # Crear gráfico
     fig = go.Figure()
     fig.add_trace(go.Scatter(
-        x=df['abertura'],
-        y=df['porcentaje_pasante'],
+        x=df['Abertura_mm'],
+        y=df['Porcentaje_Pasante'],
         mode='lines+markers',
         name='Curva Granulométrica',
-        line=dict(color='#1f77b4', width=3),
-        marker=dict(size=8)
+        line=dict(color='blue', width=2)
     ))
     
     fig.update_layout(
-        title='Curva Granulométrica Acumulativa',
+        title='Curva Granulométrica',
         xaxis_title='Abertura de Malla (mm)',
         yaxis_title='Porcentaje Pasante (%)',
         xaxis_type='log',
-        template='plotly_white',
-        height=500
+        grid=True
     )
     
     grafico_json = json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
     
     return {
-        'tabla': df.round(2).to_dict('records'),
+        'tabla': df.to_dict('records'),
         'grafico': grafico_json
     }
