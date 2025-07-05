@@ -1,0 +1,75 @@
+
+{% extends "base.html" %}
+
+{% block titulo %}Dimensionamiento de Molinos - MetaFlotPy{% endblock %}
+
+{% block contenido %}
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h1 class="h2"><i class="bi bi-gear"></i> Dimensionamiento de Molinos</h1>
+</div>
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h5>Cálculo de Dimensiones de Molino</h5>
+            </div>
+            <div class="card-body">
+                <form method="POST">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="capacidad" class="form-label">Capacidad (t/h)</label>
+                                <input type="number" class="form-control" id="capacidad" name="capacidad" step="0.01" required>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="work_index" class="form-label">Work Index (kWh/t)</label>
+                                <input type="number" class="form-control" id="work_index" name="work_index" step="0.01" required>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="p80_alimentacion" class="form-label">P80 Alimentación (μm)</label>
+                                <input type="number" class="form-control" id="p80_alimentacion" name="p80_alimentacion" step="0.01" required>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="p80_producto" class="form-label">P80 Producto (μm)</label>
+                                <input type="number" class="form-control" id="p80_producto" name="p80_producto" step="0.01" required>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-calculator"></i> Calcular Dimensiones
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h5>Información</h5>
+            </div>
+            <div class="card-body">
+                <p class="text-muted">
+                    Este módulo calcula las dimensiones aproximadas de molinos basado en:
+                </p>
+                <ul class="text-muted">
+                    <li>Capacidad requerida</li>
+                    <li>Work Index del material</li>
+                    <li>Granulometría de alimentación y producto</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

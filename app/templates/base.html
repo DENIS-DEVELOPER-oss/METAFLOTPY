@@ -13,7 +13,7 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css">
     
     <!-- Plotly.js -->
-    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <script src="https://cdn.plot.ly/plotly-2.26.0.min.js"></script>
     
     <style>
         .sidebar {
@@ -93,23 +93,23 @@
             <hr class="text-white">
             
             <a class="nav-link" href="{{ url_for('tamizado.analisis_granulometrico') }}">
-                <i class="bi bi-grid"></i> Análisis Granulométrico
+                <i class="bi bi-grid"></i> Análisis de tamaño de partícula
             </a>
             
             <a class="nav-link" href="{{ url_for('balance_masa.balance_masa') }}">
-                <i class="bi bi-diagram-3"></i> Balance de Masa
+                <i class="bi bi-diagram-3"></i> Balance de masa de circuito de molienda
             </a>
             
             <a class="nav-link" href="{{ url_for('balance_metalurgico.balance_metalurgico') }}">
-                <i class="bi bi-graph-up"></i> Balance Metalúrgico
+                <i class="bi bi-graph-up"></i> Balance metalúrgico
             </a>
             
             <a class="nav-link" href="{{ url_for('dimensionamiento.dimensionamiento') }}">
-                <i class="bi bi-rulers"></i> Dimensionamiento
+                <i class="bi bi-rulers"></i> Dimensionamiento de equipos
             </a>
             
             <a class="nav-link" href="{{ url_for('valorizacion.valorizacion') }}">
-                <i class="bi bi-cash-coin"></i> Valorización
+                <i class="bi bi-cash-coin"></i> Valorización de concentrados
             </a>
             
             <a class="nav-link" href="{{ url_for('utilitarios.utilitarios') }}">
