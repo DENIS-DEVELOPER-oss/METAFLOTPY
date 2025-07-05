@@ -1,0 +1,83 @@
+Crea una aplicación web profesional en Flask llamada MetaFlotPy, inspirada en el software Promitech, orientada a cálculos metalúrgicos.
+
+🔧 Tecnologías requeridas:
+
+Python 3.11+
+
+Flask (con Blueprints para dividir en módulos)
+
+Plotly (para generar gráficos interactivos)
+
+Pandas y NumPy (para cálculos)
+
+Bootstrap 5 o TailwindCSS (para la interfaz tipo dashboard)
+
+Jinja2 (para los templates HTML)
+
+📁 Estructura general del proyecto:
+
+csharp
+Copiar
+Editar
+MetaFlotPy/
+├── app/
+│   ├── __init__.py
+│   ├── auth/                    # Login, logout, registro
+│   ├── tamizado/                # Análisis granulométrico
+│   ├── balance_masa/           # Balance de masa
+│   ├── balance_metalurgico/    # Recuperación, leyes, relave
+│   ├── dimensionamiento/       # Cálculo de molinos, celdas, espesadores
+│   ├── valorizacion/           # Valorización de concentrados
+│   ├── utilitarios/            # Conversores y herramientas auxiliares
+│   ├── templates/
+│   ├── static/
+├── main.py
+├── requirements.txt
+└── README.md
+🧩 Cada módulo debe ser un blueprint con:
+
+routes.py (vistas y lógica del módulo)
+
+forms.py si se usan formularios
+
+templates/ (HTML por módulo)
+
+🔐 Funcionalidad de autenticación:
+
+Registro, inicio y cierre de sesión
+
+Interfaz adaptada según si el usuario está logueado
+
+📊 Módulos principales:
+
+Tamizado: curva granulométrica acumulativa, tabla de % retenido, gráfico Plotly.
+
+Balance de masa: tonelajes por flujo, carga circulante, rebose y descarga.
+
+Balance metalúrgico: recuperación global, recuperación por etapa, cálculo de leyes.
+
+Dimensionamiento: estimación de dimensiones de molinos, celdas de flotación, espesadores.
+
+Valorización: cálculo del valor económico del concentrado (precio del metal, % ley, tonelaje).
+
+Utilitarios: herramientas de conversión (densidad, % sólidos, caudal, etc.)
+
+🖥️ Interfaz de usuario:
+
+Dashboard con barra lateral y navegación clara
+
+Vistas HTML limpias con Bootstrap o Tailwind
+
+Visualización de datos con Plotly
+
+📘 Documentación:
+
+README.md con instrucciones para instalar y ejecutar
+
+requirements.txt con todas las dependencias necesarias
+
+Comentarios en el código para facilitar su comprensión
+
+🗣 Todos los nombres de carpetas, rutas, variables y archivos deben estar en español.
+
+🎯 Objetivo: Desarrollar una aplicación web profesional, funcional y modular para simulaciones metalúrgicas con interfaz amigable y cálculos correctos. 
