@@ -19,5 +19,59 @@
             </div>
         </div>
     </div>
+
+    {% if graficos %}
+                        <div class="mt-4">
+                            <h5 class="text-primary">
+                                <i class="bi bi-graph-up me-2"></i>Análisis Gráfico
+                            </h5>
+
+                            <!-- Gráfico de Recuperaciones -->
+                            {% if graficos.recuperacion %}
+                            <div class="mb-4">
+                                <h6>Recuperaciones del Proceso</h6>
+                                <div id="grafico-recuperacion" style="height: 400px;"></div>
+                            </div>
+                            {% endif %}
+
+                            <div class="row">
+                                <!-- Gráfico de Leyes -->
+                                {% if graficos.leyes %}
+                                <div class="col-md-6">
+                                    <h6>Distribución de Leyes</h6>
+                                    <div id="grafico-leyes" style="height: 400px;"></div>
+                                </div>
+                                {% endif %}
+
+                                <!-- Gráfico Circular del Balance -->
+                                {% if graficos.balance_circular %}
+                                <div class="col-md-6">
+                                    <h6>Balance Metalúrgico</h6>
+                                    <div id="grafico-balance-circular" style="height: 400px;"></div>
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% endif %}
+
 </div>
+
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                {% if graficos.recuperacion %}
+                var graficoRecuperacion = {{ graficos.recuperacion|safe }};
+                Plotly.newPlot('grafico-recuperacion', graficoRecuperacion.data, graficoRecuperacion.layout);
+                {% endif %}
+
+                {% if graficos.leyes %}
+                var graficoLeyes = {{ graficos.leyes|safe }};
+                Plotly.newPlot('grafico-leyes', graficoLeyes.data, graficoLeyes.layout);
+                {% endif %}
+
+                {% if graficos.balance_circular %}
+                var graficoBalance = {{ graficos.balance_circular|safe }};
+                Plotly.newPlot('grafico-balance-circular', graficoBalance.data, graficoBalance.layout);
+                {% endif %}
+            });
+        </script>
 {% endblock %}

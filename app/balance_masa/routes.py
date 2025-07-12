@@ -11,16 +11,18 @@ bp_balance_masa = Blueprint('balance_masa', __name__)
 def balance_masa():
     formulario = FormularioBalanceMasa()
     resultados = None
-    grafico_json = None
+    graficos = {}
     
     if formulario.validate_on_submit():
         resultados = calcular_balance_masa(formulario)
-        grafico_json = crear_diagrama_flujo(resultados)
+        graficos['flujos'] = crear_diagrama_flujo(resultados)
+        graficos['eficiencias'] = crear_grafico_eficiencias(resultados)
+        graficos['distribucion'] = crear_grafico_distribucion(resultados)
     
     return render_template('balance_masa/balance.html', 
                          formulario=formulario, 
                          resultados=resultados,
-                         grafico=grafico_json)
+                         graficos=graficos)
 
 def calcular_balance_masa(formulario):
     # Obtener datos del formulario
@@ -114,6 +116,58 @@ def crear_diagrama_flujo(resultados):
         yaxis_title='Toneladas por Hora (t/h)',
         showlegend=False,
         height=500
+    )
+    
+    return json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
+
+def crear_grafico_eficiencias(resultados):
+    # Crear gráfico circular de eficiencias
+    fig = go.Figure()
+    
+    eficiencia = resultados.get('eficiencia_clasificador', 0)
+    ineficiencia = 100 - eficiencia
+    
+    fig.add_trace(go.Pie(
+        labels=['Eficiencia', 'Ineficiencia'],
+        values=[eficiencia, ineficiencia],
+        hole=0.4,
+        marker_colors=['#2ca02c', '#ff7f0e']
+    ))
+    
+    fig.update_layout(
+        title='Eficiencia del Clasificador',
+        annotations=[dict(text=f'{eficiencia:.1f}%', x=0.5, y=0.5, font_size=20, showarrow=False)],
+        height=400
+    )
+    
+    return json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
+
+def crear_grafico_distribucion(resultados):
+    # Crear gráfico de distribución de flujos
+    fig = go.Figure()
+    
+    alimentacion_total = resultados['alimentacion_molino']
+    alimentacion_fresca = resultados['alimentacion_fresca']
+    carga_circulante = resultados['carga_circulante']
+    
+    porcentaje_fresca = (alimentacion_fresca / alimentacion_total) * 100
+    porcentaje_circulante = (carga_circulante / alimentacion_total) * 100
+    
+    fig.add_trace(go.Bar(
+        x=['Alimentación Fresca', 'Carga Circulante'],
+        y=[porcentaje_fresca, porcentaje_circulante],
+        name='Distribución (%)',
+        marker_color=['#1f77b4', '#ff7f0e'],
+        text=[f'{porcentaje_fresca:.1f}%', f'{porcentaje_circulante:.1f}%'],
+        textposition='auto'
+    ))
+    
+    fig.update_layout(
+        title='Distribución de Alimentación al Molino',
+        xaxis_title='Tipo de Alimentación',
+        yaxis_title='Porcentaje (%)',
+        showlegend=False,
+        height=400
     )
     
     return json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)

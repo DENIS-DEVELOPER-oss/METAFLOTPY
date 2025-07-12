@@ -69,24 +69,24 @@
             <div class="card-body">
                 <form method="POST">
                     {{ formulario.hidden_tag() }}
-                    
+
                     <input type="hidden" id="tipo_circuito" name="tipo_circuito" value="">
-                    
+
                     <div class="mb-3">
                         {{ formulario.alimentacion_fresca.label(class="form-label") }}
                         {{ formulario.alimentacion_fresca(class="form-control") }}
                     </div>
-                    
+
                     <div class="mb-3">
                         {{ formulario.razon_carga_circulante.label(class="form-label") }}
                         {{ formulario.razon_carga_circulante(class="form-control") }}
                     </div>
-                    
+
                     <div class="mb-3">
                         {{ formulario.eficiencia_clasificador.label(class="form-label") }}
                         {{ formulario.eficiencia_clasificador(class="form-control") }}
                     </div>
-                    
+
                     <div class="d-grid">
                         {{ formulario.calcular(class="btn btn-primary") }}
                     </div>
@@ -94,19 +94,10 @@
             </div>
         </div>
     </div>
-    
+
     <div class="col-md-8">
         {% if resultados %}
         <div class="card mb-3">
-            <div class="card-header">
-                <h5>Diagrama de Flujos</h5>
-            </div>
-            <div class="card-body">
-                <div id="grafico-balance"></div>
-            </div>
-        </div>
-        
-        <div class="card">
             <div class="card-header">
                 <h5>Resultados del Balance</h5>
             </div>
@@ -147,6 +138,39 @@
                         </ul>
                     </div>
                 </div>
+                {% if graficos %}
+                        <div class="mt-4">
+                            <h5 class="text-primary">
+                                <i class="bi bi-graph-up me-2"></i>Análisis Gráfico
+                            </h5>
+
+                            <!-- Gráfico de Flujos -->
+                            {% if graficos.flujos %}
+                            <div class="mb-4">
+                                <h6>Diagrama de Flujos del Circuito</h6>
+                                <div id="grafico-flujos" style="height: 500px;"></div>
+                            </div>
+                            {% endif %}
+
+                            <div class="row">
+                                <!-- Gráfico de Eficiencias -->
+                                {% if graficos.eficiencias %}
+                                <div class="col-md-6">
+                                    <h6>Eficiencia del Clasificador</h6>
+                                    <div id="grafico-eficiencias" style="height: 400px;"></div>
+                                </div>
+                                {% endif %}
+
+                                <!-- Gráfico de Distribución -->
+                                {% if graficos.distribucion %}
+                                <div class="col-md-6">
+                                    <h6>Distribución de Alimentación</h6>
+                                    <div id="grafico-distribucion" style="height: 400px;"></div>
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% endif %}
             </div>
         </div>
         {% endif %}
@@ -178,19 +202,20 @@
 }
 </style>
 
-<script>
-function selectCircuit(type) {
+<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+        <script>
+            function selectCircuit(type) {
     // Remover selección anterior
     document.querySelectorAll('.circuit-card').forEach(card => {
         card.classList.remove('selected');
     });
-    
+
     // Seleccionar nueva tarjeta
     event.currentTarget.classList.add('selected');
-    
+
     // Actualizar tipo de circuito
     document.getElementById('tipo_circuito').value = type;
-    
+
     // Actualizar etiqueta
     const labels = {
         'directo': 'Circuito Cerrado Directo',
@@ -199,19 +224,32 @@ function selectCircuit(type) {
         'sabc2': 'Circuito SABC-2'
     };
     document.getElementById('circuit-type-label').textContent = labels[type];
-    
+
     // Mostrar sección de cálculo
     document.getElementById('calculation-section').style.display = 'block';
-    
+
     // Scroll suave hacia la sección de cálculo
     document.getElementById('calculation-section').scrollIntoView({ 
         behavior: 'smooth' 
     });
 }
 
-{% if grafico %}
-var graficoData = {{ grafico|safe }};
-Plotly.newPlot('grafico-balance', graficoData.data, graficoData.layout);
-{% endif %}
+document.addEventListener('DOMContentLoaded', function() {
+                // Mostrar gráficos si existen
+                {% if graficos.flujos %}
+                var graficoFlujos = {{ graficos.flujos|safe }};
+                Plotly.newPlot('grafico-flujos', graficoFlujos.data, graficoFlujos.layout);
+                {% endif %}
+
+                {% if graficos.eficiencias %}
+                var graficoEficiencias = {{ graficos.eficiencias|safe }};
+                Plotly.newPlot('grafico-eficiencias', graficoEficiencias.data, graficoEficiencias.layout);
+                {% endif %}
+
+                {% if graficos.distribucion %}
+                var graficoDistribucion = {{ graficos.distribucion|safe }};
+                Plotly.newPlot('grafico-distribucion', graficoDistribucion.data, graficoDistribucion.layout);
+                {% endif %}
+            });
 </script>
 {% endblock %}
