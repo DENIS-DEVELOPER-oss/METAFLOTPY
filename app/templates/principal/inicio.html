@@ -1,3 +1,4 @@
+
 {% extends "base.html" %}
 
 {% block titulo %}MetaFlotPy - Inicio{% endblock %}
@@ -7,7 +8,7 @@
     <div class="row">
         <div class="col-12">
             <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-                <h1 class="h2">Dashboard Principal</h1>
+                <h1 class="h2">Dashboard Principal - MetaFlotPy</h1>
             </div>
 
             <!-- Welcome Section -->
@@ -18,7 +19,7 @@
                             <h4 class="card-title">¡Bienvenido a MetaFlotPy!</h4>
                             <p class="card-text">
                                 Plataforma profesional para cálculos metalúrgicos inspirada en Promitech.
-                                Selecciona un módulo para comenzar tus análisis.
+                                Software especializado para análisis de procesos de concentración de minerales.
                             </p>
                         </div>
                     </div>
@@ -31,14 +32,14 @@
                     <div class="card h-100 shadow-sm">
                         <div class="card-body">
                             <div class="d-flex align-items-center mb-3">
-                                <i class="bi bi-grid fa-2x text-primary me-3"></i>
-                                <h5 class="card-title mb-0">Análisis Granulométrico</h5>
+                                <i class="bi bi-info-circle fa-2x text-primary me-3"></i>
+                                <h5 class="card-title mb-0">Introducción al Software</h5>
                             </div>
                             <p class="card-text">
-                                Análisis de distribución de tamaños, curvas granulométricas acumulativas 
-                                y modelos de Gates-Gaudin-Schuhmann y Rosin-Rammler.
+                                Guía completa del uso de MetaFlotPy, conceptos básicos de metalurgia 
+                                y tutoriales paso a paso para cada módulo.
                             </p>
-                            <a href="{{ url_for('tamizado.analisis_granulometrico') }}" class="btn btn-primary">Acceder</a>
+                            <a href="{{ url_for('principal.introduccion') }}" class="btn btn-primary">Acceder</a>
                         </div>
                     </div>
                 </div>
@@ -47,14 +48,14 @@
                     <div class="card h-100 shadow-sm">
                         <div class="card-body">
                             <div class="d-flex align-items-center mb-3">
-                                <i class="bi bi-diagram-3 fa-2x text-success me-3"></i>
-                                <h5 class="card-title mb-0">Balance de Masa</h5>
+                                <i class="bi bi-grid fa-2x text-success me-3"></i>
+                                <h5 class="card-title mb-0">Análisis de Tamaño de Partícula</h5>
                             </div>
                             <p class="card-text">
-                                Cálculo de flujos másicos, carga circulante, eficiencias de clasificación
-                                y diagramas de flujo para circuitos de molienda.
+                                Análisis granulométrico completo con curvas de distribución,
+                                modelos de Gates-Gaudin-Schuhmann y Rosin-Rammler.
                             </p>
-                            <a href="{{ url_for('balance_masa.balance_masa') }}" class="btn btn-success">Acceder</a>
+                            <a href="{{ url_for('tamizado.analisis_granulometrico') }}" class="btn btn-success">Acceder</a>
                         </div>
                     </div>
                 </div>
@@ -63,14 +64,30 @@
                     <div class="card h-100 shadow-sm">
                         <div class="card-body">
                             <div class="d-flex align-items-center mb-3">
-                                <i class="bi bi-graph-up fa-2x text-info me-3"></i>
+                                <i class="bi bi-diagram-3 fa-2x text-info me-3"></i>
+                                <h5 class="card-title mb-0">Balance de Masa de Circuito de Molienda</h5>
+                            </div>
+                            <p class="card-text">
+                                Cálculo de flujos másicos, carga circulante, eficiencias 
+                                y diagramas de flujo para circuitos de molienda-clasificación.
+                            </p>
+                            <a href="{{ url_for('balance_masa.balance_masa') }}" class="btn btn-info">Acceder</a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-6 col-lg-4 mb-4">
+                    <div class="card h-100 shadow-sm">
+                        <div class="card-body">
+                            <div class="d-flex align-items-center mb-3">
+                                <i class="bi bi-graph-up fa-2x text-warning me-3"></i>
                                 <h5 class="card-title mb-0">Balance Metalúrgico</h5>
                             </div>
                             <p class="card-text">
-                                Cálculo de recuperaciones metalúrgicas, distribución de elementos valiosos
-                                y análisis de leyes en concentrados y relaves.
+                                Cálculo de recuperaciones metalúrgicas, distribución de elementos,
+                                análisis de leyes en concentrados, relaves y cola.
                             </p>
-                            <a href="{{ url_for('balance_metalurgico.balance_metalurgico') }}" class="btn btn-info">Acceder</a>
+                            <a href="{{ url_for('balance_metalurgico.balance_metalurgico') }}" class="btn btn-warning">Acceder</a>
                         </div>
                     </div>
                 </div>
@@ -79,14 +96,14 @@
                     <div class="card h-100 shadow-sm">
                         <div class="card-body">
                             <div class="d-flex align-items-center mb-3">
-                                <i class="bi bi-rulers fa-2x text-warning me-3"></i>
-                                <h5 class="card-title mb-0">Dimensionamiento</h5>
+                                <i class="bi bi-gear fa-2x text-danger me-3"></i>
+                                <h5 class="card-title mb-0">Dimensionamiento de Equipos</h5>
                             </div>
                             <p class="card-text">
                                 Estimación de dimensiones de molinos, celdas de flotación,
-                                espesadores y otros equipos de procesamiento de minerales.
+                                espesadores, hidrociclones y equipos de procesamiento.
                             </p>
-                            <a href="{{ url_for('dimensionamiento.dimensionamiento') }}" class="btn btn-warning">Acceder</a>
+                            <a href="{{ url_for('dimensionamiento.dimensionamiento') }}" class="btn btn-danger">Acceder</a>
                         </div>
                     </div>
                 </div>
@@ -95,14 +112,14 @@
                     <div class="card h-100 shadow-sm">
                         <div class="card-body">
                             <div class="d-flex align-items-center mb-3">
-                                <i class="bi bi-cash-coin fa-2x text-danger me-3"></i>
-                                <h5 class="card-title mb-0">Valorización</h5>
+                                <i class="bi bi-cash-coin fa-2x text-dark me-3"></i>
+                                <h5 class="card-title mb-0">Valorización de Concentrados</h5>
                             </div>
                             <p class="card-text">
                                 Cálculo del valor económico de concentrados basado en precios
-                                de metales, penalidades y condiciones comerciales.
+                                de metales, penalidades, deducciones y términos comerciales.
                             </p>
-                            <a href="{{ url_for('valorizacion.valorizacion') }}" class="btn btn-danger">Acceder</a>
+                            <a href="{{ url_for('valorizacion.valorizacion') }}" class="btn btn-dark">Acceder</a>
                         </div>
                     </div>
                 </div>
@@ -112,13 +129,50 @@
                         <div class="card-body">
                             <div class="d-flex align-items-center mb-3">
                                 <i class="bi bi-tools fa-2x text-secondary me-3"></i>
-                                <h5 class="card-title mb-0">Utilitarios</h5>
+                                <h5 class="card-title mb-0">Utilidades</h5>
                             </div>
                             <p class="card-text">
-                                Herramientas de conversión de unidades, cálculos auxiliares
-                                y otras utilidades para ingeniería metalúrgica.
+                                Herramientas de conversión de unidades, tablas de propiedades,
+                                calculadoras auxiliares y utilitarios para metalurgia.
                             </p>
                             <a href="{{ url_for('utilitarios.utilitarios') }}" class="btn btn-secondary">Acceder</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Stats -->
+            <div class="row mt-4">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5><i class="bi bi-speedometer2"></i> Estado del Sistema</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row text-center">
+                                <div class="col-md-3">
+                                    <div class="border-end">
+                                        <h4 class="text-primary">7</h4>
+                                        <p class="text-muted">Módulos Disponibles</p>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="border-end">
+                                        <h4 class="text-success">100%</h4>
+                                        <p class="text-muted">Sistema Operativo</p>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="border-end">
+                                        <h4 class="text-info">v1.0</h4>
+                                        <p class="text-muted">Versión Actual</p>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <h4 class="text-warning">Flask</h4>
+                                    <p class="text-muted">Plataforma</p>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>

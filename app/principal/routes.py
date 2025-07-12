@@ -10,3 +10,7 @@ def inicio():
 @bp_principal.route('/dashboard')
 def dashboard():
     return render_template('principal/dashboard.html')
+
+@bp_principal.route('/introduccion')
+def introduccion():
+    return render_template('principal/introduccion.html')

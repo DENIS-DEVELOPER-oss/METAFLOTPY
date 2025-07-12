@@ -1,0 +1,217 @@
+
+{% extends "base.html" %}
+
+{% block titulo %}Introducción al Software - MetaFlotPy{% endblock %}
+
+{% block contenido %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                <h1 class="h2">Introducción a MetaFlotPy</h1>
+                <a href="{{ url_for('principal.inicio') }}" class="btn btn-outline-primary">
+                    <i class="bi bi-arrow-left"></i> Volver al Inicio
+                </a>
+            </div>
+
+            <!-- Bienvenida -->
+            <div class="row mb-4">
+                <div class="col-12">
+                    <div class="card bg-gradient bg-primary text-white">
+                        <div class="card-body">
+                            <h3 class="card-title">¡Bienvenido a MetaFlotPy!</h3>
+                            <p class="card-text lead">
+                                Software profesional para cálculos metalúrgicos inspirado en Promitech, 
+                                diseñado para ingenieros y profesionales de la minería.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Descripción del Software -->
+            <div class="row mb-4">
+                <div class="col-md-8">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5><i class="bi bi-info-circle"></i> ¿Qué es MetaFlotPy?</h5>
+                        </div>
+                        <div class="card-body">
+                            <p>
+                                MetaFlotPy es una aplicación web especializada en cálculos metalúrgicos para 
+                                la industria minera. Desarrollado con tecnologías modernas como Flask y Python, 
+                                ofrece herramientas precisas para:
+                            </p>
+                            <ul>
+                                <li><strong>Análisis Granulométrico:</strong> Distribución de tamaños de partícula</li>
+                                <li><strong>Balances de Masa:</strong> Cálculos de flujos y cargas circulantes</li>
+                                <li><strong>Balances Metalúrgicos:</strong> Recuperaciones y distribución de elementos</li>
+                                <li><strong>Dimensionamiento:</strong> Diseño de equipos de procesamiento</li>
+                                <li><strong>Valorización:</strong> Evaluación económica de concentrados</li>
+                                <li><strong>Utilidades:</strong> Herramientas auxiliares y conversores</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5><i class="bi bi-check-circle"></i> Características</h5>
+                        </div>
+                        <div class="card-body">
+                            <ul class="list-unstyled">
+                                <li><i class="bi bi-check text-success"></i> Interfaz web intuitiva</li>
+                                <li><i class="bi bi-check text-success"></i> Gráficos interactivos</li>
+                                <li><i class="bi bi-check text-success"></i> Cálculos precisos</li>
+                                <li><i class="bi bi-check text-success"></i> Exportación de resultados</li>
+                                <li><i class="bi bi-check text-success"></i> Acceso multiplataforma</li>
+                                <li><i class="bi bi-check text-success"></i> Sin instalación requerida</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Módulos Disponibles -->
+            <div class="row mb-4">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5><i class="bi bi-grid"></i> Guía de Módulos</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="accordion" id="modulesAccordion">
+                                <!-- Análisis de Tamaño -->
+                                <div class="accordion-item">
+                                    <h2 class="accordion-header" id="headingOne">
+                                        <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne">
+                                            <i class="bi bi-grid me-2"></i> Análisis de Tamaño de Partícula
+                                        </button>
+                                    </h2>
+                                    <div id="collapseOne" class="accordion-collapse collapse show" data-bs-parent="#modulesAccordion">
+                                        <div class="accordion-body">
+                                            <p><strong>Funcionalidad:</strong> Análisis granulométrico completo de muestras</p>
+                                            <p><strong>Incluye:</strong></p>
+                                            <ul>
+                                                <li>Curvas granulométricas acumulativas</li>
+                                                <li>Modelos de Gates-Gaudin-Schuhmann</li>
+                                                <li>Modelos de Rosin-Rammler</li>
+                                                <li>Gráficos interactivos de distribución</li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Balance de Masa -->
+                                <div class="accordion-item">
+                                    <h2 class="accordion-header" id="headingTwo">
+                                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo">
+                                            <i class="bi bi-diagram-3 me-2"></i> Balance de Masa de Circuito de Molienda
+                                        </button>
+                                    </h2>
+                                    <div id="collapseTwo" class="accordion-collapse collapse" data-bs-parent="#modulesAccordion">
+                                        <div class="accordion-body">
+                                            <p><strong>Funcionalidad:</strong> Cálculos de balance de masa para circuitos de molienda</p>
+                                            <p><strong>Incluye:</strong></p>
+                                            <ul>
+                                                <li>Flujos másicos en cada corriente</li>
+                                                <li>Carga circulante del circuito</li>
+                                                <li>Eficiencias de clasificación</li>
+                                                <li>Diagramas de flujo visuales</li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Balance Metalúrgico -->
+                                <div class="accordion-item">
+                                    <h2 class="accordion-header" id="headingThree">
+                                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseThree">
+                                            <i class="bi bi-graph-up me-2"></i> Balance Metalúrgico
+                                        </button>
+                                    </h2>
+                                    <div id="collapseThree" class="accordion-collapse collapse" data-bs-parent="#modulesAccordion">
+                                        <div class="accordion-body">
+                                            <p><strong>Funcionalidad:</strong> Análisis de recuperaciones metalúrgicas</p>
+                                            <p><strong>Incluye:</strong></p>
+                                            <ul>
+                                                <li>Recuperación metalúrgica por elemento</li>
+                                                <li>Recuperación en peso</li>
+                                                <li>Distribución de elementos valiosos</li>
+                                                <li>Análisis de leyes en productos</li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Otros módulos -->
+                                <div class="accordion-item">
+                                    <h2 class="accordion-header" id="headingFour">
+                                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseFour">
+                                            <i class="bi bi-gear me-2"></i> Módulos Adicionales
+                                        </button>
+                                    </h2>
+                                    <div id="collapseFour" class="accordion-collapse collapse" data-bs-parent="#modulesAccordion">
+                                        <div class="accordion-body">
+                                            <div class="row">
+                                                <div class="col-md-6">
+                                                    <h6><i class="bi bi-gear"></i> Dimensionamiento de Equipos</h6>
+                                                    <p>Cálculo de dimensiones para molinos, celdas de flotación y espesadores.</p>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <h6><i class="bi bi-cash-coin"></i> Valorización de Concentrados</h6>
+                                                    <p>Evaluación económica basada en precios de metales y condiciones comerciales.</p>
+                                                </div>
+                                            </div>
+                                            <div class="row">
+                                                <div class="col-md-6">
+                                                    <h6><i class="bi bi-tools"></i> Utilidades</h6>
+                                                    <p>Conversores de unidades y herramientas auxiliares.</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Getting Started -->
+            <div class="row mb-4">
+                <div class="col-12">
+                    <div class="card border-success">
+                        <div class="card-header bg-success text-white">
+                            <h5><i class="bi bi-play-circle"></i> Comenzar a Usar MetaFlotPy</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <h6>1. Seleccionar Módulo</h6>
+                                    <p>Elija el módulo apropiado según el tipo de análisis que desea realizar.</p>
+                                </div>
+                                <div class="col-md-4">
+                                    <h6>2. Ingresar Datos</h6>
+                                    <p>Complete los formularios con los datos de su proceso o muestra.</p>
+                                </div>
+                                <div class="col-md-4">
+                                    <h6>3. Analizar Resultados</h6>
+                                    <p>Revise los gráficos y tablas generados automáticamente.</p>
+                                </div>
+                            </div>
+                            <hr>
+                            <div class="text-center">
+                                <a href="{{ url_for('principal.inicio') }}" class="btn btn-success btn-lg">
+                                    <i class="bi bi-rocket"></i> Comenzar Ahora
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+{% endblock %}
