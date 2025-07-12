@@ -1,3 +1,4 @@
+
 {% extends "base.html" %}
 
 {% block titulo %}MetaFlotPy - Inicio{% endblock %}
@@ -5,147 +6,174 @@
 {% block contenido %}
 <div class="container-fluid">
     <div class="row">
-        <div class="col-12">
-            <!-- Hero Section -->
-            <div class="jumbotron bg-primary text-white p-5 rounded mb-4">
-                <div class="container">
-                    <h1 class="display-4">
-                        <i class="bi bi-gear-fill"></i> MetaFlotPy
-                    </h1>
-                    <p class="lead">Aplicación web profesional para cálculos metalúrgicos</p>
-                    <p>Inspirada en el software Promitech, diseñada para ingenieros metalúrgicos y profesionales de la minería.</p>
-                    <a class="btn btn-light btn-lg" href="{{ url_for('principal.dashboard') }}" role="button">
-                        <i class="bi bi-speedometer2"></i> Ir al Dashboard
-                    </a>
+        <!-- Sidebar -->
+        <nav class="col-md-3 col-lg-2 d-md-block bg-dark sidebar collapse">
+            <div class="position-sticky pt-3">
+                <div class="text-center mb-4">
+                    <h4 class="text-white">MetaFlotPy</h4>
+                    <p class="text-muted small">Cálculos Metalúrgicos</p>
+                </div>
+                
+                <ul class="nav flex-column">
+                    <li class="nav-item">
+                        <a class="nav-link text-white active" href="/">
+                            <i class="fas fa-home"></i> Inicio
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-white" href="/tamizado/">
+                            <i class="fas fa-filter"></i> Análisis Granulométrico
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-white" href="/balance-masa/">
+                            <i class="fas fa-balance-scale"></i> Balance de Masa
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-white" href="/balance-metalurgico/">
+                            <i class="fas fa-chart-line"></i> Balance Metalúrgico
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-white" href="/dimensionamiento/">
+                            <i class="fas fa-cogs"></i> Dimensionamiento
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-white" href="/valorizacion/">
+                            <i class="fas fa-dollar-sign"></i> Valorización
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-white" href="/utilitarios/">
+                            <i class="fas fa-tools"></i> Utilitarios
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </nav>
+
+        <!-- Main content -->
+        <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+            <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                <h1 class="h2">Dashboard Principal</h1>
+            </div>
+
+            <!-- Welcome Section -->
+            <div class="row mb-4">
+                <div class="col-12">
+                    <div class="card bg-primary text-white">
+                        <div class="card-body">
+                            <h4 class="card-title">¡Bienvenido a MetaFlotPy!</h4>
+                            <p class="card-text">
+                                Plataforma profesional para cálculos metalúrgicos inspirada en Promitech.
+                                Selecciona un módulo para comenzar tus análisis.
+                            </p>
+                        </div>
+                    </div>
                 </div>
             </div>
-        </div>
-    </div>
 
-    <!-- Módulos Disponibles -->
-    <div class="row">
-        <div class="col-12">
-            <h2 class="mb-4">Módulos Disponibles</h2>
-        </div>
-    </div>
+            <!-- Modules Grid -->
+            <div class="row">
+                <div class="col-md-6 col-lg-4 mb-4">
+                    <div class="card h-100 shadow-sm">
+                        <div class="card-body">
+                            <div class="d-flex align-items-center mb-3">
+                                <i class="fas fa-filter fa-2x text-primary me-3"></i>
+                                <h5 class="card-title mb-0">Análisis Granulométrico</h5>
+                            </div>
+                            <p class="card-text">
+                                Análisis de distribución de tamaños, curvas granulométricas acumulativas 
+                                y modelos de Gates-Gaudin-Schuhmann y Rosin-Rammler.
+                            </p>
+                            <a href="/tamizado/" class="btn btn-primary">Acceder</a>
+                        </div>
+                    </div>
+                </div>
 
-    <div class="row">
-        <div class="col-md-6 col-lg-4 mb-4">
-            <div class="card h-100">
-                <div class="card-body">
-                    <h5 class="card-title">
-                        <i class="bi bi-grid text-primary"></i> Análisis de tamaño de partícula
-                    </h5>
-                    <p class="card-text">Curvas granulométricas acumulativas y análisis de distribución de tamaños.</p>
-                    <a href="{{ url_for('tamizado.analisis_granulometrico') }}" class="btn btn-primary">Acceder</a>
+                <div class="col-md-6 col-lg-4 mb-4">
+                    <div class="card h-100 shadow-sm">
+                        <div class="card-body">
+                            <div class="d-flex align-items-center mb-3">
+                                <i class="fas fa-balance-scale fa-2x text-success me-3"></i>
+                                <h5 class="card-title mb-0">Balance de Masa</h5>
+                            </div>
+                            <p class="card-text">
+                                Cálculo de flujos másicos, carga circulante, eficiencias de clasificación
+                                y diagramas de flujo para circuitos de molienda.
+                            </p>
+                            <a href="/balance-masa/" class="btn btn-success">Acceder</a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-6 col-lg-4 mb-4">
+                    <div class="card h-100 shadow-sm">
+                        <div class="card-body">
+                            <div class="d-flex align-items-center mb-3">
+                                <i class="fas fa-chart-line fa-2x text-info me-3"></i>
+                                <h5 class="card-title mb-0">Balance Metalúrgico</h5>
+                            </div>
+                            <p class="card-text">
+                                Cálculo de recuperaciones metalúrgicas, distribución de elementos valiosos
+                                y análisis de leyes en concentrados y relaves.
+                            </p>
+                            <a href="/balance-metalurgico/" class="btn btn-info">Acceder</a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-6 col-lg-4 mb-4">
+                    <div class="card h-100 shadow-sm">
+                        <div class="card-body">
+                            <div class="d-flex align-items-center mb-3">
+                                <i class="fas fa-cogs fa-2x text-warning me-3"></i>
+                                <h5 class="card-title mb-0">Dimensionamiento</h5>
+                            </div>
+                            <p class="card-text">
+                                Estimación de dimensiones de molinos, celdas de flotación,
+                                espesadores y otros equipos de procesamiento de minerales.
+                            </p>
+                            <a href="/dimensionamiento/" class="btn btn-warning">Acceder</a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-6 col-lg-4 mb-4">
+                    <div class="card h-100 shadow-sm">
+                        <div class="card-body">
+                            <div class="d-flex align-items-center mb-3">
+                                <i class="fas fa-dollar-sign fa-2x text-danger me-3"></i>
+                                <h5 class="card-title mb-0">Valorización</h5>
+                            </div>
+                            <p class="card-text">
+                                Cálculo del valor económico de concentrados basado en precios
+                                de metales, penalidades y condiciones comerciales.
+                            </p>
+                            <a href="/valorizacion/" class="btn btn-danger">Acceder</a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-6 col-lg-4 mb-4">
+                    <div class="card h-100 shadow-sm">
+                        <div class="card-body">
+                            <div class="d-flex align-items-center mb-3">
+                                <i class="fas fa-tools fa-2x text-secondary me-3"></i>
+                                <h5 class="card-title mb-0">Utilitarios</h5>
+                            </div>
+                            <p class="card-text">
+                                Herramientas de conversión de unidades, cálculos auxiliares
+                                y otras utilidades para ingeniería metalúrgica.
+                            </p>
+                            <a href="/utilitarios/" class="btn btn-secondary">Acceder</a>
+                        </div>
+                    </div>
                 </div>
             </div>
-        </div>
-
-        <div class="col-md-6 col-lg-4 mb-4">
-            <div class="card h-100">
-                <div class="card-body">
-                    <h5 class="card-title">
-                        <i class="bi bi-diagram-3 text-success"></i> Balance de masa de circuito de molienda
-                    </h5>
-                    <p class="card-text">Cálculos de flujos másicos, carga circulante y eficiencias de clasificación.</p>
-                    <a href="{{ url_for('balance_masa.balance_masa') }}" class="btn btn-success">Acceder</a>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-md-6 col-lg-4 mb-4">
-            <div class="card h-100">
-                <div class="card-body">
-                    <h5 class="card-title">
-                        <i class="bi bi-graph-up text-info"></i> Balance metalúrgico
-                    </h5>
-                    <p class="card-text">Recuperaciones metalúrgicas, leyes y distribución de elementos valiosos.</p>
-                    <a href="{{ url_for('balance_metalurgico.balance_metalurgico') }}" class="btn btn-info">Acceder</a>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-md-6 col-lg-4 mb-4">
-            <div class="card h-100">
-                <div class="card-body">
-                    <h5 class="card-title">
-                        <i class="bi bi-rulers text-warning"></i> Dimensionamiento de equipos
-                    </h5>
-                    <p class="card-text">Estimación de dimensiones de molinos, celdas de flotación y espesadores.</p>
-                    <a href="{{ url_for('dimensionamiento.dimensionamiento') }}" class="btn btn-warning">Acceder</a>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-md-6 col-lg-4 mb-4">
-            <div class="card h-100">
-                <div class="card-body">
-                    <h5 class="card-title">
-                        <i class="bi bi-cash-coin text-danger"></i> Valorización de concentrados
-                    </h5>
-                    <p class="card-text">Cálculo del valor económico de concentrados y evaluación financiera.</p>
-                    <a href="{{ url_for('valorizacion.valorizacion') }}" class="btn btn-danger">Acceder</a>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-md-6 col-lg-4 mb-4">
-            <div class="card h-100">
-                <div class="card-body">
-                    <h5 class="card-title">
-                        <i class="bi bi-tools text-secondary"></i> Utilitarios
-                    </h5>
-                    <p class="card-text">Herramientas de conversión y cálculos auxiliares para metalurgia.</p>
-                    <a href="{{ url_for('utilitarios.utilitarios') }}" class="btn btn-secondary">Acceder</a>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Características -->
-    <div class="row mt-5">
-        <div class="col-12">
-            <h2 class="mb-4">Características Principales</h2>
-        </div>
-    </div>
-
-    <div class="row">
-        <div class="col-md-4 mb-3">
-            <div class="d-flex">
-                <div class="flex-shrink-0">
-                    <i class="bi bi-calculator-fill text-primary fs-3"></i>
-                </div>
-                <div class="flex-grow-1 ms-3">
-                    <h5>Cálculos Especializados</h5>
-                    <p>Algoritmos específicos para la industria metalúrgica y minera.</p>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-md-4 mb-3">
-            <div class="d-flex">
-                <div class="flex-shrink-0">
-                    <i class="bi bi-graph-up-arrow text-success fs-3"></i>
-                </div>
-                <div class="flex-grow-1 ms-3">
-                    <h5>Visualizaciones Interactivas</h5>
-                    <p>Gráficos dinámicos con Plotly para análisis detallado.</p>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-md-4 mb-3">
-            <div class="d-flex">
-                <div class="flex-shrink-0">
-                    <i class="bi bi-shield-check text-info fs-3"></i>
-                </div>
-                <div class="flex-grow-1 ms-3">
-                    <h5>Interfaz Profesional</h5>
-                    <p>Diseño moderno y responsivo para uso en cualquier dispositivo.</p>
-                </div>
-            </div>
-        </div>
+        </main>
     </div>
 </div>
 {% endblock %}
