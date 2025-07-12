@@ -1,4 +1,3 @@
-
 {% extends "base.html" %}
 
 {% block titulo %}MetaFlotPy - Inicio{% endblock %}
@@ -6,56 +5,7 @@
 {% block contenido %}
 <div class="container-fluid">
     <div class="row">
-        <!-- Sidebar -->
-        <nav class="col-md-3 col-lg-2 d-md-block bg-dark sidebar collapse">
-            <div class="position-sticky pt-3">
-                <div class="text-center mb-4">
-                    <h4 class="text-white">MetaFlotPy</h4>
-                    <p class="text-muted small">Cálculos Metalúrgicos</p>
-                </div>
-                
-                <ul class="nav flex-column">
-                    <li class="nav-item">
-                        <a class="nav-link text-white active" href="/">
-                            <i class="fas fa-home"></i> Inicio
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link text-white" href="/tamizado/">
-                            <i class="fas fa-filter"></i> Análisis Granulométrico
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link text-white" href="/balance-masa/">
-                            <i class="fas fa-balance-scale"></i> Balance de Masa
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link text-white" href="/balance-metalurgico/">
-                            <i class="fas fa-chart-line"></i> Balance Metalúrgico
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link text-white" href="/dimensionamiento/">
-                            <i class="fas fa-cogs"></i> Dimensionamiento
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link text-white" href="/valorizacion/">
-                            <i class="fas fa-dollar-sign"></i> Valorización
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link text-white" href="/utilitarios/">
-                            <i class="fas fa-tools"></i> Utilitarios
-                        </a>
-                    </li>
-                </ul>
-            </div>
-        </nav>
-
-        <!-- Main content -->
-        <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+        <div class="col-12">
             <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
                 <h1 class="h2">Dashboard Principal</h1>
             </div>
@@ -81,14 +31,14 @@
                     <div class="card h-100 shadow-sm">
                         <div class="card-body">
                             <div class="d-flex align-items-center mb-3">
-                                <i class="fas fa-filter fa-2x text-primary me-3"></i>
+                                <i class="bi bi-grid fa-2x text-primary me-3"></i>
                                 <h5 class="card-title mb-0">Análisis Granulométrico</h5>
                             </div>
                             <p class="card-text">
                                 Análisis de distribución de tamaños, curvas granulométricas acumulativas 
                                 y modelos de Gates-Gaudin-Schuhmann y Rosin-Rammler.
                             </p>
-                            <a href="/tamizado/" class="btn btn-primary">Acceder</a>
+                            <a href="{{ url_for('tamizado.analisis_granulometrico') }}" class="btn btn-primary">Acceder</a>
                         </div>
                     </div>
                 </div>
@@ -97,14 +47,14 @@
                     <div class="card h-100 shadow-sm">
                         <div class="card-body">
                             <div class="d-flex align-items-center mb-3">
-                                <i class="fas fa-balance-scale fa-2x text-success me-3"></i>
+                                <i class="bi bi-diagram-3 fa-2x text-success me-3"></i>
                                 <h5 class="card-title mb-0">Balance de Masa</h5>
                             </div>
                             <p class="card-text">
                                 Cálculo de flujos másicos, carga circulante, eficiencias de clasificación
                                 y diagramas de flujo para circuitos de molienda.
                             </p>
-                            <a href="/balance-masa/" class="btn btn-success">Acceder</a>
+                            <a href="{{ url_for('balance_masa.balance_masa') }}" class="btn btn-success">Acceder</a>
                         </div>
                     </div>
                 </div>
@@ -113,14 +63,14 @@
                     <div class="card h-100 shadow-sm">
                         <div class="card-body">
                             <div class="d-flex align-items-center mb-3">
-                                <i class="fas fa-chart-line fa-2x text-info me-3"></i>
+                                <i class="bi bi-graph-up fa-2x text-info me-3"></i>
                                 <h5 class="card-title mb-0">Balance Metalúrgico</h5>
                             </div>
                             <p class="card-text">
                                 Cálculo de recuperaciones metalúrgicas, distribución de elementos valiosos
                                 y análisis de leyes en concentrados y relaves.
                             </p>
-                            <a href="/balance-metalurgico/" class="btn btn-info">Acceder</a>
+                            <a href="{{ url_for('balance_metalurgico.balance_metalurgico') }}" class="btn btn-info">Acceder</a>
                         </div>
                     </div>
                 </div>
@@ -129,14 +79,14 @@
                     <div class="card h-100 shadow-sm">
                         <div class="card-body">
                             <div class="d-flex align-items-center mb-3">
-                                <i class="fas fa-cogs fa-2x text-warning me-3"></i>
+                                <i class="bi bi-rulers fa-2x text-warning me-3"></i>
                                 <h5 class="card-title mb-0">Dimensionamiento</h5>
                             </div>
                             <p class="card-text">
                                 Estimación de dimensiones de molinos, celdas de flotación,
                                 espesadores y otros equipos de procesamiento de minerales.
                             </p>
-                            <a href="/dimensionamiento/" class="btn btn-warning">Acceder</a>
+                            <a href="{{ url_for('dimensionamiento.dimensionamiento') }}" class="btn btn-warning">Acceder</a>
                         </div>
                     </div>
                 </div>
@@ -145,14 +95,14 @@
                     <div class="card h-100 shadow-sm">
                         <div class="card-body">
                             <div class="d-flex align-items-center mb-3">
-                                <i class="fas fa-dollar-sign fa-2x text-danger me-3"></i>
+                                <i class="bi bi-cash-coin fa-2x text-danger me-3"></i>
                                 <h5 class="card-title mb-0">Valorización</h5>
                             </div>
                             <p class="card-text">
                                 Cálculo del valor económico de concentrados basado en precios
                                 de metales, penalidades y condiciones comerciales.
                             </p>
-                            <a href="/valorizacion/" class="btn btn-danger">Acceder</a>
+                            <a href="{{ url_for('valorizacion.valorizacion') }}" class="btn btn-danger">Acceder</a>
                         </div>
                     </div>
                 </div>
@@ -161,19 +111,19 @@
                     <div class="card h-100 shadow-sm">
                         <div class="card-body">
                             <div class="d-flex align-items-center mb-3">
-                                <i class="fas fa-tools fa-2x text-secondary me-3"></i>
+                                <i class="bi bi-tools fa-2x text-secondary me-3"></i>
                                 <h5 class="card-title mb-0">Utilitarios</h5>
                             </div>
                             <p class="card-text">
                                 Herramientas de conversión de unidades, cálculos auxiliares
                                 y otras utilidades para ingeniería metalúrgica.
                             </p>
-                            <a href="/utilitarios/" class="btn btn-secondary">Acceder</a>
+                            <a href="{{ url_for('utilitarios.utilitarios') }}" class="btn btn-secondary">Acceder</a>
                         </div>
                     </div>
                 </div>
             </div>
-        </main>
+        </div>
     </div>
 </div>
 {% endblock %}
