@@ -1,401 +1,3 @@
-
-{% extends "base.html" %}
-
-{% block titulo %}Regresión Lineal Empírica - MetaFlotPy{% endblock %}
-
-{% block contenido %}
-<div class="container-fluid">
-    <div class="row">
-        <div class="col-12">
-            <h1><i class="bi bi-grid"></i> Análisis de Tamaño de Partícula</h1>
-            <p class="lead">Regresión Lineal (Ajuste de curva empírica)</p>
-            
-            <!-- Navegación entre modelos -->
-            <nav class="mb-4">
-                <div class="nav nav-tabs" id="nav-tab" role="tablist">
-                    <a class="nav-link" href="{{ url_for('tamizado.analisis_granulometrico') }}">
-                        <i class="bi bi-graph-up"></i> Gates-Gaudin-Schuhmann
-                    </a>
-                    <a class="nav-link" href="{{ url_for('tamizado.rosin_rammler') }}">
-                        <i class="bi bi-graph-down"></i> Rosin-Rammler
-                    </a>
-                    <a class="nav-link active" href="{{ url_for('tamizado.regresion_lineal') }}">
-                        <i class="bi bi-graph-up-arrow"></i> Regresión Lineal
-                    </a>
-                </div>
-            </nav>
-        </div>
-    </div>
-
-    <!-- Formulario de entrada de datos -->
-    <div class="row">
-        <div class="col-md-8">
-            <div class="card">
-                <div class="card-header">
-                    <h5><i class="bi bi-clipboard-data"></i> Datos de Entrada</h5>
-                </div>
-                <div class="card-body">
-                    <form method="POST" id="formulario-regresion">
-                        <h6><i class="bi bi-table"></i> Pares de datos (xi, yi)</h6>
-                        <div class="alert alert-info">
-                            <strong>Nota:</strong> Ingrese los pares de datos. Se tienen pares de datos (xi, yi) donde:
-                            <br><strong>x:</strong> Tamaño de partícula (generalmente en escala logarítmica)
-                            <br><strong>y:</strong> % acumulado pasante o retenido
-                        </div>
-                        
-                        <div id="tabla-datos">
-                            <table class="table table-bordered">
-                                <thead class="table-dark">
-                                    <tr>
-                                        <th>x: Tamaño de partícula</th>
-                                        <th>y: % acumulado pasante o retenido</th>
-                                        <th>Acción</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="filas-datos">
-                                    <!-- Las filas se generan dinámicamente -->
-                                </tbody>
-                            </table>
-                        </div>
-
-                        <div class="text-center mt-3">
-                            <button type="button" class="btn btn-secondary me-2" onclick="agregarFila()">
-                                <i class="bi bi-plus-circle"></i> Agregar Punto
-                            </button>
-                            <button type="submit" class="btn btn-primary">
-                                <i class="bi bi-calculator"></i> Calcular Regresión Lineal
-                            </button>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-md-4">
-            <div class="card">
-                <div class="card-header bg-info text-white">
-                    <h5><i class="bi bi-info-circle"></i> 3. Regresión Lineal (Ajuste de curva empírica)</h5>
-                </div>
-                <div class="card-body">
-                    <div class="bg-primary text-white p-2 rounded mb-3">
-                        <h6><i class="bi bi-database"></i> Datos de entrada:</h6>
-                    </div>
-                    <ul class="mb-3">
-                        <li><strong>x</strong>: Tamaño de partícula (generalmente en escala logarítmica)</li>
-                        <li><strong>y</strong>: % acumulado pasante o retenido</li>
-                        <li>Se tienen pares de datos (x<sub>i</sub>, y<sub>i</sub>)</li>
-                    </ul>
-
-                    <div class="bg-danger text-white p-2 rounded mb-3">
-                        <h6><i class="bi bi-calculator-fill"></i> Fórmula:</h6>
-                    </div>
-                    
-                    <div class="formula-main mb-3">
-                        <div class="text-center bg-light p-3 rounded border">
-                            <strong>y = a × x + b</strong>
-                        </div>
-                    </div>
-                    
-                    <div class="mb-3">
-                        <strong>donde:</strong>
-                        <ul class="mt-2">
-                            <li><strong>a</strong>: pendiente</li>
-                            <li><strong>b</strong>: intersección</li>
-                        </ul>
-                    </div>
-
-                    <div class="bg-warning text-dark p-2 rounded mb-3">
-                        <strong>Usa método de mínimos cuadrados:</strong>
-                    </div>
-                    
-                    <div class="formula-minimos mb-3">
-                        <div class="bg-light p-2 rounded mb-2">
-                            <small><strong>a = </strong>(n∑x<sub>i</sub>y<sub>i</sub> - ∑x<sub>i</sub>∑y<sub>i</sub>) / (n∑x<sub>i</sub>² - (∑x<sub>i</sub>)²)</small>
-                        </div>
-                        <div class="bg-light p-2 rounded">
-                            <small><strong>b = </strong>(∑y<sub>i</sub> - a∑x<sub>i</sub>) / n</small>
-                        </div>
-                    </div>
-
-                    <div class="bg-success text-white p-2 rounded mb-3">
-                        <h6><i class="bi bi-graph-up"></i> Gráfico recomendado:</h6>
-                    </div>
-                    <ul class="mb-3">
-                        <li><strong>Eje X:</strong> Tamaño (log(d)) o d directamente</li>
-                        <li><strong>Eje Y:</strong> % acumulado pasante</li>
-                        <li><strong>Tipo:</strong> Diagrama de dispersión con línea de tendencia</li>
-                    </ul>
-
-                    <div class="bg-secondary text-white p-2 rounded">
-                        <h6><i class="bi bi-lightbulb"></i> Interpretación:</h6>
-                        <ul class="mb-0">
-                            <li>Se puede usar para ajustar cualquier modelo.</li>
-                            <li>El R² (coeficiente de determinación) indica qué tan bueno es el ajuste.</li>
-                        </ul>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Tabla de resultados -->
-    {% if tabla_datos %}
-    <div class="row mt-4">
-        <div class="col-12">
-            <div class="card">
-                <div class="card-header">
-                    <h5><i class="bi bi-table"></i> Tabla de Datos de Entrada</h5>
-                </div>
-                <div class="card-body">
-                    <div class="table-responsive">
-                        <table class="table table-striped table-hover">
-                            <thead class="table-dark">
-                                <tr>
-                                    <th>Punto</th>
-                                    <th>x<sub>i</sub></th>
-                                    <th>y<sub>i</sub></th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for fila in tabla_datos %}
-                                <tr>
-                                    <td>{{ loop.index }}</td>
-                                    <td>{{ "%.4f"|format(fila.x) }}</td>
-                                    <td>{{ "%.4f"|format(fila.y) }}</td>
-                                </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    {% endif %}
-
-    <!-- Gráfico Principal -->
-    {% if grafico_principal %}
-    <div class="row mt-4">
-        <div class="col-12">
-            <div class="card">
-                <div class="card-header">
-                    <h5><i class="bi bi-graph-up"></i> Regresión Lineal</h5>
-                </div>
-                <div class="card-body">
-                    <div id="grafico-principal"></div>
-                </div>
-            </div>
-        </div>
-    </div>
-    {% endif %}
-
-    <!-- Resultados de Regresión -->
-    {% if resultados_calculo %}
-    <div class="row mt-4">
-        <div class="col-md-6">
-            <div class="card">
-                <div class="card-header bg-success text-white">
-                    <h5><i class="bi bi-calculator"></i> Parámetros de Regresión</h5>
-                </div>
-                <div class="card-body">
-                    <table class="table table-sm">
-                        <tr>
-                            <td><strong>Pendiente (a):</strong></td>
-                            <td><span class="badge bg-primary fs-6">{{ "%.6f"|format(resultados_calculo.a) }}</span></td>
-                        </tr>
-                        <tr>
-                            <td><strong>Intersección (b):</strong></td>
-                            <td><span class="badge bg-warning fs-6">{{ "%.6f"|format(resultados_calculo.b) }}</span></td>
-                        </tr>
-                        <tr>
-                            <td><strong>Coeficiente de determinación (R²):</strong></td>
-                            <td><span class="badge bg-info fs-6">{{ "%.6f"|format(resultados_calculo.r2) }}</span></td>
-                        </tr>
-                        <tr>
-                            <td><strong>Número de puntos (n):</strong></td>
-                            <td><span class="badge bg-secondary fs-6">{{ resultados_calculo.n }}</span></td>
-                        </tr>
-                    </table>
-
-                    <div class="alert alert-primary mt-3">
-                        <h6><i class="bi bi-formula"></i> Ecuación final:</h6>
-                        <code>{{ resultados_calculo.ecuacion }}</code>
-                    </div>
-
-                    <div class="alert alert-info mt-3">
-                        <h6><i class="bi bi-info-circle"></i> Interpretación del ajuste:</h6>
-                        {% if resultados_calculo.r2 > 0.95 %}
-                        <span class="badge bg-success">Excelente ajuste</span> (R² > 0.95)
-                        {% elif resultados_calculo.r2 > 0.90 %}
-                        <span class="badge bg-primary">Buen ajuste</span> (R² > 0.90)
-                        {% elif resultados_calculo.r2 > 0.80 %}
-                        <span class="badge bg-warning">Ajuste moderado</span> (R² > 0.80)
-                        {% else %}
-                        <span class="badge bg-danger">Ajuste pobre</span> (R² < 0.80)
-                        {% endif %}
-                    </div>
-
-                    <div class="bg-light p-3 rounded mt-3">
-                        <h6><i class="bi bi-calculator-fill"></i> Cálculo de parámetros:</h6>
-                        <small>
-                            <strong>a = </strong>{{ resultados_calculo.formula_a }}<br>
-                            <strong>b = </strong>{{ resultados_calculo.formula_b }}
-                        </small>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-md-6">
-            <div class="card">
-                <div class="card-header">
-                    <h5><i class="bi bi-table"></i> Tabla de Cálculos</h5>
-                </div>
-                <div class="card-body">
-                    <div class="table-responsive">
-                        <table class="table table-sm table-striped">
-                            <thead>
-                                <tr>
-                                    <th>i</th>
-                                    <th>x<sub>i</sub></th>
-                                    <th>y<sub>i</sub></th>
-                                    <th>x<sub>i</sub>y<sub>i</sub></th>
-                                    <th>x<sub>i</sub>²</th>
-                                    <th>y pred</th>
-                                    <th>Residuo</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for fila in resultados_calculo.tabla_calculos %}
-                                <tr>
-                                    <td>{{ fila.i }}</td>
-                                    <td>{{ "%.3f"|format(fila.xi) }}</td>
-                                    <td>{{ "%.3f"|format(fila.yi) }}</td>
-                                    <td>{{ "%.3f"|format(fila.xi_yi) }}</td>
-                                    <td>{{ "%.3f"|format(fila.xi2) }}</td>
-                                    <td>{{ "%.3f"|format(fila.y_pred) }}</td>
-                                    <td>{{ "%.3f"|format(fila.residuo) }}</td>
-                                </tr>
-                                {% endfor %}
-                                <tr class="table-info">
-                                    <td><strong>Σ</strong></td>
-                                    <td><strong>{{ "%.3f"|format(resultados_calculo.sumas.sum_x) }}</strong></td>
-                                    <td><strong>{{ "%.3f"|format(resultados_calculo.sumas.sum_y) }}</strong></td>
-                                    <td><strong>{{ "%.3f"|format(resultados_calculo.sumas.sum_xy) }}</strong></td>
-                                    <td><strong>{{ "%.3f"|format(resultados_calculo.sumas.sum_x2) }}</strong></td>
-                                    <td>-</td>
-                                    <td>-</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Gráfico de dispersión -->
-    {% if grafico_dispersion %}
-    <div class="row mt-4">
-        <div class="col-12">
-            <div class="card">
-                <div class="card-header">
-                    <h5><i class="bi bi-graph-up-arrow"></i> Diagrama de dispersión con línea de tendencia</h5>
-                </div>
-                <div class="card-body">
-                    <div id="grafico-dispersion"></div>
-                </div>
-            </div>
-        </div>
-    </div>
-    {% endif %}
-    {% endif %}
-</div>
-
-<style>
-.formula-main {
-    font-size: 1.2em;
-}
-
-.formula-minimos {
-    font-size: 0.85em;
-}
-
-.nav-tabs .nav-link.active {
-    background-color: #0d6efd;
-    color: white;
-    border-color: #0d6efd;
-}
-</style>
-
-<script src="https://cdn.plot.ly/plotly-2.26.0.min.js"></script>
-<script>
-// Función para agregar filas de datos dinámicamente
-function agregarFila() {
-    const tbody = document.getElementById('filas-datos');
-    const numFilas = tbody.children.length;
-
-    const fila = document.createElement('tr');
-    fila.innerHTML = `
-        <td>
-            <input type="number" class="form-control" name="x_value[]" step="0.0001" placeholder="ej: 1.5" required>
-        </td>
-        <td>
-            <input type="number" class="form-control" name="y_value[]" step="0.0001" placeholder="ej: 85.5" required>
-        </td>
-        <td>
-            <button type="button" class="btn btn-sm btn-danger" onclick="eliminarFila(this)">
-                <i class="bi bi-trash"></i>
-            </button>
-        </td>
-    `;
-
-    tbody.appendChild(fila);
-}
-
-function eliminarFila(boton) {
-    boton.closest('tr').remove();
-}
-
-// Agregar algunas filas iniciales
-document.addEventListener('DOMContentLoaded', function() {
-    // Agregar 6 filas iniciales
-    for (let i = 0; i < 6; i++) {
-        agregarFila();
-    }
-
-    // Llenar con valores de ejemplo para demostración
-    const ejemplos_x = [0.5, 1.0, 1.5, 2.0, 2.5, 3.0];
-    const ejemplos_y = [95.2, 87.8, 78.5, 65.3, 48.9, 28.7];
-    
-    const inputs_x = document.querySelectorAll('input[name="x_value[]"]');
-    const inputs_y = document.querySelectorAll('input[name="y_value[]"]');
-
-    ejemplos_x.forEach((valor, index) => {
-        if (inputs_x[index]) {
-            inputs_x[index].value = valor;
-        }
-    });
-
-    ejemplos_y.forEach((valor, index) => {
-        if (inputs_y[index]) {
-            inputs_y[index].value = valor;
-        }
-    });
-});
-
-// Renderizar gráficos
-{% if grafico_principal %}
-var grafico_principal = {{ grafico_principal|safe }};
-Plotly.newPlot('grafico-principal', grafico_principal.data, grafico_principal.layout, {responsive: true});
-{% endif %}
-
-{% if grafico_dispersion %}
-var grafico_dispersion = {{ grafico_dispersion|safe }};
-Plotly.newPlot('grafico-dispersion', grafico_dispersion.data, grafico_dispersion.layout, {responsive: true});
-{% endif %}
-</script>
-{% endblock %}
 {% extends "base.html" %}
 
 {% block titulo %}Regresión Lineal - MetaFlotPy{% endblock %}
@@ -410,7 +12,7 @@ Plotly.newPlot('grafico-dispersion', grafico_dispersion.data, grafico_dispersion
                     <i class="bi bi-graph-up-arrow me-3"></i>Regresión Lineal
                 </h1>
                 <p class="lead mb-3">Ajuste de curva empírica para análisis granulométrico</p>
-                
+
                 <!-- Navegación entre modelos -->
                 <nav class="d-flex gap-2 flex-wrap">
                     <a href="{{ url_for('tamizado.analisis_granulometrico') }}" class="btn btn-outline-light btn-sm">
@@ -494,7 +96,7 @@ Plotly.newPlot('grafico-dispersion', grafico_dispersion.data, grafico_dispersion
                     <div class="formula-box bg-light p-3 rounded text-center mb-3">
                         <strong>y = a × x + b</strong>
                     </div>
-                    
+
                     <div class="mt-2">
                         <small><strong>Donde:</strong></small>
                         <ul class="small">
@@ -616,7 +218,7 @@ Plotly.newPlot('grafico-dispersion', grafico_dispersion.data, grafico_dispersion
                                 </tr>
                             </table>
                         </div>
-                        
+
                         <div class="col-md-6">
                             <h6><i class="bi bi-calculator"></i> Cálculos de Mínimos Cuadrados:</h6>
                             <table class="table table-sm">
@@ -652,11 +254,11 @@ Plotly.newPlot('grafico-dispersion', grafico_dispersion.data, grafico_dispersion
                 </div>
                 <div class="card-body">
                     <h6>Método de Mínimos Cuadrados:</h6>
-                    
+
                     <div class="formula-box bg-light p-2 rounded mb-2">
                         <strong>a = </strong>(n∑xy - ∑x∑y) / (n∑x² - (∑x)²)
                     </div>
-                    
+
                     <div class="formula-box bg-light p-2 rounded mb-3">
                         <strong>b = </strong>(∑y - a∑x) / n
                     </div>
@@ -665,7 +267,7 @@ Plotly.newPlot('grafico-dispersion', grafico_dispersion.data, grafico_dispersion
                     <div class="formula-box bg-light p-2 rounded">
                         <strong>R² = </strong>1 - (SS<sub>res</sub> / SS<sub>tot</sub>)
                     </div>
-                    
+
                     <small class="text-muted mt-2 d-block">
                         <strong>SS<sub>res</sub>:</strong> Suma de cuadrados residuales<br>
                         <strong>SS<sub>tot</sub>:</strong> Suma total de cuadrados
