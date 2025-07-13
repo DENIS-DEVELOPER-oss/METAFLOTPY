@@ -174,6 +174,12 @@
 
                         <div class="text-center mt-4">
                             {{ formulario.calcular(class="btn btn-primary btn-lg") }}
+                            <div class="mt-2">
+                                <small class="text-muted">
+                                    <i class="bi bi-info-circle"></i> 
+                                    Ingrese al menos 2 valores para calcular automáticamente el tercero
+                                </small>
+                            </div>
                         </div>
                     </form>
                 </div>
@@ -316,7 +322,7 @@ document.addEventListener('DOMContentLoaded', function() {
 </script>
 
 {% if graficos %}
-<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+<script src="https://cdn.plot.ly/plotly-2.18.0.min.js"></script>
 <script>
     {% if graficos.flujos %}
     var grafico_flujos = {{ graficos.flujos|safe }};

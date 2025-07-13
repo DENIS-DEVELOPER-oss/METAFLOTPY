@@ -41,26 +41,38 @@ def calcular_balance_masa(formulario):
 
 def calcular_circuito_directo(formulario):
     """Circuito Cerrado Directo: F = P + R"""
-    # Validar que se tengan al menos 2 valores para calcular el tercero
-    f = formulario.f_alimentacion.data
-    p = formulario.p_producto.data  
-    r = formulario.r_rechazo.data
+    # Obtener valores del formulario
+    f = formulario.f_alimentacion.data or 0
+    p = formulario.p_producto.data or 0
+    r = formulario.r_rechazo.data or 0
     
-    # Calcular el valor faltante usando F = P + R
-    if f and p and not r:
+    # Contar cuántos valores se han ingresado
+    valores_ingresados = sum([1 for x in [f, p, r] if x > 0])
+    
+    # Si se tienen al menos 2 valores, calcular el tercero
+    if valores_ingresados >= 2:
+        if f > 0 and p > 0 and r == 0:
+            r = f - p
+        elif f > 0 and r > 0 and p == 0:
+            p = f - r
+        elif p > 0 and r > 0 and f == 0:
+            f = p + r
+    else:
+        # Usar valores ejemplo si no hay suficientes datos
+        f = f or 100.0
+        p = p or 80.0
         r = f - p
-    elif f and r and not p:
-        p = f - r
-    elif p and r and not f:
-        f = p + r
-    elif not (f and p and r):
-        # Si no hay suficientes datos, usar valores por defecto
-        if not f: f = 100
-        if not p: p = 80
-        if not r: r = f - p
+    
+    # Validar que los valores sean positivos
+    f = max(0, f)
+    p = max(0, p)
+    r = max(0, r)
     
     # Calcular carga circulante CC = (R/P) * 100
     carga_circulante_pct = (r / p) * 100 if p > 0 else 0
+    
+    # Verificar balance F = P + R
+    balance_verificado = abs(f - (p + r)) < 0.1
     
     return {
         'tipo_circuito': 'directo',
@@ -68,30 +80,43 @@ def calcular_circuito_directo(formulario):
         'p_producto': round(p, 2),
         'r_rechazo': round(r, 2),
         'carga_circulante_pct': round(carga_circulante_pct, 1),
-        'balance_verificado': abs((f) - (p + r)) < 0.1
+        'balance_verificado': balance_verificado
     }
 
 def calcular_circuito_inverso(formulario):
     """Circuito Cerrado Inverso: F + R = P"""
-    f = formulario.f_alimentacion_inv.data
-    r = formulario.r_rechazo_inv.data
-    p = formulario.p_producto_inv.data
+    # Obtener valores del formulario
+    f = formulario.f_alimentacion_inv.data or 0
+    r = formulario.r_rechazo_inv.data or 0
+    p = formulario.p_producto_inv.data or 0
     
-    # Calcular el valor faltante usando F + R = P
-    if f and r and not p:
+    # Contar cuántos valores se han ingresado
+    valores_ingresados = sum([1 for x in [f, r, p] if x > 0])
+    
+    # Si se tienen al menos 2 valores, calcular el tercero
+    if valores_ingresados >= 2:
+        if f > 0 and r > 0 and p == 0:
+            p = f + r
+        elif f > 0 and p > 0 and r == 0:
+            r = p - f
+        elif r > 0 and p > 0 and f == 0:
+            f = p - r
+    else:
+        # Usar valores ejemplo si no hay suficientes datos
+        f = f or 100.0
+        r = r or 20.0
         p = f + r
-    elif f and p and not r:
-        r = p - f
-    elif r and p and not f:
-        f = p - r
-    elif not (f and r and p):
-        # Valores por defecto
-        if not f: f = 100
-        if not r: r = 20
-        if not p: p = f + r
+    
+    # Validar que los valores sean positivos
+    f = max(0, f)
+    r = max(0, r)
+    p = max(0, p)
     
     # Calcular carga circulante CC = (R/F) * 100
     carga_circulante_pct = (r / f) * 100 if f > 0 else 0
+    
+    # Verificar balance F + R = P
+    balance_verificado = abs((f + r) - p) < 0.1
     
     return {
         'tipo_circuito': 'inverso',
@@ -99,37 +124,45 @@ def calcular_circuito_inverso(formulario):
         'r_rechazo': round(r, 2),
         'p_producto': round(p, 2),
         'carga_circulante_pct': round(carga_circulante_pct, 1),
-        'balance_verificado': abs((f + r) - p) < 0.1
+        'balance_verificado': balance_verificado
     }
 
 def calcular_circuito_sabc1(formulario):
     """Circuito SABC-1: Balance global F = P + R, Sub-balance SAG F = S, Sub-balance molino bolas S + R = B y B = P + R"""
-    f = formulario.f_mineral_sabc1.data or 100
-    s = formulario.s_producto_sag.data or f  # F = S
-    b = formulario.b_producto_bolas.data
-    p = formulario.p_producto_final_sabc1.data
-    r = formulario.r_carga_circulante_sabc1.data
+    # Obtener valores del formulario
+    f = formulario.f_mineral_sabc1.data or 100.0
+    s = formulario.s_producto_sag.data or 0
+    b = formulario.b_producto_bolas.data or 0
+    p = formulario.p_producto_final_sabc1.data or 0
+    r = formulario.r_carga_circulante_sabc1.data or 0
     
     # Aplicar balance F = S (sub-balance SAG)
     s = f
     
-    # Si tenemos P y R, calcular B = P + R
-    if p and r:
+    # Calcular valores faltantes según los datos disponibles
+    if p > 0 and r > 0:
         b = p + r
-    # Si tenemos B y P, calcular R = B - P
-    elif b and p:
+    elif b > 0 and p > 0:
         r = b - p
-    # Si tenemos B y R, calcular P = B - R
-    elif b and r:
+    elif b > 0 and r > 0:
         p = b - r
     else:
-        # Valores por defecto
-        if not p: p = f * 0.8
-        if not r: r = f * 0.2
-        if not b: b = p + r
+        # Valores típicos si no se especifican
+        p = p or f * 0.8
+        r = r or f * 0.2
+        b = p + r
     
-    # Verificar S + R = B
-    s_r_balance = abs((s + r) - b) < 0.1
+    # Validar que los valores sean positivos
+    f = max(0, f)
+    s = max(0, s)
+    b = max(0, b)
+    p = max(0, p)
+    r = max(0, r)
+    
+    # Verificar balances
+    balance_sag = abs(f - s) < 0.1  # F = S
+    balance_bolas = abs((s + r) - b) < 0.1  # S + R = B
+    balance_global = abs(f - (p + r)) < 0.1  # F = P + R
     
     return {
         'tipo_circuito': 'sabc1',
@@ -138,25 +171,37 @@ def calcular_circuito_sabc1(formulario):
         'b_producto_bolas': round(b, 2),
         'p_producto_final': round(p, 2),
         'r_carga_circulante': round(r, 2),
-        'balance_verificado': s_r_balance and abs((f) - (p + r)) < 0.1
+        'balance_verificado': balance_sag and balance_bolas and balance_global
     }
 
 def calcular_circuito_sabc2(formulario):
     """Circuito SABC-2: Balance SAG F = S, Balance Bolas + Clasificador S + R = P + R => P = S"""
-    f = formulario.f_mineral_sabc2.data or 100
-    s = formulario.s_producto_sag_sabc2.data or f  # F = S
-    r = formulario.r_rechazo_sabc2.data
-    p = formulario.p_producto_final_sabc2.data or s  # P = S
+    # Obtener valores del formulario
+    f = formulario.f_mineral_sabc2.data or 100.0
+    s = formulario.s_producto_sag_sabc2.data or 0
+    r = formulario.r_rechazo_sabc2.data or 0
+    p = formulario.p_producto_final_sabc2.data or 0
     
-    # Aplicar balances
+    # Aplicar balances fundamentales
     s = f  # Balance SAG: F = S
     p = s  # Balance simplificado: P = S
     
-    if not r:
-        r = f * 0.15  # Valor típico
+    # Si no se especifica rechazo, usar valor típico
+    if r == 0:
+        r = f * 0.15  # 15% típico
+    
+    # Validar que los valores sean positivos
+    f = max(0, f)
+    s = max(0, s)
+    r = max(0, r)
+    p = max(0, p)
     
     # Calcular carga circulante CC = (R/P) * 100
     carga_circulante_pct = (r / p) * 100 if p > 0 else 0
+    
+    # Verificar balances
+    balance_sag = abs(f - s) < 0.1  # F = S
+    balance_producto = abs(p - s) < 0.1  # P = S
     
     return {
         'tipo_circuito': 'sabc2',
@@ -165,7 +210,7 @@ def calcular_circuito_sabc2(formulario):
         'r_rechazo': round(r, 2),
         'p_producto_final': round(p, 2),
         'carga_circulante_pct': round(carga_circulante_pct, 1),
-        'balance_verificado': abs(f - s) < 0.1 and abs(p - s) < 0.1
+        'balance_verificado': balance_sag and balance_producto
     }
 
 def crear_diagrama_flujo(resultados):
