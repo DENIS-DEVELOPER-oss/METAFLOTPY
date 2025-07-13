@@ -1,23 +1,311 @@
+
 {% extends "base.html" %}
 
-{% block titulo %}Valorización - MetaFlotPy{% endblock %}
+{% block titulo %}Valorización de Concentrados - MetaFlotPy{% endblock %}
 
 {% block contenido %}
 <div class="container-fluid">
-    <div class="row">
+    <!-- Header principal -->
+    <div class="row mb-4">
         <div class="col-12">
-            <h1><i class="bi bi-cash-coin"></i> Valorización de Concentrados</h1>
-            <p class="lead">Cálculo del valor económico y evaluación financiera</p>
+            <div class="bg-success text-white p-4 rounded shadow">
+                <h1 class="display-6 fw-bold mb-2">
+                    <i class="bi bi-currency-dollar me-3"></i>Módulo V: Valorización de Concentrados
+                </h1>
+                <p class="lead mb-0">Cálculo del valor económico de concentrados con análisis detallado</p>
+            </div>
         </div>
     </div>
 
     <div class="row">
-        <div class="col-12">
-            <div class="alert alert-info">
-                <i class="bi bi-info-circle"></i>
-                <strong>Módulo en Desarrollo:</strong> Esta funcionalidad estará disponible próximamente.
+        <!-- Panel de entrada de datos -->
+        <div class="col-lg-4">
+            <div class="card shadow border-0 h-100">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0"><i class="bi bi-clipboard-data me-2"></i>Datos de entrada</h5>
+                </div>
+                <div class="card-body">
+                    <form method="POST">
+                        {{ formulario.hidden_tag() }}
+                        
+                        <div class="mb-3">
+                            {{ formulario.cantidad_concentrado.label(class="form-label fw-bold") }}
+                            {{ formulario.cantidad_concentrado(class="form-control") }}
+                            <small class="text-muted">Q: Cantidad de concentrado (t/día o t/mes)</small>
+                        </div>
+                        
+                        <div class="mb-3">
+                            {{ formulario.ley_metal.label(class="form-label fw-bold") }}
+                            {{ formulario.ley_metal(class="form-control") }}
+                            <small class="text-muted">L: Ley del metal en el concentrado (%)</small>
+                        </div>
+                        
+                        <div class="mb-3">
+                            {{ formulario.recuperacion.label(class="form-label fw-bold") }}
+                            {{ formulario.recuperacion(class="form-control") }}
+                            <small class="text-muted">R: Recuperación metalúrgica (opcional si ya se valorizó con L)</small>
+                        </div>
+                        
+                        <div class="mb-3">
+                            {{ formulario.precio_metal.label(class="form-label fw-bold") }}
+                            {{ formulario.precio_metal(class="form-control") }}
+                            <small class="text-muted">P: Precio del metal en el mercado (USD/ton o USD/oz)</small>
+                        </div>
+                        
+                        <div class="mb-3">
+                            {{ formulario.costo_tratamiento.label(class="form-label fw-bold") }}
+                            {{ formulario.costo_tratamiento(class="form-control") }}
+                            <small class="text-muted">C_tr: Costo de tratamiento (USD/t de concentrado)</small>
+                        </div>
+                        
+                        <div class="mb-3">
+                            {{ formulario.penalidades.label(class="form-label fw-bold") }}
+                            {{ formulario.penalidades(class="form-control") }}
+                            <small class="text-muted">P_pen: Penalidades por impurezas (USD/t)</small>
+                        </div>
+                        
+                        <div class="mb-4">
+                            {{ formulario.factor_conversion.label(class="form-label fw-bold") }}
+                            {{ formulario.factor_conversion(class="form-select") }}
+                            <small class="text-muted">F: Factor de conversión según el metal</small>
+                            <div class="mt-2">
+                                <small class="d-block">• Oro: F = 31.1035 g/oz</small>
+                                <small class="d-block">• Plata: F = 31.1035 g/oz</small>
+                                <small class="d-block">• Cobre/Plomo/Zinc: F = 1000 kg/t</small>
+                            </div>
+                        </div>
+                        
+                        {{ formulario.calcular(class="btn btn-success btn-lg w-100") }}
+                    </form>
+                </div>
             </div>
+        </div>
+
+        <!-- Panel de resultados -->
+        <div class="col-lg-8">
+            {% if resultados_calculo %}
+            <!-- Fórmulas utilizadas -->
+            <div class="card shadow border-0 mb-4">
+                <div class="card-header bg-danger text-white">
+                    <h5 class="mb-0"><i class="bi bi-calculator me-2"></i>Fórmulas</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6>1. Valor bruto del concentrado:</h6>
+                            <div class="bg-light p-3 rounded text-center mb-3">
+                                <strong>Valor Bruto = Q × (L/100) × F × P</strong>
+                            </div>
+                            
+                            <h6>2. Deducciones totales:</h6>
+                            <div class="bg-light p-3 rounded text-center mb-3">
+                                <strong>Deducciones = Q × (C_tr + P_pen)</strong>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <h6>3. Valor neto del concentrado:</h6>
+                            <div class="bg-light p-3 rounded text-center mb-3">
+                                <strong>Valor Neto = Valor Bruto - Deducciones</strong>
+                            </div>
+                            
+                            <h6>4. Valor neto por tonelada:</h6>
+                            <div class="bg-light p-3 rounded text-center mb-3">
+                                <strong>USD/t = Valor Neto / Q</strong>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Resultados principales -->
+            <div class="card shadow border-0 mb-4">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0"><i class="bi bi-bar-chart me-2"></i>Resultados de Valorización</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row text-center">
+                        <div class="col-md-3">
+                            <div class="border rounded p-3 bg-light">
+                                <h4 class="text-success">${{ "{:,.2f}".format(resultados_calculo.valor_bruto) }}</h4>
+                                <small class="text-muted">Valor Bruto (USD)</small>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="border rounded p-3 bg-light">
+                                <h4 class="text-warning">${{ "{:,.2f}".format(resultados_calculo.deducciones_totales) }}</h4>
+                                <small class="text-muted">Deducciones (USD)</small>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="border rounded p-3 bg-light">
+                                <h4 class="text-primary">${{ "{:,.2f}".format(resultados_calculo.valor_neto) }}</h4>
+                                <small class="text-muted">Valor Neto (USD)</small>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="border rounded p-3 bg-light">
+                                <h4 class="text-info">${{ "{:,.2f}".format(resultados_calculo.valor_neto_por_tonelada) }}</h4>
+                                <small class="text-muted">USD por tonelada</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Gráfico de barras -->
+            {% if grafico_barras %}
+            <div class="card shadow border-0 mb-4">
+                <div class="card-header bg-warning text-white">
+                    <h5 class="mb-0"><i class="bi bi-bar-chart-fill me-2"></i>Gráfico recomendado</h5>
+                </div>
+                <div class="card-body">
+                    <div id="grafico-barras"></div>
+                    <ul class="mt-3 small">
+                        <li><strong>Valor bruto:</strong> Ingresos totales por el metal</li>
+                        <li><strong>Costo de tratamiento:</strong> Descuentos por procesamiento</li>
+                        <li><strong>Penalidades:</strong> Descuentos por impurezas</li>
+                        <li><strong>Valor neto:</strong> Ingreso real final</li>
+                    </ul>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Tabla resumen -->
+            {% if tabla_resumen %}
+            <div class="card shadow border-0 mb-4">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0"><i class="bi bi-table me-2"></i>Tabla resumen: ley, recuperación, precio, ingresos netos</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-striped table-hover">
+                            <thead class="table-dark">
+                                <tr>
+                                    <th>Parámetro</th>
+                                    <th>Valor</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><strong>Ley del concentrado</strong></td>
+                                    <td>{{ tabla_resumen.ley_concentrado }}</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Recuperación metalúrgica</strong></td>
+                                    <td>{{ tabla_resumen.recuperacion_metalurgica }}</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Precio del metal</strong></td>
+                                    <td>{{ tabla_resumen.precio_metal }}</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Metal pagable</strong></td>
+                                    <td>{{ tabla_resumen.metal_pagable }}</td>
+                                </tr>
+                                <tr class="table-success">
+                                    <td><strong>Ingresos netos totales</strong></td>
+                                    <td><strong>{{ tabla_resumen.ingresos_netos }}</strong></td>
+                                </tr>
+                                <tr class="table-info">
+                                    <td><strong>Valor por tonelada</strong></td>
+                                    <td><strong>{{ tabla_resumen.valor_por_tonelada }}</strong></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Interpretación -->
+            <div class="card shadow border-0 mb-4">
+                <div class="card-header bg-secondary text-white">
+                    <h5 class="mb-0"><i class="bi bi-lightbulb me-2"></i>Interpretación</h5>
+                </div>
+                <div class="card-body">
+                    <ul>
+                        <li><strong>Valor bruto</strong> representa el ingreso potencial sin costos.</li>
+                        <li><strong>Deducciones</strong> reflejan los descuentos por tratamiento y penalidades.</li>
+                        <li><strong>Valor neto</strong> es el ingreso real por concentrado vendido.</li>
+                        <li>Se puede usar para simular escenarios: cambios de ley, precio o costos.</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Ejemplo de cálculo -->
+            <div class="card shadow border-0 mb-4">
+                <div class="card-header bg-dark text-white">
+                    <h5 class="mb-0"><i class="bi bi-file-text me-2"></i>Ejemplo para Concentrado de Cobre</h5>
+                </div>
+                <div class="card-body">
+                    <h6>Supongamos:</h6>
+                    <ul class="small">
+                        <li><strong>Q</strong> = 500 t/mes</li>
+                        <li><strong>L</strong> = 28% Cu</li>
+                        <li><strong>P</strong> = 8500 USD/t Cu</li>
+                        <li><strong>C_tr</strong> = 150 USD/t</li>
+                        <li><strong>P_pen</strong> = 20 USD/t</li>
+                        <li><strong>F</strong> = 1 (para metales cotizados por tonelada)</li>
+                    </ul>
+                    
+                    <h6>Cálculo:</h6>
+                    <p class="small">
+                        <strong>Valor Bruto</strong> = 500 × (28/100) × 8500 = 500 × 0.28 × 8500 = 1,190,000 USD<br>
+                        <strong>Deducciones</strong> = 500 × (150 + 20) = 500 × 170 = 85,000 USD<br>
+                        <strong>Valor Neto</strong> = 1,190,000 - 85,000 = 1,105,000 USD
+                    </p>
+                </div>
+            </div>
+
+            {% else %}
+            <!-- Mensaje cuando no hay resultados -->
+            <div class="card shadow border-0">
+                <div class="card-body text-center">
+                    <i class="bi bi-calculator display-1 text-muted"></i>
+                    <h4>Ingrese los datos para calcular la valorización</h4>
+                    <p class="text-muted">Complete el formulario de la izquierda para obtener los resultados</p>
+                </div>
+            </div>
+            {% endif %}
         </div>
     </div>
 </div>
+
+{% if grafico_barras %}
+<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+<script>
+    // Renderizar gráfico de barras
+    var graphJSON = {{ grafico_barras|safe }};
+    Plotly.newPlot('grafico-barras', graphJSON.data, graphJSON.layout, {responsive: true});
+</script>
+{% endif %}
+
+<style>
+/* Efectos hover para cards */
+.card {
+    transition: all 0.3s ease;
+}
+
+.card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+}
+
+/* Mejoras para fórmulas */
+.bg-light {
+    font-family: 'Fira Code', 'Courier New', monospace;
+    font-weight: bold;
+    border: 2px solid #e9ecef;
+}
+
+/* Resaltar resultados principales */
+.border {
+    transition: all 0.3s ease;
+}
+
+.border:hover {
+    background-color: #f8f9fa !important;
+    transform: scale(1.05);
+}
+</style>
 {% endblock %}
