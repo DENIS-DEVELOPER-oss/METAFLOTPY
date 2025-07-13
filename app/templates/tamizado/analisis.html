@@ -60,35 +60,43 @@
         <div class="col-md-4">
             <div class="card">
                 <div class="card-header">
-                    <h5><i class="bi bi-info-circle"></i> Gates-Gaudin-Schuhmann (GGS)</h5>
+                    <h5><i class="bi bi-info-circle"></i> Datos de entrada esperados</h5>
                 </div>
                 <div class="card-body">
                     <h6><i class="bi bi-clipboard-data"></i> Datos de entrada:</h6>
                     <ul class="small">
-                        <li><strong>d</strong>: Tamaño de partícula (μm o mm)</li>
-                        <li><strong>d<sub>máx</sub></strong>: Tamaño máximo (μm o mm)</li>
-                        <li><strong>P(d)</strong>: % acumulado pasante para d (dato a calcular)</li>
-                        <li><strong>n</strong>: Exponente de distribución</li>
+                        <li><strong>T</strong>: Peso total de muestra (g) → campo único</li>
+                        <li><strong>d<sub>i</sub></strong>: Tamaño de partícula (por malla, en mm o μm)</li>
+                        <li><strong>R<sub>i</sub></strong>: Peso retenido en cada malla (g)</li>
                     </ul>
 
-                    <h6><i class="bi bi-calculator-fill text-primary"></i> Fórmula:</h6>
-                    <div class="bg-light p-3 border rounded text-center">
-                        <strong>P(d) = (d/d<sub>máx</sub>)<sup>n</sup> × 100</strong>
+                    <h6><i class="bi bi-calculator-fill text-success"></i> PASOS DE CÁLCULO</h6>
+                    
+                    <div class="bg-light p-3 border rounded mb-2">
+                        <strong>1. % Retenido por malla:</strong><br>
+                        <code>%R<sub>i</sub> = R<sub>i</sub>/T × 100</code>
                     </div>
-
-                    <h6 class="mt-3"><i class="bi bi-graph-up"></i> Gráfico recomendado:</h6>
-                    <ul class="small">
-                        <li>Eje X: Tamaño de partícula log(d)</li>
-                        <li>Eje Y: % acumulado pasante log(P(d))</li>
-                        <li>Tipo: Gráfico log-log (línea recta si el modelo se ajusta bien)</li>
-                    </ul>
-
-                    <h6><i class="bi bi-lightbulb"></i> Interpretación:</h6>
-                    <ul class="small">
-                        <li>Se usa principalmente para materiales con distribución gruesa.</li>
-                        <li>Si se ajusta linealmente en el log-log, el modelo es adecuado.</li>
-                        <li>El exponente <strong>n</strong> indica la uniformidad: menor <strong>n</strong> → distribución más gruesa.</li>
-                    </ul>
+                    
+                    <div class="bg-light p-3 border rounded mb-2">
+                        <strong>2. % Acumulado retenido:</strong><br>
+                        <code>%AcumR<sub>i</sub> = Σ%R<sub>j</sub></code> (j=1 hasta i)
+                    </div>
+                    
+                    <div class="bg-light p-3 border rounded mb-2">
+                        <strong>3. % Acumulado pasante:</strong><br>
+                        <code>%P<sub>i</sub> = 100 - %AcumR<sub>i</sub></code>
+                    </div>
+                    
+                    <div class="bg-light p-3 border rounded mb-2">
+                        <strong>4. Logaritmos (para graficar):</strong><br>
+                        <code>log(d<sub>i</sub>), log(%P<sub>i</sub>)</code>
+                    </div>
+                    
+                    <div class="bg-light p-3 border rounded">
+                        <strong>5. Regresión lineal log-log:</strong><br>
+                        <code>log(%P<sub>i</sub>) = n × log(d<sub>i</sub>)</code><br>
+                        <small>Usa mínimos cuadrados para obtener la pendiente <strong>n</strong></small>
+                    </div>
                 </div>
             </div>
         </div>
@@ -133,71 +141,110 @@
     </div>
     {% endif %}
 
-    <!-- Resultados Gates-Gaudin-Schuhmann -->
-    {% if resultados_gates %}
+    <!-- Gráfico Principal -->
+    {% if grafico_principal %}
     <div class="row mt-4">
         <div class="col-12">
             <div class="card">
-                <div class="card-header bg-primary text-white">
-                    <h5><i class="bi bi-diamond"></i> Resultados del Modelo Gates-Gaudin-Schuhmann</h5>
+                <div class="card-header">
+                    <h5><i class="bi bi-graph-up"></i> Curvas Granulométricas</h5>
                 </div>
                 <div class="card-body">
-                    <div class="row">
-                        <div class="col-md-6">
-                            <table class="table table-sm">
-                                <tr>
-                                    <td><strong>Tamaño máximo (d<sub>máx</sub>):</strong></td>
-                                    <td>{{ "%.3f"|format(resultados_gates.d_max) }} mm</td>
-                                </tr>
-                                <tr>
-                                    <td><strong>Exponente de distribución (n):</strong></td>
-                                    <td>{{ "%.3f"|format(resultados_gates.n) }}</td>
-                                </tr>
-                                <tr>
-                                    <td><strong>Coeficiente de determinación (R²):</strong></td>
-                                    <td>{{ "%.4f"|format(resultados_gates.r2) }}</td>
-                                </tr>
-                                <tr>
-                                    <td><strong>Ecuación del modelo:</strong></td>
-                                    <td><code>{{ resultados_gates.ecuacion }}</code></td>
-                                </tr>
-                            </table>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="alert alert-info">
-                                <h6><i class="bi bi-info-circle"></i> Interpretación:</h6>
-                                <ul class="mb-0 small">
-                                    {% if resultados_gates.r2 > 0.95 %}
-                                    <li><strong>Excelente ajuste</strong> (R² > 0.95): El modelo describe muy bien la distribución.</li>
-                                    {% elif resultados_gates.r2 > 0.90 %}
-                                    <li><strong>Buen ajuste</strong> (R² > 0.90): El modelo es apropiado para esta distribución.</li>
-                                    {% elif resultados_gates.r2 > 0.80 %}
-                                    <li><strong>Ajuste moderado</strong> (R² > 0.80): El modelo puede ser útil con precaución.</li>
-                                    {% else %}
-                                    <li><strong>Ajuste pobre</strong> (R² < 0.80): El modelo no es adecuado para esta distribución.</li>
-                                    {% endif %}
-
-                                    {% if resultados_gates.n < 0.5 %}
-                                    <li><strong>Distribución muy gruesa</strong> (n < 0.5): Pocas partículas finas.</li>
-                                    {% elif resultados_gates.n < 1.0 %}
-                                    <li><strong>Distribución gruesa</strong> (0.5 < n < 1.0): Predominan partículas grandes.</li>
-                                    {% else %}
-                                    <li><strong>Distribución uniforme</strong> (n ≥ 1.0): Buena distribución de tamaños.</li>
-                                    {% endif %}
-                                </ul>
-                            </div>
-                        </div>
-                    </div>
-
-                    {% if grafico_gates %}
-                    <div class="mt-3">
-                        <div id="grafico-gates"></div>
-                    </div>
-                    {% endif %}
+                    <div id="grafico-principal"></div>
                 </div>
             </div>
         </div>
     </div>
+    {% endif %}
+
+    <!-- Resultados de Regresión -->
+    {% if resultados_calculo %}
+    <div class="row mt-4">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header bg-success text-white">
+                    <h5><i class="bi bi-calculator"></i> Resultados de Regresión Lineal</h5>
+                </div>
+                <div class="card-body">
+                    <table class="table table-sm">
+                        <tr>
+                            <td><strong>Exponente n (pendiente):</strong></td>
+                            <td><span class="badge bg-primary fs-6">{{ "%.4f"|format(resultados_calculo.n) }}</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Coeficiente de determinación (R²):</strong></td>
+                            <td><span class="badge bg-info fs-6">{{ "%.4f"|format(resultados_calculo.r2) }}</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Ecuación de regresión:</strong></td>
+                            <td><code>{{ resultados_calculo.ecuacion }}</code></td>
+                        </tr>
+                    </table>
+
+                    <div class="alert alert-info mt-3">
+                        <h6><i class="bi bi-info-circle"></i> Interpretación del ajuste:</h6>
+                        {% if resultados_calculo.r2 > 0.95 %}
+                        <span class="badge bg-success">Excelente ajuste</span> (R² > 0.95)
+                        {% elif resultados_calculo.r2 > 0.90 %}
+                        <span class="badge bg-primary">Buen ajuste</span> (R² > 0.90)
+                        {% elif resultados_calculo.r2 > 0.80 %}
+                        <span class="badge bg-warning">Ajuste moderado</span> (R² > 0.80)
+                        {% else %}
+                        <span class="badge bg-danger">Ajuste pobre</span> (R² < 0.80)
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5><i class="bi bi-table"></i> Tabla de Logaritmos</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-sm table-striped">
+                            <thead>
+                                <tr>
+                                    <th>d<sub>i</sub> (mm)</th>
+                                    <th>%P<sub>i</sub></th>
+                                    <th>log(d<sub>i</sub>)</th>
+                                    <th>log(%P<sub>i</sub>)</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for fila in resultados_calculo.tabla_logaritmos %}
+                                <tr>
+                                    <td>{{ "%.3f"|format(fila.abertura) }}</td>
+                                    <td>{{ "%.2f"|format(fila.porcentaje_pasante) }}</td>
+                                    <td>{{ "%.4f"|format(fila.log_di) }}</td>
+                                    <td>{{ "%.4f"|format(fila.log_Pi) }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Gráfico Log-Log -->
+    {% if grafico_log_log %}
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5><i class="bi bi-graph-up-arrow"></i> Gráfico Log-Log para obtener n</h5>
+                </div>
+                <div class="card-body">
+                    <div id="grafico-log-log"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
     {% endif %}
 </div>
 
@@ -248,10 +295,15 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 
-// Renderizar gráfico Gates-Gaudin-Schuhmann
-{% if grafico_gates %}
-var grafico_gates = {{ grafico_gates|safe }};
-Plotly.newPlot('grafico-gates', grafico_gates.data, grafico_gates.layout, {responsive: true});
+// Renderizar gráficos
+{% if grafico_principal %}
+var grafico_principal = {{ grafico_principal|safe }};
+Plotly.newPlot('grafico-principal', grafico_principal.data, grafico_principal.layout, {responsive: true});
+{% endif %}
+
+{% if grafico_log_log %}
+var grafico_log_log = {{ grafico_log_log|safe }};
+Plotly.newPlot('grafico-log-log', grafico_log_log.data, grafico_log_log.layout, {responsive: true});
 {% endif %}
 </script>
 {% endblock %}
