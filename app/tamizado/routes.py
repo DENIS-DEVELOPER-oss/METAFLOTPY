@@ -201,3 +201,196 @@ def calcular_regresion_especifica(df):
     except Exception as e:
         print(f"Error en cálculo de regresión: {e}")
         return None
+
+@bp_tamizado.route('/rosin-rammler', methods=['GET', 'POST'])
+def rosin_rammler():
+    formulario = FormularioTamizado()
+    
+    resultados_calculo = None
+    grafico_principal = None
+    grafico_semilog = None
+    tabla_datos = None
+
+    if request.method == 'POST':
+        peso_total = float(request.form.get('peso_total', 0))
+        aberturas = [float(x) for x in request.form.getlist('abertura[]') if x]
+        pesos_retenidos = [float(x) for x in request.form.getlist('peso_retenido[]') if x]
+
+        if len(aberturas) == len(pesos_retenidos) and len(aberturas) > 0:
+            # Crear tabla para Rosin-Rammler
+            df = crear_tabla_rosin_rammler(aberturas, pesos_retenidos, peso_total)
+            tabla_datos = df.to_dict('records')
+
+            # Crear gráficos
+            grafico_principal = crear_grafico_rosin_rammler(df)
+            grafico_semilog = crear_grafico_semilog_rosin_rammler(df)
+
+            # Calcular parámetros Rosin-Rammler
+            resultados_calculo = calcular_parametros_rosin_rammler(df)
+
+    return render_template('tamizado/rosin_rammler.html',
+                         formulario=formulario,
+                         resultados_calculo=resultados_calculo,
+                         grafico_principal=grafico_principal,
+                         grafico_semilog=grafico_semilog,
+                         tabla_datos=tabla_datos)
+
+def crear_tabla_rosin_rammler(aberturas, pesos_retenidos, peso_total):
+    """Crear tabla específica para análisis Rosin-Rammler"""
+    df = pd.DataFrame({
+        'abertura': aberturas,
+        'peso_retenido': pesos_retenidos
+    })
+    
+    # Ordenar por abertura descendente
+    df = df.sort_values('abertura', ascending=False).reset_index(drop=True)
+    
+    # Cálculos básicos
+    df['porcentaje_retenido'] = (df['peso_retenido'] / peso_total) * 100
+    df['porcentaje_acumulado'] = df['porcentaje_retenido'].cumsum()
+    
+    # R(d) para Rosin-Rammler (% retenido acumulado)
+    df['R_d'] = df['porcentaje_acumulado']
+    
+    return df
+
+def crear_grafico_rosin_rammler(df):
+    """Crear gráfico principal para Rosin-Rammler"""
+    try:
+        fig = go.Figure()
+
+        # Curva de % retenido acumulado R(d)
+        fig.add_trace(go.Scatter(
+            x=df['abertura'],
+            y=df['R_d'],
+            mode='markers+lines',
+            name='R(d) - % Retenido Acumulado',
+            marker=dict(size=10, color='red'),
+            line=dict(color='red', width=3)
+        ))
+
+        fig.update_layout(
+            title='Distribución Rosin-Rammler<br>R(d) = 100 × e^[-(d/d₀)ⁿ]',
+            xaxis_title='Tamaño de partícula d (mm)',
+            yaxis_title='R(d) - % Retenido Acumulado',
+            xaxis_type='log',
+            xaxis_showgrid=True,
+            yaxis_showgrid=True,
+            hovermode='closest',
+            template='plotly_white'
+        )
+
+        return json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
+
+    except Exception as e:
+        print(f"Error creando gráfico Rosin-Rammler: {e}")
+        return None
+
+def crear_grafico_semilog_rosin_rammler(df):
+    """Crear gráfico semilogarítmico para obtener parámetros Rosin-Rammler"""
+    try:
+        # Filtrar datos válidos
+        df_valid = df[(df['R_d'] > 0) & (df['R_d'] < 100)].copy()
+        
+        if len(df_valid) < 2:
+            return None
+
+        fig = go.Figure()
+
+        # Calcular ln[-ln(R(d)/100)]
+        ln_ln_R = []
+        ln_d = []
+        
+        for _, row in df_valid.iterrows():
+            try:
+                R_fraction = row['R_d'] / 100
+                if 0 < R_fraction < 1:
+                    ln_ln_value = np.log(-np.log(R_fraction))
+                    ln_d_value = np.log(row['abertura'])
+                    ln_ln_R.append(ln_ln_value)
+                    ln_d.append(ln_d_value)
+            except:
+                continue
+
+        if len(ln_d) >= 2:
+            # Datos experimentales
+            fig.add_trace(go.Scatter(
+                x=ln_d,
+                y=ln_ln_R,
+                mode='markers+lines',
+                name='Datos Experimentales',
+                marker=dict(size=10, color='blue'),
+                line=dict(color='blue', width=2)
+            ))
+
+        fig.update_layout(
+            title='Gráfico Semilogarítmico Rosin-Rammler<br>ln[-ln(R(d)/100)] = n × ln(d) - n × ln(d₀)',
+            xaxis_title='ln(d)',
+            yaxis_title='ln[-ln(R(d)/100)]',
+            xaxis_showgrid=True,
+            yaxis_showgrid=True,
+            hovermode='closest',
+            template='plotly_white'
+        )
+
+        return json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
+
+    except Exception as e:
+        print(f"Error creando gráfico semilog: {e}")
+        return None
+
+def calcular_parametros_rosin_rammler(df):
+    """Calcular parámetros n y d₀ del modelo Rosin-Rammler"""
+    try:
+        df_valid = df[(df['R_d'] > 0) & (df['R_d'] < 100)].copy()
+        
+        if len(df_valid) < 2:
+            return None
+
+        # Preparar datos para regresión
+        ln_d = []
+        ln_ln_R = []
+        tabla_logaritmos = []
+        
+        for _, row in df_valid.iterrows():
+            try:
+                R_fraction = row['R_d'] / 100
+                if 0 < R_fraction < 1:
+                    ln_d_val = np.log(row['abertura'])
+                    ln_ln_R_val = np.log(-np.log(R_fraction))
+                    
+                    ln_d.append(ln_d_val)
+                    ln_ln_R.append(ln_ln_R_val)
+                    
+                    tabla_logaritmos.append({
+                        'abertura': row['abertura'],
+                        'R_d': row['R_d'],
+                        'ln_d': ln_d_val,
+                        'ln_ln_R': ln_ln_R_val
+                    })
+            except:
+                continue
+
+        if len(ln_d) >= 2:
+            # Regresión lineal: ln[-ln(R(d)/100)] = n × ln(d) - n × ln(d₀)
+            slope, intercept, r_value, p_value, std_err = stats.linregress(ln_d, ln_ln_R)
+            
+            n = slope  # Parámetro de distribución
+            d0 = np.exp(-intercept / slope)  # Tamaño característico
+            r2 = r_value ** 2
+            
+            formula_rosin = f'R(d) = 100 × e^[-(d/{d0:.3f})^{n:.3f}]'
+            
+            resultados = {
+                'n': n,
+                'd0': d0,
+                'r2': r2,
+                'formula_rosin': formula_rosin,
+                'tabla_logaritmos': tabla_logaritmos
+            }
+            
+            return resultados
+
+    except Exception as e:
+        print(f"Error calculando parámetros Rosin-Rammler: {e}")
+        return None

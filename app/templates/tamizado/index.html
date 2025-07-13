@@ -5,19 +5,30 @@
 
 {% block contenido %}
 <div class="container-fluid">
-    <div class="row">
+    <!-- Header principal con gradiente -->
+    <div class="row mb-5">
         <div class="col-12">
-            <h1><i class="bi bi-grid"></i> Análisis de Tamaño de Partícula</h1>
-            <p class="lead">Seleccione el método de análisis granulométrico que desea utilizar</p>
+            <div class="hero-section bg-gradient-primary text-white p-5 rounded-4 shadow-lg text-center">
+                <h1 class="display-4 fw-bold mb-3">
+                    <i class="bi bi-grid-3x3-gap-fill me-3"></i>Análisis de Tamaño de Partícula
+                </h1>
+                <p class="lead fs-4 mb-4">Seleccione el método de análisis granulométrico profesional</p>
+                <div class="row justify-content-center">
+                    <div class="col-md-8">
+                        <p class="mb-0">Herramientas avanzadas para caracterización de materiales particulados con modelos matemáticos validados</p>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
     <div class="row">
         <!-- 0. Tamizado Dinámico -->
-        <div class="col-lg-4 mb-4">
-            <div class="card h-100 border-success">
-                <div class="card-header bg-success text-white">
-                    <h5><i class="bi bi-sliders"></i> Tamizado Dinámico</h5>
+        <div class="col-lg-6 col-xl-4 mb-4">
+            <div class="card h-100 shadow-lg border-0 rounded-4 card-hover">
+                <div class="card-header bg-gradient-success text-white rounded-top-4">
+                    <h5 class="mb-0"><i class="bi bi-sliders me-2"></i>Tamizado Dinámico</h5>
+                    <small class="opacity-75">Máxima flexibilidad</small>
                 </div>
                 <div class="card-body">
                     <div class="mb-3">
@@ -39,19 +50,20 @@
                         </ul>
                     </div>
                 </div>
-                <div class="card-footer">
-                    <a href="{{ url_for('tamizado.tamizado_dinamico') }}" class="btn btn-success w-100">
-                        <i class="bi bi-play-circle"></i> Usar Tamizado Dinámico
+                <div class="card-footer bg-transparent border-0 p-3">
+                    <a href="{{ url_for('tamizado.tamizado_dinamico') }}" class="btn btn-success w-100 btn-lg rounded-3">
+                        <i class="bi bi-play-circle-fill me-2"></i>Usar Tamizado Dinámico
                     </a>
                 </div>
             </div>
         </div>
 
         <!-- 1. Gates-Gaudin-Schuhmann -->
-        <div class="col-lg-4 mb-4">
-            <div class="card h-100">
-                <div class="card-header bg-primary text-white">
-                    <h5><i class="bi bi-1-circle"></i> Gates-Gaudin-Schuhmann (GGS)</h5>
+        <div class="col-lg-6 col-xl-4 mb-4">
+            <div class="card h-100 shadow-lg border-0 rounded-4 card-hover">
+                <div class="card-header bg-gradient-primary text-white rounded-top-4">
+                    <h5 class="mb-0"><i class="bi bi-1-circle-fill me-2"></i>Gates-Gaudin-Schuhmann</h5>
+                    <small class="opacity-75">Molienda gruesa</small>
                 </div>
                 <div class="card-body">
                     <div class="mb-3">
@@ -98,20 +110,24 @@
                         </ul>
                     </div>
 
-                    <div class="text-center">
-                        <a href="{{ url_for('tamizado.gates_gaudin_schuhmann') }}" class="btn btn-primary">
-                            <i class="bi bi-calculator"></i> Usar Gates-Gaudin-Schuhmann
-                        </a>
-                    </div>
+                    <div class="card-footer bg-transparent border-0 p-3">
+                    <a href="{{ url_for('tamizado.analisis_granulometrico') }}" class="btn btn-primary w-100 btn-lg rounded-3">
+                        <i class="bi bi-calculator-fill me-2"></i>Usar Gates-Gaudin-Schuhmann
+                    </a>
+                </div>
                 </div>
             </div>
         </div>
 
         <!-- 2. Rosin-Rammler -->
-        <div class="col-lg-4 mb-4">
-            <div class="card h-100">
-                <div class="card-header bg-success text-white">
-                    <h5><i class="bi bi-2-circle"></i> Rosin-Rammler</h5>
+        <div class="col-lg-6 col-xl-4 mb-4">
+            <div class="card h-100 shadow-lg border-0 rounded-4 card-hover card-featured">
+                <div class="card-header bg-gradient-warning text-dark rounded-top-4 position-relative">
+                    <div class="featured-badge">
+                        <i class="bi bi-star-fill"></i> NUEVO
+                    </div>
+                    <h5 class="mb-0"><i class="bi bi-2-circle-fill me-2"></i>Rosin-Rammler</h5>
+                    <small class="opacity-75">Polvos finos y molienda fina</small>
                 </div>
                 <div class="card-body">
                     <div class="mb-3">
@@ -161,20 +177,21 @@
                         </ul>
                     </div>
 
-                    <div class="text-center">
-                        <a href="{{ url_for('tamizado.rosin_rammler') }}" class="btn btn-success">
-                            <i class="bi bi-calculator"></i> Usar Rosin-Rammler
-                        </a>
-                    </div>
+                    <div class="card-footer bg-transparent border-0 p-3">
+                    <a href="{{ url_for('tamizado.rosin_rammler') }}" class="btn btn-warning w-100 btn-lg rounded-3 text-dark fw-bold">
+                        <i class="bi bi-calculator-fill me-2"></i>Usar Rosin-Rammler
+                    </a>
+                </div>
                 </div>
             </div>
         </div>
 
         <!-- 3. Regresión Lineal -->
-        <div class="col-lg-4 mb-4">
-            <div class="card h-100">
-                <div class="card-header bg-warning text-dark">
-                    <h5><i class="bi bi-3-circle"></i> Regresión Lineal (Ajuste de curva empírica)</h5>
+        <div class="col-lg-6 col-xl-4 mb-4">
+            <div class="card h-100 shadow-lg border-0 rounded-4 card-hover">
+                <div class="card-header bg-gradient-info text-white rounded-top-4">
+                    <h5 class="mb-0"><i class="bi bi-3-circle-fill me-2"></i>Regresión Lineal</h5>
+                    <small class="opacity-75">Ajuste empírico general</small>
                 </div>
                 <div class="card-body">
                     <div class="mb-3">
@@ -228,11 +245,11 @@
                         </ul>
                     </div>
 
-                    <div class="text-center">
-                        <a href="{{ url_for('tamizado.regresion_lineal') }}" class="btn btn-warning text-dark">
-                            <i class="bi bi-calculator"></i> Usar Regresión Lineal
-                        </a>
-                    </div>
+                    <div class="card-footer bg-transparent border-0 p-3">
+                    <a href="{{ url_for('tamizado.regresion_lineal') }}" class="btn btn-info w-100 btn-lg rounded-3">
+                        <i class="bi bi-calculator-fill me-2"></i>Usar Regresión Lineal
+                    </a>
+                </div>
                 </div>
             </div>
         </div>
@@ -240,24 +257,198 @@
 </div>
 
 <style>
-.formula-box {
-    font-family: 'Courier New', monospace;
+/* Hero section con gradiente */
+.hero-section {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    position: relative;
+    overflow: hidden;
+}
+
+.hero-section::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="50" cy="50" r="2" fill="rgba(255,255,255,0.1)"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
+    pointer-events: none;
+}
+
+/* Gradientes personalizados */
+.bg-gradient-primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.bg-gradient-success {
+    background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+}
+
+.bg-gradient-warning {
+    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+}
+
+.bg-gradient-info {
+    background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+}
+
+/* Cards mejoradas */
+.card-hover {
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    border: 2px solid transparent;
+}
+
+.card-hover:hover {
+    transform: translateY(-15px) scale(1.02);
+    box-shadow: 0 25px 50px rgba(0,0,0,0.15);
+    border-color: rgba(102, 126, 234, 0.3);
+}
+
+/* Card destacada para Rosin-Rammler */
+.card-featured {
+    position: relative;
+    animation: pulse-glow 3s infinite;
+}
+
+.featured-badge {
+    position: absolute;
+    top: -10px;
+    right: 15px;
+    background: linear-gradient(45deg, #ff6b6b, #ffd93d);
+    color: white;
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-size: 0.75rem;
     font-weight: bold;
-    border: 1px solid #ddd;
+    box-shadow: 0 4px 15px rgba(255, 107, 107, 0.4);
 }
 
-.card {
-    transition: transform 0.2s;
+@keyframes pulse-glow {
+    0%, 100% { box-shadow: 0 20px 40px rgba(0,0,0,0.1); }
+    50% { box-shadow: 0 25px 50px rgba(255, 107, 107, 0.2); }
 }
 
-.card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-}
-
+/* Botones mejorados */
 .btn {
-    border-radius: 25px;
-    padding: 10px 20px;
+    transition: all 0.3s ease;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+}
+
+.btn-lg {
+    padding: 12px 30px;
+    font-size: 1rem;
+}
+
+/* Efectos de formulario */
+.formula-box {
+    font-family: 'Fira Code', 'Courier New', monospace;
+    font-weight: bold;
+    border: 2px solid #e9ecef;
+    background: linear-gradient(45deg, #f8f9fa, #ffffff);
+    position: relative;
+    overflow: hidden;
+}
+
+.formula-box::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(102, 126, 234, 0.1), transparent);
+    transition: left 0.5s;
+}
+
+.formula-box:hover::before {
+    left: 100%;
+}
+
+/* Bordes redondeados */
+.rounded-4 {
+    border-radius: 1.5rem !important;
+}
+
+.rounded-top-4 {
+    border-top-left-radius: 1.5rem !important;
+    border-top-right-radius: 1.5rem !important;
+}
+
+.rounded-3 {
+    border-radius: 1rem !important;
+}
+
+/* Iconos con efectos */
+.bi {
+    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
+    transition: all 0.3s ease;
+}
+
+.card:hover .bi {
+    transform: scale(1.1);
+}
+
+/* Sombras mejoradas */
+.shadow-lg {
+    box-shadow: 0 20px 40px rgba(0,0,0,0.1) !important;
+}
+
+/* Animaciones de entrada */
+.card {
+    opacity: 0;
+    animation: slideInUp 0.6s ease forwards;
+}
+
+.card:nth-child(1) { animation-delay: 0.1s; }
+.card:nth-child(2) { animation-delay: 0.2s; }
+.card:nth-child(3) { animation-delay: 0.3s; }
+.card:nth-child(4) { animation-delay: 0.4s; }
+
+@keyframes slideInUp {
+    from {
+        opacity: 0;
+        transform: translateY(50px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Responsive mejorado */
+@media (max-width: 768px) {
+    .hero-section {
+        padding: 3rem 1rem !important;
+    }
+    
+    .display-4 {
+        font-size: 2rem !important;
+    }
+    
+    .card-hover:hover {
+        transform: translateY(-8px) scale(1.01);
+    }
+}
+
+/* Efectos de hover para texto */
+.card-body h6 {
+    transition: color 0.3s ease;
+}
+
+.card:hover .card-body h6 {
+    color: #667eea;
+}
+
+/* Loading animation para botones */
+.btn:active {
+    transform: scale(0.98);
 }
 </style>
 {% endblock %}
