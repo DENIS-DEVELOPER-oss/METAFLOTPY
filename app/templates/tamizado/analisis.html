@@ -309,15 +309,15 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 // Renderizar gráficos
-{% if grafico_principal %}
-var grafico_principal = {{ grafico_principal|safe }};
-Plotly.newPlot('grafico-principal', grafico_principal.data, grafico_principal.layout, {responsive: true});
-{% endif %}
+        {% if grafico_principal %}
+        var grafico_principal = {{ grafico_principal|safe }};
+        Plotly.newPlot('grafico-principal', grafico_principal.data, grafico_principal.layout, {responsive: true});
+        {% endif %}
 
-{% if grafico_log_log %}
-var grafico_log_log = {{ grafico_log_log|safe }};
-Plotly.newPlot('grafico-log-log', grafico_log_log.data, grafico_log_log.layout, {responsive: true});
-{% endif %}
+        {% if grafico_log_log %}
+        var grafico_log_log = {{ grafico_log_log|safe }};
+        Plotly.newPlot('grafico-log-log', grafico_log_log.data, grafico_log_log.layout, {responsive: true});
+        {% endif %}
 </script>
 
 <style>
