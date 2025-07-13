@@ -363,9 +363,21 @@
     {% endif %}
 </div>
 
+{% endblock %}
+
+<!-- JavaScript siempre al final para evitar conflictos -->
+{% block scripts %}
+<!-- Cargar Plotly primero si hay gráficos -->
+{% if graficos %}
+<script src="https://cdn.plot.ly/plotly-2.25.2.min.js"></script>
+{% endif %}
+
 <script>
-// Función para mostrar/ocultar formularios según el tipo de circuito seleccionado
-function mostrarFormulario() {
+// Variables globales para evitar conflictos
+window.MetaFlotPy = window.MetaFlotPy || {};
+
+// Función principal para mostrar/ocultar formularios
+window.MetaFlotPy.mostrarFormulario = function() {
     try {
         // Ocultar todos los formularios
         const formularios = document.querySelectorAll('.tipo-circuito');
@@ -387,72 +399,70 @@ function mostrarFormulario() {
     } catch(e) {
         console.error('Error al mostrar formulario:', e);
     }
-}
-
-// Validar que al menos 2 campos estén llenos antes de enviar
-function validarFormulario() {
-    const tipoCircuito = document.getElementById('tipo_circuito').value;
-    let camposLlenos = 0;
-    let campos = [];
-    
-    if (tipoCircuito === 'directo') {
-        campos = ['f_alimentacion', 'p_producto', 'r_rechazo'];
-    } else if (tipoCircuito === 'inverso') {
-        campos = ['f_alimentacion_inv', 'r_rechazo_inv', 'p_producto_inv'];
-    }
-    
-    campos.forEach(campo => {
-        const elemento = document.getElementById(campo);
-        if (elemento && elemento.value && parseFloat(elemento.value) > 0) {
-            camposLlenos++;
-        }
-    });
-    
-    return camposLlenos >= 2;
-}
-
-// Mostrar formulario inicial al cargar la página
-document.addEventListener('DOMContentLoaded', function() {
-    try {
-        mostrarFormulario();
-        
-        // Agregar event listener al selector de circuito
-        const selectorCircuito = document.getElementById('tipo_circuito');
-        if (selectorCircuito) {
-            selectorCircuito.addEventListener('change', mostrarFormulario);
-        }
-        
-        // Agregar validación al formulario
-        const formulario = document.getElementById('formulario-balance');
-        if (formulario) {
-            formulario.addEventListener('submit', function(e) {
-                if (!validarFormulario()) {
-                    e.preventDefault();
-                    alert('Debe ingresar exactamente 2 valores válidos para calcular el tercero.');
-                }
-            });
-        }
-    } catch(e) {
-        console.error('Error al inicializar la página:', e);
-    }
-});
-
-// Asegurar que no hay referencias a funciones indefinidas
-window.selectCircuit = function() {
-    // Redireccionar a mostrarFormulario para compatibilidad
-    mostrarFormulario();
 };
-</script>
 
-{% if graficos %}
-<script src="https://cdn.plot.ly/plotly-2.25.2.min.js"></script>
-<script>
-    // Esperar a que el DOM esté completamente cargado
-    document.addEventListener('DOMContentLoaded', function() {
+// Función de validación mejorada
+window.MetaFlotPy.validarFormulario = function() {
+    try {
+        const tipoCircuito = document.getElementById('tipo_circuito').value;
+        let camposLlenos = 0;
+        let campos = [];
+        
+        // Definir campos según tipo de circuito
+        switch(tipoCircuito) {
+            case 'directo':
+                campos = ['f_alimentacion', 'p_producto', 'r_rechazo'];
+                break;
+            case 'inverso':
+                campos = ['f_alimentacion_inv', 'r_rechazo_inv', 'p_producto_inv'];
+                break;
+            case 'sabc1':
+                campos = ['f_mineral_sabc1', 's_producto_sag', 'b_producto_bolas', 'p_producto_final_sabc1', 'r_carga_circulante_sabc1'];
+                break;
+            case 'sabc2':
+                campos = ['f_mineral_sabc2', 's_producto_sag_sabc2', 'r_rechazo_sabc2', 'p_producto_final_sabc2'];
+                break;
+            default:
+                return false;
+        }
+        
+        // Contar campos válidos
+        campos.forEach(campo => {
+            const elemento = document.getElementById(campo);
+            if (elemento && elemento.value && parseFloat(elemento.value) > 0) {
+                camposLlenos++;
+            }
+        });
+        
+        // Para circuitos simples necesitamos exactamente 2 valores
+        if (tipoCircuito === 'directo' || tipoCircuito === 'inverso') {
+            return camposLlenos >= 2;
+        }
+        
+        // Para circuitos SABC al menos 1 valor
+        return camposLlenos >= 1;
+        
+    } catch(e) {
+        console.error('Error en validación:', e);
+        return false;
+    }
+};
+
+// Función para cargar gráficos
+window.MetaFlotPy.cargarGraficos = function() {
+    {% if graficos %}
+    try {
+        // Verificar que Plotly esté disponible
+        if (typeof Plotly === 'undefined') {
+            console.error('Plotly no está disponible');
+            return;
+        }
+
         {% if graficos.flujos %}
         try {
             var grafico_flujos = {{ graficos.flujos|safe }};
-            if (document.getElementById('grafico-flujos')) {
+            const containerFlujos = document.getElementById('grafico-flujos');
+            if (containerFlujos && grafico_flujos) {
                 Plotly.newPlot('grafico-flujos', grafico_flujos.data, grafico_flujos.layout);
             }
         } catch(e) {
@@ -463,7 +473,8 @@ window.selectCircuit = function() {
         {% if graficos.eficiencias %}
         try {
             var grafico_eficiencias = {{ graficos.eficiencias|safe }};
-            if (document.getElementById('grafico-eficiencias')) {
+            const containerEficiencias = document.getElementById('grafico-eficiencias');
+            if (containerEficiencias && grafico_eficiencias) {
                 Plotly.newPlot('grafico-eficiencias', grafico_eficiencias.data, grafico_eficiencias.layout);
             }
         } catch(e) {
@@ -474,14 +485,68 @@ window.selectCircuit = function() {
         {% if graficos.distribucion %}
         try {
             var grafico_distribucion = {{ graficos.distribucion|safe }};
-            if (document.getElementById('grafico-distribucion')) {
+            const containerDistribucion = document.getElementById('grafico-distribucion');
+            if (containerDistribucion && grafico_distribucion) {
                 Plotly.newPlot('grafico-distribucion', grafico_distribucion.data, grafico_distribucion.layout);
             }
         } catch(e) {
             console.error('Error al cargar gráfico de distribución:', e);
         }
         {% endif %}
-    });
+        
+    } catch(e) {
+        console.error('Error general al cargar gráficos:', e);
+    }
+    {% endif %}
+};
+
+// Alias para compatibilidad con código antiguo
+window.mostrarFormulario = window.MetaFlotPy.mostrarFormulario;
+window.selectCircuit = window.MetaFlotPy.mostrarFormulario;
+
+// Inicialización cuando el DOM esté listo
+document.addEventListener('DOMContentLoaded', function() {
+    try {
+        console.log('Inicializando Balance de Masa...');
+        
+        // Mostrar formulario inicial
+        window.MetaFlotPy.mostrarFormulario();
+        
+        // Agregar event listeners
+        const selectorCircuito = document.getElementById('tipo_circuito');
+        if (selectorCircuito) {
+            selectorCircuito.addEventListener('change', window.MetaFlotPy.mostrarFormulario);
+            console.log('Event listener agregado al selector de circuito');
+        }
+        
+        // Agregar validación al formulario
+        const formulario = document.getElementById('formulario-balance');
+        if (formulario) {
+            formulario.addEventListener('submit', function(e) {
+                if (!window.MetaFlotPy.validarFormulario()) {
+                    e.preventDefault();
+                    alert('Debe ingresar al menos 2 valores válidos para realizar el cálculo.');
+                    return false;
+                }
+            });
+            console.log('Validación de formulario configurada');
+        }
+        
+        // Cargar gráficos si existen
+        setTimeout(function() {
+            window.MetaFlotPy.cargarGraficos();
+        }, 100);
+        
+        console.log('Balance de Masa inicializado correctamente');
+        
+    } catch(e) {
+        console.error('Error al inicializar Balance de Masa:', e);
+    }
+});
+
+// Manejo de errores globales para JavaScript
+window.addEventListener('error', function(e) {
+    console.error('Error JavaScript global:', e.error);
+});
 </script>
-{% endif %}
 {% endblock %}
