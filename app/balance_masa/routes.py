@@ -12,18 +12,28 @@ def balance_masa():
     formulario = FormularioBalanceMasa()
     resultados = None
     graficos = {}
+    error_mensaje = None
     
     if formulario.validate_on_submit():
+        print(f"Formulario validado. Tipo circuito: {formulario.tipo_circuito.data}")
         resultados = calcular_balance_masa(formulario)
         if resultados:
+            print("Resultados calculados exitosamente")
             graficos['flujos'] = crear_diagrama_flujo(resultados)
             graficos['eficiencias'] = crear_grafico_eficiencias(resultados)
             graficos['distribucion'] = crear_grafico_distribucion(resultados)
+        else:
+            print("Error: No se pudieron calcular los resultados")
+            error_mensaje = "Error en el cálculo. Verifique que ha ingresado al menos 2 valores válidos."
+    elif formulario.errors:
+        print(f"Errores de validación: {formulario.errors}")
+        error_mensaje = "Error en los datos ingresados. Verifique los valores."
     
     return render_template('balance_masa/balance.html', 
                          formulario=formulario, 
                          resultados=resultados,
-                         graficos=graficos)
+                         graficos=graficos,
+                         error_mensaje=error_mensaje)
 
 def calcular_balance_masa(formulario):
     tipo_circuito = formulario.tipo_circuito.data

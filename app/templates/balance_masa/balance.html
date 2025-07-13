@@ -230,13 +230,14 @@
                 <div class="card-header">
                     <h5><i class="bi bi-clipboard-data"></i> Resultados del Balance</h5>
                 </div>
-    {% elif formulario.validate_on_submit() %}
+    {% elif error_mensaje %}
     <div class="row mt-4">
         <div class="col-12">
             <div class="alert alert-danger">
                 <h5><i class="bi bi-exclamation-triangle"></i> Error en los datos</h5>
-                <p>Debe ingresar exactamente 2 valores válidos (mayores que 0) para calcular el tercero automáticamente.</p>
-                <p>Verifique que ha ingresado los valores correctamente en los campos correspondientes.</p>
+                <p>{{ error_mensaje }}</p>
+                <p>Para circuitos Directo/Inverso: ingrese exactamente 2 valores válidos para calcular el tercero.</p>
+                <p>Para circuitos SABC: ingrese al menos 1 valor para realizar el cálculo.</p>
             </div>
         </div>
     </div>
@@ -423,7 +424,8 @@ window.MetaFlotPy.validarFormulario = function() {
                 campos = ['f_mineral_sabc2', 's_producto_sag_sabc2', 'r_rechazo_sabc2', 'p_producto_final_sabc2'];
                 break;
             default:
-                return false;
+                console.log('Tipo de circuito no válido, pero permitiendo envío');
+                return true; // Permitir envío para que el servidor maneje la validación
         }
         
         // Contar campos válidos
@@ -434,17 +436,28 @@ window.MetaFlotPy.validarFormulario = function() {
             }
         });
         
-        // Para circuitos simples necesitamos exactamente 2 valores
+        console.log(`Campos llenos: ${camposLlenos} de ${campos.length} campos`);
+        
+        // Para circuitos simples necesitamos al menos 2 valores
         if (tipoCircuito === 'directo' || tipoCircuito === 'inverso') {
-            return camposLlenos >= 2;
+            if (camposLlenos < 2) {
+                console.log('Validación falló: necesita al menos 2 campos para circuitos simples');
+                return false;
+            }
         }
         
         // Para circuitos SABC al menos 1 valor
-        return camposLlenos >= 1;
+        if ((tipoCircuito === 'sabc1' || tipoCircuito === 'sabc2') && camposLlenos < 1) {
+            console.log('Validación falló: necesita al menos 1 campo para circuitos SABC');
+            return false;
+        }
+        
+        console.log('Validación exitosa');
+        return true;
         
     } catch(e) {
         console.error('Error en validación:', e);
-        return false;
+        return true; // En caso de error, permitir envío
     }
 };
 
@@ -519,15 +532,18 @@ document.addEventListener('DOMContentLoaded', function() {
             console.log('Event listener agregado al selector de circuito');
         }
         
-        // Agregar validación al formulario
+        // Agregar manejo de envío del formulario
         const formulario = document.getElementById('formulario-balance');
         if (formulario) {
             formulario.addEventListener('submit', function(e) {
-                if (!window.MetaFlotPy.validarFormulario()) {
+                console.log('Enviando formulario...');
+                const esValido = window.MetaFlotPy.validarFormulario();
+                if (!esValido) {
                     e.preventDefault();
-                    alert('Debe ingresar al menos 2 valores válidos para realizar el cálculo.');
+                    alert('Para circuitos Directo/Inverso: debe ingresar al menos 2 valores válidos.\nPara circuitos SABC: debe ingresar al menos 1 valor válido.');
                     return false;
                 }
+                console.log('Formulario válido, enviando...');
             });
             console.log('Validación de formulario configurada');
         }
