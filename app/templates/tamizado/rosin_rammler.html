@@ -1,22 +1,22 @@
 
 {% extends "base.html" %}
 
-{% block titulo %}Análisis Granulométrico - MetaFlotPy{% endblock %}
+{% block titulo %}Análisis Rosin-Rammler - MetaFlotPy{% endblock %}
 
 {% block contenido %}
 <div class="container-fluid">
     <div class="row">
         <div class="col-12">
             <h1><i class="bi bi-grid"></i> Análisis de Tamaño de Partícula</h1>
-            <p class="lead">Análisis granulométrico con modelo Gates-Gaudin-Schuhmann</p>
+            <p class="lead">Análisis granulométrico con modelo Rosin-Rammler</p>
             
             <!-- Navegación entre modelos -->
             <nav class="mb-4">
                 <div class="nav nav-tabs" id="nav-tab" role="tablist">
-                    <a class="nav-link active" href="{{ url_for('tamizado.analisis_granulometrico') }}">
+                    <a class="nav-link" href="{{ url_for('tamizado.analisis_granulometrico') }}">
                         <i class="bi bi-graph-up"></i> Gates-Gaudin-Schuhmann
                     </a>
-                    <a class="nav-link" href="{{ url_for('tamizado.rosin_rammler') }}">
+                    <a class="nav-link active" href="{{ url_for('tamizado.rosin_rammler') }}">
                         <i class="bi bi-graph-down"></i> Rosin-Rammler
                     </a>
                 </div>
@@ -32,13 +32,13 @@
                     <h5><i class="bi bi-clipboard-data"></i> Datos de Entrada</h5>
                 </div>
                 <div class="card-body">
-                    <form method="POST" id="formulario-tamizado">
+                    <form method="POST" id="formulario-rosin-rammler">
                         <div class="row">
                             <div class="col-md-12">
                                 <div class="mb-3">
-                                    <label for="peso_total" class="form-label">Peso Total de Muestra T (g)</label>
+                                    <label for="peso_total" class="form-label">Peso Total de Muestra (g)</label>
                                     <input type="number" class="form-control" id="peso_total" name="peso_total" step="0.01" required>
-                                    <div class="form-text">T: Peso total de muestra (g) → campo único</div>
+                                    <div class="form-text">Peso total de la muestra para análisis</div>
                                 </div>
                             </div>
                         </div>
@@ -48,8 +48,8 @@
                             <table class="table table-bordered">
                                 <thead class="table-dark">
                                     <tr>
-                                        <th>Tamaño de partícula d<sub>i</sub> (mm)</th>
-                                        <th>Peso retenido R<sub>i</sub> (g)</th>
+                                        <th>d: Tamaño de partícula (μm o mm)</th>
+                                        <th>Peso retenido (g)</th>
                                         <th>Acción</th>
                                     </tr>
                                 </thead>
@@ -64,7 +64,7 @@
                                 <i class="bi bi-plus-circle"></i> Agregar Malla
                             </button>
                             <button type="submit" class="btn btn-primary">
-                                <i class="bi bi-calculator"></i> Calcular Análisis Granulométrico
+                                <i class="bi bi-calculator"></i> Calcular Análisis Rosin-Rammler
                             </button>
                         </div>
                     </form>
@@ -75,43 +75,52 @@
         <div class="col-md-4">
             <div class="card">
                 <div class="card-header bg-info text-white">
-                    <h5><i class="bi bi-info-circle"></i> Datos de entrada esperados:</h5>
+                    <h5><i class="bi bi-info-circle"></i> 2. Rosin-Rammler</h5>
                 </div>
                 <div class="card-body">
+                    <div class="bg-primary text-white p-2 rounded mb-3">
+                        <h6><i class="bi bi-database"></i> Datos de entrada:</h6>
+                    </div>
                     <ul class="mb-3">
-                        <li><strong>T</strong>: Peso total de muestra (g) → campo único</li>
-                        <li><strong>d<sub>i</sub></strong>: Tamaño de partícula (por malla, en mm o μm)</li>
-                        <li><strong>R<sub>i</sub></strong>: Peso retenido en cada malla (g)</li>
+                        <li><strong>d</strong>: Tamaño de partícula (μm o mm)</li>
+                        <li><strong>d₀</strong>: Tamaño característico donde el 36.8% de las partículas son más grandes</li>
+                        <li><strong>n</strong>: Parámetro de distribución</li>
+                        <li><strong>R(d)</strong>: % retenido acumulado (dato a calcular)</li>
                     </ul>
 
+                    <div class="bg-danger text-white p-2 rounded mb-3">
+                        <h6><i class="bi bi-calculator-fill"></i> Fórmula:</h6>
+                    </div>
+                    
+                    <div class="formula-main mb-3">
+                        <div class="text-center bg-light p-3 rounded border">
+                            <strong>R(d) = 100 × e^(-(d/d₀)ⁿ)</strong>
+                        </div>
+                    </div>
+                    
+                    <div class="formula-alt mb-3">
+                        <strong>O también:</strong><br>
+                        <div class="bg-light p-2 rounded mt-2">
+                            ln[-ln(R(d)/100)] = n × ln(d) - n × ln(d₀)
+                        </div>
+                    </div>
+
                     <div class="bg-success text-white p-2 rounded mb-3">
-                        <h6><i class="bi bi-calculator-fill"></i> PASOS DE CÁLCULO</h6>
+                        <h6><i class="bi bi-graph-up"></i> Gráfico recomendado:</h6>
                     </div>
-                    
-                    <div class="step-box mb-2">
-                        <strong>1. % Retenido por malla:</strong><br>
-                        <div class="formula-box">%R<sub>i</sub> = <span class="fraction">R<sub>i</sub><span class="divider"></span>T</span> × 100</div>
-                    </div>
-                    
-                    <div class="step-box mb-2">
-                        <strong>2. % Acumulado retenido:</strong><br>
-                        <div class="formula-box">%AcumR<sub>i</sub> = ∑<sub>j=1</sub><sup>i</sup> %R<sub>j</sub></div>
-                    </div>
-                    
-                    <div class="step-box mb-2">
-                        <strong>3. % Acumulado pasante:</strong><br>
-                        <div class="formula-box">%P<sub>i</sub> = 100 - %AcumR<sub>i</sub></div>
-                    </div>
-                    
-                    <div class="step-box mb-2">
-                        <strong>4. Logaritmos (para graficar y obtener n):</strong><br>
-                        <div class="formula-box">log(d<sub>i</sub>), log(%P<sub>i</sub>)</div>
-                    </div>
-                    
-                    <div class="step-box">
-                        <strong>5. Regresión lineal en gráfico log-log para obtener n:</strong><br>
-                        <div class="formula-box">log(%P<sub>i</sub>) = n × log(d<sub>i</sub>)</div>
-                        <small class="text-muted">Usa mínimos cuadrados para obtener la pendiente <strong>n</strong> de:</small>
+                    <ul class="mb-3">
+                        <li><strong>Eje X:</strong> ln(d)</li>
+                        <li><strong>Eje Y:</strong> ln[-ln(R(d)/100)]</li>
+                        <li><strong>Tipo:</strong> Gráfico semilogarítmico (línea recta si el modelo es adecuado)</li>
+                    </ul>
+
+                    <div class="bg-warning text-dark p-2 rounded">
+                        <h6><i class="bi bi-lightbulb"></i> Interpretación:</h6>
+                        <ul class="mb-0">
+                            <li>Muy usado en molienda fina o polvos.</li>
+                            <li>El parámetro <strong>n</strong> define la pendiente (dispersión).</li>
+                            <li><strong>d₀</strong> define la centralidad de la distribución.</li>
+                        </ul>
                     </div>
                 </div>
             </div>
@@ -124,18 +133,18 @@
         <div class="col-12">
             <div class="card">
                 <div class="card-header">
-                    <h5><i class="bi bi-table"></i> Tabla de Resultados Granulométricos</h5>
+                    <h5><i class="bi bi-table"></i> Tabla de Resultados Rosin-Rammler</h5>
                 </div>
                 <div class="card-body">
                     <div class="table-responsive">
                         <table class="table table-striped table-hover">
                             <thead class="table-dark">
                                 <tr>
-                                    <th>Tamaño d<sub>i</sub> (mm)</th>
-                                    <th>Peso Retenido R<sub>i</sub> (g)</th>
-                                    <th>% Retenido %R<sub>i</sub></th>
-                                    <th>% Retenido Acum. %AcumR<sub>i</sub></th>
-                                    <th>% Pasante %P<sub>i</sub></th>
+                                    <th>Tamaño d (mm)</th>
+                                    <th>Peso Retenido (g)</th>
+                                    <th>% Retenido</th>
+                                    <th>% Retenido Acum.</th>
+                                    <th>R(d) (%)</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -145,7 +154,7 @@
                                     <td>{{ "%.2f"|format(fila.peso_retenido) }}</td>
                                     <td>{{ "%.2f"|format(fila.porcentaje_retenido) }}</td>
                                     <td>{{ "%.2f"|format(fila.porcentaje_acumulado) }}</td>
-                                    <td>{{ "%.2f"|format(fila.porcentaje_pasante) }}</td>
+                                    <td>{{ "%.2f"|format(fila.R_d) }}</td>
                                 </tr>
                                 {% endfor %}
                             </tbody>
@@ -163,7 +172,7 @@
         <div class="col-12">
             <div class="card">
                 <div class="card-header">
-                    <h5><i class="bi bi-graph-up"></i> Curvas Granulométricas</h5>
+                    <h5><i class="bi bi-graph-up"></i> Distribución Rosin-Rammler</h5>
                 </div>
                 <div class="card-body">
                     <div id="grafico-principal"></div>
@@ -173,29 +182,34 @@
     </div>
     {% endif %}
 
-    <!-- Resultados de Regresión -->
+    <!-- Resultados de Parámetros -->
     {% if resultados_calculo %}
     <div class="row mt-4">
         <div class="col-md-6">
             <div class="card">
                 <div class="card-header bg-success text-white">
-                    <h5><i class="bi bi-calculator"></i> Resultados de Regresión Lineal</h5>
+                    <h5><i class="bi bi-calculator"></i> Parámetros Rosin-Rammler</h5>
                 </div>
                 <div class="card-body">
                     <table class="table table-sm">
                         <tr>
-                            <td><strong>Exponente n (pendiente):</strong></td>
+                            <td><strong>Parámetro de distribución (n):</strong></td>
                             <td><span class="badge bg-primary fs-6">{{ "%.4f"|format(resultados_calculo.n) }}</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Tamaño característico (d₀):</strong></td>
+                            <td><span class="badge bg-warning fs-6">{{ "%.4f"|format(resultados_calculo.d0) }} mm</span></td>
                         </tr>
                         <tr>
                             <td><strong>Coeficiente de determinación (R²):</strong></td>
                             <td><span class="badge bg-info fs-6">{{ "%.4f"|format(resultados_calculo.r2) }}</span></td>
                         </tr>
-                        <tr>
-                            <td><strong>Ecuación de regresión:</strong></td>
-                            <td><code>{{ resultados_calculo.ecuacion }}</code></td>
-                        </tr>
                     </table>
+
+                    <div class="alert alert-primary mt-3">
+                        <h6><i class="bi bi-formula"></i> Ecuación final:</h6>
+                        <code>{{ resultados_calculo.formula_rosin }}</code>
+                    </div>
 
                     <div class="alert alert-info mt-3">
                         <h6><i class="bi bi-info-circle"></i> Interpretación del ajuste:</h6>
@@ -216,26 +230,26 @@
         <div class="col-md-6">
             <div class="card">
                 <div class="card-header">
-                    <h5><i class="bi bi-table"></i> Tabla de Logaritmos</h5>
+                    <h5><i class="bi bi-table"></i> Datos para Regresión</h5>
                 </div>
                 <div class="card-body">
                     <div class="table-responsive">
                         <table class="table table-sm table-striped">
                             <thead>
                                 <tr>
-                                    <th>d<sub>i</sub> (mm)</th>
-                                    <th>%P<sub>i</sub></th>
-                                    <th>log(d<sub>i</sub>)</th>
-                                    <th>log(%P<sub>i</sub>)</th>
+                                    <th>d (mm)</th>
+                                    <th>R(d) (%)</th>
+                                    <th>ln(d)</th>
+                                    <th>ln[-ln(R(d)/100)]</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {% for fila in resultados_calculo.tabla_logaritmos %}
                                 <tr>
                                     <td>{{ "%.3f"|format(fila.abertura) }}</td>
-                                    <td>{{ "%.2f"|format(fila.porcentaje_pasante) }}</td>
-                                    <td>{{ "%.4f"|format(fila.log_di) }}</td>
-                                    <td>{{ "%.4f"|format(fila.log_Pi) }}</td>
+                                    <td>{{ "%.2f"|format(fila.R_d) }}</td>
+                                    <td>{{ "%.4f"|format(fila.ln_d) }}</td>
+                                    <td>{{ "%.4f"|format(fila.ln_ln_R) }}</td>
                                 </tr>
                                 {% endfor %}
                             </tbody>
@@ -246,17 +260,17 @@
         </div>
     </div>
 
-    <!-- Gráfico Log-Log -->
-    {% if grafico_log_log %}
+    <!-- Gráfico Semilogarítmico -->
+    {% if grafico_semilog %}
     <div class="row mt-4">
         <div class="col-12">
             <div class="card">
                 <div class="card-header">
-                    <h5><i class="bi bi-graph-up-arrow"></i> Gráfico Log-Log para obtener n</h5>
-                    <small class="text-muted">log(%P<sub>i</sub>) = n × log(d<sub>i</sub>)</small>
+                    <h5><i class="bi bi-graph-up-arrow"></i> Gráfico Semilogarítmico para obtener parámetros</h5>
+                    <small class="text-muted">ln[-ln(R(d)/100)] = n × ln(d) - n × ln(d₀)</small>
                 </div>
                 <div class="card-body">
-                    <div id="grafico-log-log"></div>
+                    <div id="grafico-semilog"></div>
                 </div>
             </div>
         </div>
@@ -266,34 +280,12 @@
 </div>
 
 <style>
-.step-box {
-    background-color: #f8f9fa;
-    border: 1px solid #dee2e6;
-    border-radius: 5px;
-    padding: 10px;
+.formula-main {
+    font-size: 1.2em;
 }
 
-.formula-box {
-    background-color: #e9ecef;
-    border-radius: 3px;
-    padding: 5px 8px;
-    font-family: 'Courier New', monospace;
-    font-weight: bold;
-    margin-top: 5px;
-}
-
-.fraction {
-    display: inline-block;
-    position: relative;
-    vertical-align: middle;
-    letter-spacing: 0.001em;
-    text-align: center;
-}
-
-.fraction .divider {
-    border-top: 1px solid #000;
-    display: block;
-    margin: 0 2px;
+.formula-alt {
+    font-size: 0.9em;
 }
 
 .nav-tabs .nav-link.active {
@@ -313,7 +305,7 @@ function agregarFila() {
     const fila = document.createElement('tr');
     fila.innerHTML = `
         <td>
-            <input type="number" class="form-control" name="abertura[]" step="0.001" placeholder="ej: 1.000" required>
+            <input type="number" class="form-control" name="abertura[]" step="0.001" placeholder="ej: 1000" required>
         </td>
         <td>
             <input type="number" class="form-control" name="peso_retenido[]" step="0.01" placeholder="ej: 25.50" required>
@@ -339,8 +331,8 @@ document.addEventListener('DOMContentLoaded', function() {
         agregarFila();
     }
 
-    // Llenar con valores predeterminados comunes
-    const aberturas = [4.75, 2.36, 1.18, 0.6, 0.3, 0.15, 0.075, 0.037];
+    // Llenar con valores predeterminados comunes en micrones
+    const aberturas = [4750, 2360, 1180, 600, 300, 150, 75, 37];
     const inputs_abertura = document.querySelectorAll('input[name="abertura[]"]');
 
     aberturas.forEach((abertura, index) => {
@@ -356,9 +348,9 @@ var grafico_principal = {{ grafico_principal|safe }};
 Plotly.newPlot('grafico-principal', grafico_principal.data, grafico_principal.layout, {responsive: true});
 {% endif %}
 
-{% if grafico_log_log %}
-var grafico_log_log = {{ grafico_log_log|safe }};
-Plotly.newPlot('grafico-log-log', grafico_log_log.data, grafico_log_log.layout, {responsive: true});
+{% if grafico_semilog %}
+var grafico_semilog = {{ grafico_semilog|safe }};
+Plotly.newPlot('grafico-semilog', grafico_semilog.data, grafico_semilog.layout, {responsive: true});
 {% endif %}
 </script>
 {% endblock %}
