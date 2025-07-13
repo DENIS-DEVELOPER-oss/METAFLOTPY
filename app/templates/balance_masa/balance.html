@@ -364,42 +364,124 @@
 </div>
 
 <script>
+// Función para mostrar/ocultar formularios según el tipo de circuito seleccionado
 function mostrarFormulario() {
-    // Ocultar todos los formularios
-    const formularios = document.querySelectorAll('.tipo-circuito');
-    formularios.forEach(form => form.style.display = 'none');
-    
-    // Mostrar el formulario seleccionado
-    const tipoSeleccionado = document.getElementById('tipo_circuito').value;
-    const formularioActivo = document.getElementById('form-' + tipoSeleccionado);
-    if (formularioActivo) {
-        formularioActivo.style.display = 'block';
+    try {
+        // Ocultar todos los formularios
+        const formularios = document.querySelectorAll('.tipo-circuito');
+        formularios.forEach(form => {
+            if (form) {
+                form.style.display = 'none';
+            }
+        });
+        
+        // Mostrar el formulario seleccionado
+        const selectElement = document.getElementById('tipo_circuito');
+        if (selectElement) {
+            const tipoSeleccionado = selectElement.value;
+            const formularioActivo = document.getElementById('form-' + tipoSeleccionado);
+            if (formularioActivo) {
+                formularioActivo.style.display = 'block';
+            }
+        }
+    } catch(e) {
+        console.error('Error al mostrar formulario:', e);
     }
+}
+
+// Validar que al menos 2 campos estén llenos antes de enviar
+function validarFormulario() {
+    const tipoCircuito = document.getElementById('tipo_circuito').value;
+    let camposLlenos = 0;
+    let campos = [];
+    
+    if (tipoCircuito === 'directo') {
+        campos = ['f_alimentacion', 'p_producto', 'r_rechazo'];
+    } else if (tipoCircuito === 'inverso') {
+        campos = ['f_alimentacion_inv', 'r_rechazo_inv', 'p_producto_inv'];
+    }
+    
+    campos.forEach(campo => {
+        const elemento = document.getElementById(campo);
+        if (elemento && elemento.value && parseFloat(elemento.value) > 0) {
+            camposLlenos++;
+        }
+    });
+    
+    return camposLlenos >= 2;
 }
 
 // Mostrar formulario inicial al cargar la página
 document.addEventListener('DOMContentLoaded', function() {
-    mostrarFormulario();
+    try {
+        mostrarFormulario();
+        
+        // Agregar event listener al selector de circuito
+        const selectorCircuito = document.getElementById('tipo_circuito');
+        if (selectorCircuito) {
+            selectorCircuito.addEventListener('change', mostrarFormulario);
+        }
+        
+        // Agregar validación al formulario
+        const formulario = document.getElementById('formulario-balance');
+        if (formulario) {
+            formulario.addEventListener('submit', function(e) {
+                if (!validarFormulario()) {
+                    e.preventDefault();
+                    alert('Debe ingresar exactamente 2 valores válidos para calcular el tercero.');
+                }
+            });
+        }
+    } catch(e) {
+        console.error('Error al inicializar la página:', e);
+    }
 });
+
+// Asegurar que no hay referencias a funciones indefinidas
+window.selectCircuit = function() {
+    // Redireccionar a mostrarFormulario para compatibilidad
+    mostrarFormulario();
+};
 </script>
 
 {% if graficos %}
-<script src="https://cdn.plot.ly/plotly-2.18.0.min.js"></script>
+<script src="https://cdn.plot.ly/plotly-2.25.2.min.js"></script>
 <script>
-    {% if graficos.flujos %}
-    var grafico_flujos = {{ graficos.flujos|safe }};
-    Plotly.newPlot('grafico-flujos', grafico_flujos.data, grafico_flujos.layout);
-    {% endif %}
+    // Esperar a que el DOM esté completamente cargado
+    document.addEventListener('DOMContentLoaded', function() {
+        {% if graficos.flujos %}
+        try {
+            var grafico_flujos = {{ graficos.flujos|safe }};
+            if (document.getElementById('grafico-flujos')) {
+                Plotly.newPlot('grafico-flujos', grafico_flujos.data, grafico_flujos.layout);
+            }
+        } catch(e) {
+            console.error('Error al cargar gráfico de flujos:', e);
+        }
+        {% endif %}
 
-    {% if graficos.eficiencias %}
-    var grafico_eficiencias = {{ graficos.eficiencias|safe }};
-    Plotly.newPlot('grafico-eficiencias', grafico_eficiencias.data, grafico_eficiencias.layout);
-    {% endif %}
+        {% if graficos.eficiencias %}
+        try {
+            var grafico_eficiencias = {{ graficos.eficiencias|safe }};
+            if (document.getElementById('grafico-eficiencias')) {
+                Plotly.newPlot('grafico-eficiencias', grafico_eficiencias.data, grafico_eficiencias.layout);
+            }
+        } catch(e) {
+            console.error('Error al cargar gráfico de eficiencias:', e);
+        }
+        {% endif %}
 
-    {% if graficos.distribucion %}
-    var grafico_distribucion = {{ graficos.distribucion|safe }};
-    Plotly.newPlot('grafico-distribucion', grafico_distribucion.data, grafico_distribucion.layout);
-    {% endif %}
+        {% if graficos.distribucion %}
+        try {
+            var grafico_distribucion = {{ graficos.distribucion|safe }};
+            if (document.getElementById('grafico-distribucion')) {
+                Plotly.newPlot('grafico-distribucion', grafico_distribucion.data, grafico_distribucion.layout);
+            }
+        } catch(e) {
+            console.error('Error al cargar gráfico de distribución:', e);
+        }
+        {% endif %}
+    });
 </script>
 {% endif %}
 {% endblock %}
