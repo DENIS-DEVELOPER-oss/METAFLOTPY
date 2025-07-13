@@ -1,20 +1,19 @@
-
 {% extends "base.html" %}
 
 {% block titulo %}Análisis Granulométrico - MetaFlotPy{% endblock %}
 
 {% block contenido %}
 <div class="container-fluid">
-    <!-- Header mejorado con gradiente -->
+    <!-- Header principal -->
     <div class="row mb-4">
         <div class="col-12">
-            <div class="bg-gradient-primary text-white p-4 rounded-4 shadow-lg">
+            <div class="bg-primary text-white p-4 rounded shadow">
                 <h1 class="display-6 fw-bold mb-2">
                     <i class="bi bi-grid-3x3-gap-fill me-3"></i>Análisis de Tamaño de Partícula
                 </h1>
-                <p class="lead mb-3">Análisis granulométrico profesional con múltiples modelos matemáticos</p>
-                
-                <!-- Navegación entre modelos mejorada -->
+                <p class="lead mb-3">Análisis granulométrico con modelo Gates-Gaudin-Schuhmann</p>
+
+                <!-- Navegación entre modelos -->
                 <nav class="d-flex gap-2 flex-wrap">
                     <a href="{{ url_for('tamizado.analisis_granulometrico') }}" class="btn btn-light btn-sm active">
                         <i class="bi bi-graph-up"></i> Gates-Gaudin-Schuhmann
@@ -33,8 +32,8 @@
     <!-- Formulario de entrada de datos -->
     <div class="row">
         <div class="col-md-8">
-            <div class="card shadow-lg border-0 rounded-4">
-                <div class="card-header bg-gradient-success text-white rounded-top-4">
+            <div class="card shadow border-0">
+                <div class="card-header bg-success text-white">
                     <h5 class="mb-0"><i class="bi bi-clipboard-data-fill me-2"></i>Datos de Entrada</h5>
                 </div>
                 <div class="card-body">
@@ -51,7 +50,7 @@
                         <h6><i class="bi bi-table"></i> Datos de Mallas</h6>
                         <div id="tabla-mallas">
                             <table class="table table-bordered">
-                                <thead>
+                                <thead class="table-dark">
                                     <tr>
                                         <th>Abertura d (mm)</th>
                                         <th>Peso Retenido (g)</th>
@@ -78,44 +77,38 @@
         </div>
 
         <div class="col-md-4">
-            <div class="card shadow-lg border-0 rounded-4">
-                <div class="card-header bg-gradient-info text-white rounded-top-4">
+            <div class="card shadow border-0">
+                <div class="card-header bg-info text-white">
                     <h5 class="mb-0"><i class="bi bi-info-circle-fill me-2"></i>Modelo Gates-Gaudin-Schuhmann</h5>
                 </div>
                 <div class="card-body">
                     <h6><i class="bi bi-clipboard-data"></i> Datos de entrada:</h6>
                     <ul class="small">
-                        <li><strong>T</strong>: Peso total de muestra (g) → campo único</li>
-                        <li><strong>d<sub>i</sub></strong>: Tamaño de partícula (por malla, en mm o μm)</li>
+                        <li><strong>T</strong>: Peso total de muestra (g)</li>
+                        <li><strong>d<sub>i</sub></strong>: Tamaño de partícula (mm)</li>
                         <li><strong>R<sub>i</sub></strong>: Peso retenido en cada malla (g)</li>
                     </ul>
 
-                    <h6><i class="bi bi-calculator-fill text-success"></i> PASOS DE CÁLCULO</h6>
-                    
+                    <h6><i class="bi bi-calculator-fill text-success"></i> Pasos de Cálculo:</h6>
+
                     <div class="bg-light p-3 border rounded mb-2">
                         <strong>1. % Retenido por malla:</strong><br>
                         <code>%R<sub>i</sub> = R<sub>i</sub>/T × 100</code>
                     </div>
-                    
+
                     <div class="bg-light p-3 border rounded mb-2">
                         <strong>2. % Acumulado retenido:</strong><br>
-                        <code>%AcumR<sub>i</sub> = Σ%R<sub>j</sub></code> (j=1 hasta i)
+                        <code>%AcumR<sub>i</sub> = Σ%R<sub>j</sub></code>
                     </div>
-                    
+
                     <div class="bg-light p-3 border rounded mb-2">
                         <strong>3. % Acumulado pasante:</strong><br>
                         <code>%P<sub>i</sub> = 100 - %AcumR<sub>i</sub></code>
                     </div>
-                    
-                    <div class="bg-light p-3 border rounded mb-2">
-                        <strong>4. Logaritmos (para graficar):</strong><br>
-                        <code>log(d<sub>i</sub>), log(%P<sub>i</sub>)</code>
-                    </div>
-                    
+
                     <div class="bg-light p-3 border rounded">
-                        <strong>5. Regresión lineal log-log:</strong><br>
-                        <code>log(%P<sub>i</sub>) = n × log(d<sub>i</sub>)</code><br>
-                        <small>Usa mínimos cuadrados para obtener la pendiente <strong>n</strong></small>
+                        <strong>4. Regresión log-log:</strong><br>
+                        <code>log(%P<sub>i</sub>) = n × log(d<sub>i</sub>)</code>
                     </div>
                 </div>
             </div>
@@ -126,8 +119,8 @@
     {% if tabla_datos %}
     <div class="row mt-4">
         <div class="col-12">
-            <div class="card shadow-lg border-0 rounded-4">
-                <div class="card-header bg-gradient-dark text-white rounded-top-4">
+            <div class="card shadow border-0">
+                <div class="card-header bg-dark text-white">
                     <h5 class="mb-0"><i class="bi bi-table me-2"></i>Tabla de Resultados Granulométricos</h5>
                 </div>
                 <div class="card-body">
@@ -165,8 +158,8 @@
     {% if grafico_principal %}
     <div class="row mt-4">
         <div class="col-12">
-            <div class="card shadow-lg border-0 rounded-4">
-                <div class="card-header bg-gradient-primary text-white rounded-top-4">
+            <div class="card shadow border-0">
+                <div class="card-header bg-primary text-white">
                     <h5 class="mb-0"><i class="bi bi-graph-up me-2"></i>Curvas Granulométricas</h5>
                 </div>
                 <div class="card-body">
@@ -181,7 +174,7 @@
     {% if resultados_calculo %}
     <div class="row mt-4">
         <div class="col-md-6">
-            <div class="card">
+            <div class="card shadow border-0">
                 <div class="card-header bg-success text-white">
                     <h5><i class="bi bi-calculator"></i> Resultados de Regresión Lineal</h5>
                 </div>
@@ -218,8 +211,8 @@
         </div>
 
         <div class="col-md-6">
-            <div class="card">
-                <div class="card-header">
+            <div class="card shadow border-0">
+                <div class="card-header bg-info text-white">
                     <h5><i class="bi bi-table"></i> Tabla de Logaritmos</h5>
                 </div>
                 <div class="card-body">
@@ -254,8 +247,8 @@
     {% if grafico_log_log %}
     <div class="row mt-4">
         <div class="col-12">
-            <div class="card">
-                <div class="card-header">
+            <div class="card shadow border-0">
+                <div class="card-header bg-warning text-dark">
                     <h5><i class="bi bi-graph-up-arrow"></i> Gráfico Log-Log para obtener n</h5>
                 </div>
                 <div class="card-body">
@@ -268,7 +261,7 @@
     {% endif %}
 </div>
 
-<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+<script src="https://cdn.plot.ly/plotly-2.26.0.min.js"></script>
 <script>
 // Función para agregar filas de mallas dinámicamente
 function agregarFila() {
@@ -328,99 +321,35 @@ Plotly.newPlot('grafico-log-log', grafico_log_log.data, grafico_log_log.layout, 
 </script>
 
 <style>
-/* Gradientes personalizados */
-.bg-gradient-primary {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-}
-
-.bg-gradient-success {
-    background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
-}
-
-.bg-gradient-info {
-    background: linear-gradient(135deg, #667eea 0%, #f093fb 100%);
-}
-
-.bg-gradient-dark {
-    background: linear-gradient(135deg, #232526 0%, #414345 100%);
-}
-
-/* Efectos de hover para botones */
-.btn:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 25px rgba(0,0,0,0.15);
-    transition: all 0.3s ease;
-}
-
-/* Animaciones suaves para cards */
+/* Tema unificado para toda la aplicación */
 .card {
     transition: all 0.3s ease;
+    border-radius: 8px;
 }
 
 .card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.1);
 }
 
-/* Bordes redondeados mejorados */
-.rounded-4 {
-    border-radius: 1rem !important;
-}
-
-.rounded-top-4 {
-    border-top-left-radius: 1rem !important;
-    border-top-right-radius: 1rem !important;
-}
-
-/* Efectos para formularios */
-.form-control:focus {
-    border-color: #667eea;
-    box-shadow: 0 0 15px rgba(102, 126, 234, 0.2);
-    transform: scale(1.02);
-    transition: all 0.3s ease;
-}
-
-/* Mejoras para badges */
-.badge {
-    padding: 0.5rem 1rem;
-    font-size: 0.9rem;
-    border-radius: 50px;
-}
-
-/* Animación para elementos destacados */
-@keyframes pulse {
-    0% { transform: scale(1); }
-    50% { transform: scale(1.05); }
-    100% { transform: scale(1); }
-}
-
-.nav .btn.active {
-    animation: pulse 2s infinite;
-}
-
-/* Mejoras para tablas */
-.table thead th {
-    border: none;
-    font-weight: 600;
-    text-transform: uppercase;
-    font-size: 0.85rem;
-    letter-spacing: 1px;
-}
-
-.table tbody tr:hover {
-    background-color: rgba(102, 126, 234, 0.1);
-    transform: scale(1.01);
+.btn:hover {
+    transform: translateY(-1px);
     transition: all 0.2s ease;
 }
 
-/* Iconos mejorados */
-.bi {
-    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
+.nav .btn.active {
+    background-color: #fff !important;
+    color: #0d6efd !important;
+    font-weight: bold;
 }
 
-/* Efectos de profundidad */
-.shadow-lg {
-    box-shadow: 0 20px 40px rgba(0,0,0,0.1) !important;
+.table tbody tr:hover {
+    background-color: rgba(13, 110, 253, 0.1);
+}
+
+.badge {
+    padding: 0.4rem 0.8rem;
+    border-radius: 20px;
 }
 </style>
 {% endblock %}

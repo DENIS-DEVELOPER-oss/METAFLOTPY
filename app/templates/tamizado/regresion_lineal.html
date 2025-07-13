@@ -4,14 +4,14 @@
 
 {% block contenido %}
 <div class="container-fluid">
-    <!-- Header mejorado con gradiente -->
+    <!-- Header principal -->
     <div class="row mb-4">
         <div class="col-12">
-            <div class="bg-gradient-info text-white p-4 rounded-4 shadow-lg">
+            <div class="bg-primary text-white p-4 rounded shadow">
                 <h1 class="display-6 fw-bold mb-2">
-                    <i class="bi bi-graph-up-arrow me-3"></i>Regresión Lineal
+                    <i class="bi bi-grid-3x3-gap-fill me-3"></i>Análisis de Tamaño de Partícula
                 </h1>
-                <p class="lead mb-3">Ajuste de curva empírica para análisis granulométrico</p>
+                <p class="lead mb-3">Análisis granulométrico con regresión lineal empírica</p>
 
                 <!-- Navegación entre modelos -->
                 <nav class="d-flex gap-2 flex-wrap">
@@ -32,17 +32,18 @@
     <!-- Formulario de entrada de datos -->
     <div class="row">
         <div class="col-md-8">
-            <div class="card shadow-lg border-0 rounded-4">
-                <div class="card-header bg-gradient-warning text-dark rounded-top-4">
+            <div class="card shadow border-0">
+                <div class="card-header bg-info text-white">
                     <h5 class="mb-0"><i class="bi bi-clipboard-data-fill me-2"></i>Datos de Entrada</h5>
                 </div>
                 <div class="card-body">
-                    <form method="POST" id="formulario-regresion">
+                    <form method="POST" id="formulario-regresion-lineal">
                         <div class="row">
                             <div class="col-md-12">
                                 <div class="mb-3">
                                     <label for="peso_total" class="form-label">Peso Total de Muestra (g)</label>
                                     <input type="number" class="form-control" id="peso_total" name="peso_total" step="0.01" required>
+                                    <div class="form-text">Peso total de la muestra para análisis</div>
                                 </div>
                             </div>
                         </div>
@@ -50,10 +51,10 @@
                         <h6><i class="bi bi-table"></i> Datos de Mallas</h6>
                         <div id="tabla-mallas">
                             <table class="table table-bordered">
-                                <thead>
+                                <thead class="table-dark">
                                     <tr>
-                                        <th>Abertura d (mm)</th>
-                                        <th>Peso Retenido (g)</th>
+                                        <th>d: Tamaño de partícula (mm)</th>
+                                        <th>Peso retenido (g)</th>
                                         <th>Acción</th>
                                     </tr>
                                 </thead>
@@ -67,7 +68,7 @@
                             <button type="button" class="btn btn-secondary me-2" onclick="agregarFila()">
                                 <i class="bi bi-plus-circle"></i> Agregar Malla
                             </button>
-                            <button type="submit" class="btn btn-warning text-dark fw-bold">
+                            <button type="submit" class="btn btn-primary">
                                 <i class="bi bi-calculator"></i> Calcular Regresión Lineal
                             </button>
                         </div>
@@ -77,51 +78,38 @@
         </div>
 
         <div class="col-md-4">
-            <div class="card shadow-lg border-0 rounded-4">
-                <div class="card-header bg-gradient-dark text-white rounded-top-4">
-                    <h5 class="mb-0"><i class="bi bi-info-circle-fill me-2"></i>Regresión Lineal (Ajuste Empírico)</h5>
+            <div class="card shadow border-0">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0"><i class="bi bi-info-circle-fill me-2"></i>Regresión Lineal Empírica</h5>
                 </div>
                 <div class="card-body">
                     <h6><i class="bi bi-clipboard-data"></i> Datos de entrada:</h6>
                     <ul class="small">
-                        <li><strong>x:</strong> Tamaño de partícula (en escala logarítmica o directa)</li>
-                        <li><strong>y:</strong> % acumulado pasante o retenido</li>
-                        <li>Se trabajan pares de datos (x<sub>i</sub>, y<sub>i</sub>)</li>
+                        <li><strong>d</strong>: Tamaño de partícula (mm)</li>
+                        <li><strong>y</strong>: % acumulado pasante</li>
+                        <li><strong>a</strong>: pendiente (coeficiente)</li>
+                        <li><strong>b</strong>: intersección</li>
                     </ul>
 
-                    <h6><i class="bi bi-calculator-fill text-warning"></i> Fórmula:</h6>
-                    <div class="formula-box bg-light p-3 rounded text-center mb-3">
-                        <strong>y = a × x + b</strong>
+                    <h6><i class="bi bi-calculator-fill text-success"></i> Fórmula:</h6>
+
+                    <div class="bg-light p-3 border rounded mb-3">
+                        <div class="text-center">
+                            <strong>y = a × log(d) + b</strong>
+                        </div>
                     </div>
 
-                    <div class="mt-2">
-                        <small><strong>Donde:</strong></small>
-                        <ul class="small">
-                            <li><strong>a:</strong> pendiente</li>
-                            <li><strong>b:</strong> intersección</li>
-                        </ul>
+                    <div class="bg-light p-3 border rounded mb-3">
+                        <strong>Mínimos cuadrados:</strong><br>
+                        <code>a = (n∑xy - ∑x∑y) / (n∑x² - (∑x)²)</code><br>
+                        <code>b = (∑y - a∑x) / n</code>
                     </div>
-
-                    <h6><i class="bi bi-calculator"></i> Usa método de mínimos cuadrados:</h6>
-                    <div class="formula-box bg-light p-2 rounded mb-2">
-                        <small><strong>a = </strong>(n∑x<sub>i</sub>y<sub>i</sub> - ∑x<sub>i</sub>∑y<sub>i</sub>) / (n∑x<sub>i</sub>² - (∑x<sub>i</sub>)²)</small>
-                    </div>
-                    <div class="formula-box bg-light p-2 rounded">
-                        <small><strong>b = </strong>(∑y<sub>i</sub> - a∑x<sub>i</sub>) / n</small>
-                    </div>
-
-                    <h6 class="mt-3"><i class="bi bi-graph-up"></i> Gráfico recomendado:</h6>
-                    <ul class="small">
-                        <li><strong>Eje X:</strong> tamaño (log(d) o d)</li>
-                        <li><strong>Eje Y:</strong> % acumulado pasante</li>
-                        <li><strong>Tipo:</strong> Diagrama de dispersión con línea de tendencia</li>
-                    </ul>
 
                     <h6><i class="bi bi-info-circle"></i> Interpretación:</h6>
                     <ul class="small">
-                        <li>Ajusta modelos de forma general.</li>
-                        <li>Se puede aplicar sobre curvas empíricas.</li>
-                        <li><strong>R²</strong> (coeficiente de determinación) indica la calidad del ajuste.</li>
+                        <li>Ajuste empírico general</li>
+                        <li><strong>R²</strong> indica calidad del ajuste</li>
+                        <li>Aplicable a curvas empíricas</li>
                     </ul>
                 </div>
             </div>
@@ -132,21 +120,21 @@
     {% if tabla_datos %}
     <div class="row mt-4">
         <div class="col-12">
-            <div class="card shadow-lg border-0 rounded-4">
-                <div class="card-header bg-gradient-primary text-white rounded-top-4">
-                    <h5 class="mb-0"><i class="bi bi-table me-2"></i>Tabla de Datos para Regresión</h5>
+            <div class="card shadow border-0">
+                <div class="card-header bg-dark text-white">
+                    <h5 class="mb-0"><i class="bi bi-table me-2"></i>Tabla de Resultados Granulométricos</h5>
                 </div>
                 <div class="card-body">
                     <div class="table-responsive">
                         <table class="table table-striped table-hover">
                             <thead class="table-dark">
                                 <tr>
-                                    <th>Abertura d (mm)</th>
+                                    <th>Tamaño d (mm)</th>
                                     <th>Peso Retenido (g)</th>
                                     <th>% Retenido</th>
                                     <th>% Retenido Acum.</th>
-                                    <th>% Pasante y</th>
-                                    <th>log(d) - x</th>
+                                    <th>% Pasante</th>
+                                    <th>log(d)</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -173,8 +161,8 @@
     {% if grafico_principal %}
     <div class="row mt-4">
         <div class="col-12">
-            <div class="card shadow-lg border-0 rounded-4">
-                <div class="card-header bg-gradient-success text-white rounded-top-4">
+            <div class="card shadow border-0">
+                <div class="card-header bg-primary text-white">
                     <h5 class="mb-0"><i class="bi bi-graph-up me-2"></i>Distribución Granulométrica</h5>
                 </div>
                 <div class="card-body">
@@ -188,44 +176,34 @@
     <!-- Resultados de Regresión -->
     {% if resultados_calculo %}
     <div class="row mt-4">
-        <div class="col-md-8">
-            <div class="card shadow-lg border-0 rounded-4">
-                <div class="card-header bg-gradient-warning text-dark rounded-top-4">
-                    <h5><i class="bi bi-calculator"></i> Resultados de Regresión Lineal Empírica</h5>
+        <div class="col-md-6">
+            <div class="card shadow border-0">
+                <div class="card-header bg-success text-white">
+                    <h5><i class="bi bi-calculator"></i> Resultados de Regresión Lineal</h5>
                 </div>
                 <div class="card-body">
-                    <div class="row">
-                        <div class="col-md-6">
-                            <table class="table table-sm">
-                                <tr>
-                                    <td><strong>Pendiente (a):</strong></td>
-                                    <td><span class="badge bg-primary fs-6">{{ "%.6f"|format(resultados_calculo.a) }}</span></td>
-                                </tr>
-                                <tr>
-                                    <td><strong>Intersección (b):</strong></td>
-                                    <td><span class="badge bg-success fs-6">{{ "%.6f"|format(resultados_calculo.b) }}</span></td>
-                                </tr>
-                                <tr>
-                                    <td><strong>Coeficiente R²:</strong></td>
-                                    <td><span class="badge bg-info fs-6">{{ "%.6f"|format(resultados_calculo.r2) }}</span></td>
-                                </tr>
-                                <tr>
-                                    <td><strong>Ecuación:</strong></td>
-                                    <td><code>{{ resultados_calculo.ecuacion }}</code></td>
-                                </tr>
-                            </table>
-                        </div>
+                    <table class="table table-sm">
+                        <tr>
+                            <td><strong>Pendiente (a):</strong></td>
+                            <td><span class="badge bg-primary fs-6">{{ "%.4f"|format(resultados_calculo.a) }}</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Intersección (b):</strong></td>
+                            <td><span class="badge bg-warning fs-6">{{ "%.4f"|format(resultados_calculo.b) }}</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Coeficiente de determinación (R²):</strong></td>
+                            <td><span class="badge bg-info fs-6">{{ "%.4f"|format(resultados_calculo.r2) }}</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Número de datos:</strong></td>
+                            <td><span class="badge bg-secondary fs-6">{{ resultados_calculo.n_datos }}</span></td>
+                        </tr>
+                    </table>
 
-                        <div class="col-md-6">
-                            <h6><i class="bi bi-calculator"></i> Cálculos de Mínimos Cuadrados:</h6>
-                            <table class="table table-sm">
-                                <tr><td>n (datos):</td><td>{{ resultados_calculo.n_datos }}</td></tr>
-                                <tr><td>∑x:</td><td>{{ "%.4f"|format(resultados_calculo.sum_x) }}</td></tr>
-                                <tr><td>∑y:</td><td>{{ "%.4f"|format(resultados_calculo.sum_y) }}</td></tr>
-                                <tr><td>∑xy:</td><td>{{ "%.4f"|format(resultados_calculo.sum_xy) }}</td></tr>
-                                <tr><td>∑x²:</td><td>{{ "%.4f"|format(resultados_calculo.sum_x2) }}</td></tr>
-                            </table>
-                        </div>
+                    <div class="alert alert-primary mt-3">
+                        <h6><i class="bi bi-formula"></i> Ecuación final:</h6>
+                        <code>{{ resultados_calculo.ecuacion }}</code>
                     </div>
 
                     <div class="alert alert-info mt-3">
@@ -244,53 +222,21 @@
             </div>
         </div>
 
-        <div class="col-md-4">
-            <div class="card shadow-lg border-0 rounded-4">
-                <div class="card-header bg-gradient-dark text-white rounded-top-4">
-                    <h5><i class="bi bi-graph-up-arrow"></i> Fórmulas Aplicadas</h5>
-                </div>
-                <div class="card-body">
-                    <h6>Método de Mínimos Cuadrados:</h6>
-
-                    <div class="formula-box bg-light p-2 rounded mb-2">
-                        <strong>a = </strong>(n∑xy - ∑x∑y) / (n∑x² - (∑x)²)
-                    </div>
-
-                    <div class="formula-box bg-light p-2 rounded mb-3">
-                        <strong>b = </strong>(∑y - a∑x) / n
-                    </div>
-
-                    <h6>Coeficiente de Determinación:</h6>
-                    <div class="formula-box bg-light p-2 rounded">
-                        <strong>R² = </strong>1 - (SS<sub>res</sub> / SS<sub>tot</sub>)
-                    </div>
-
-                    <small class="text-muted mt-2 d-block">
-                        <strong>SS<sub>res</sub>:</strong> Suma de cuadrados residuales<br>
-                        <strong>SS<sub>tot</sub>:</strong> Suma total de cuadrados
-                    </small>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Tabla detallada de regresión -->
-    <div class="row mt-4">
-        <div class="col-12">
-            <div class="card shadow-lg border-0 rounded-4">
-                <div class="card-header bg-gradient-info text-white rounded-top-4">
-                    <h5><i class="bi bi-table"></i> Tabla Detallada de Regresión</h5>
+        <div class="col-md-6">
+            <div class="card shadow border-0">
+                <div class="card-header bg-info text-white">
+                    <h5><i class="bi bi-table"></i> Datos de Regresión</h5>
                 </div>
                 <div class="card-body">
                     <div class="table-responsive">
                         <table class="table table-sm table-striped">
-                            <thead class="table-dark">
+                            <thead>
                                 <tr>
-                                    <th>d<sub>i</sub> (mm)</th>
-                                    <th>y<sub>i</sub> (%Pasante)</th>
-                                    <th>x<sub>i</sub> = log(d<sub>i</sub>)</th>
-                                    <th>y<sub>calc</sub> = ax + b</th>
-                                    <th>Residuo (y<sub>i</sub> - y<sub>calc</sub>)</th>
+                                    <th>d (mm)</th>
+                                    <th>%Pasante</th>
+                                    <th>log(d)</th>
+                                    <th>y calculado</th>
+                                    <th>Residuo</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -300,9 +246,7 @@
                                     <td>{{ "%.2f"|format(fila.porcentaje_pasante) }}</td>
                                     <td>{{ "%.4f"|format(fila.log_d) }}</td>
                                     <td>{{ "%.2f"|format(fila.y_calculado) }}</td>
-                                    <td class="{% if fila.residuo|abs < 2 %}text-success{% elif fila.residuo|abs < 5 %}text-warning{% else %}text-danger{% endif %}">
-                                        {{ "%.2f"|format(fila.residuo) }}
-                                    </td>
+                                    <td>{{ "%.2f"|format(fila.residuo) }}</td>
                                 </tr>
                                 {% endfor %}
                             </tbody>
@@ -317,9 +261,9 @@
     {% if grafico_regresion %}
     <div class="row mt-4">
         <div class="col-12">
-            <div class="card shadow-lg border-0 rounded-4">
-                <div class="card-header bg-gradient-warning text-dark rounded-top-4">
-                    <h5 class="mb-0"><i class="bi bi-scatter-chart me-2"></i>Gráfico de Dispersión con Línea de Tendencia</h5>
+            <div class="card shadow border-0">
+                <div class="card-header bg-warning text-dark">
+                    <h5><i class="bi bi-graph-up-arrow"></i> Diagrama de Dispersión con Línea de Tendencia</h5>
                 </div>
                 <div class="card-body">
                     <div id="grafico-regresion"></div>
@@ -331,7 +275,7 @@
     {% endif %}
 </div>
 
-<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+<script src="https://cdn.plot.ly/plotly-2.26.0.min.js"></script>
 <script>
 // Función para agregar filas de mallas dinámicamente
 function agregarFila() {
@@ -391,133 +335,35 @@ Plotly.newPlot('grafico-regresion', grafico_regresion.data, grafico_regresion.la
 </script>
 
 <style>
-/* Gradientes personalizados */
-.bg-gradient-info {
-    background: linear-gradient(135deg, #667eea 0%, #f093fb 100%);
-}
-
-.bg-gradient-warning {
-    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-}
-
-.bg-gradient-success {
-    background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
-}
-
-.bg-gradient-primary {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-}
-
-.bg-gradient-dark {
-    background: linear-gradient(135deg, #232526 0%, #414345 100%);
-}
-
-/* Efectos de hover para botones */
-.btn:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 25px rgba(0,0,0,0.15);
-    transition: all 0.3s ease;
-}
-
-/* Animaciones suaves para cards */
+/* Tema unificado para toda la aplicación */
 .card {
     transition: all 0.3s ease;
+    border-radius: 8px;
 }
 
 .card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.1);
 }
 
-/* Bordes redondeados mejorados */
-.rounded-4 {
-    border-radius: 1rem !important;
-}
-
-.rounded-top-4 {
-    border-top-left-radius: 1rem !important;
-    border-top-right-radius: 1rem !important;
-}
-
-/* Efectos para formularios */
-.form-control:focus {
-    border-color: #f093fb;
-    box-shadow: 0 0 15px rgba(240, 147, 251, 0.2);
-    transform: scale(1.02);
-    transition: all 0.3s ease;
-}
-
-/* Mejoras para badges */
-.badge {
-    padding: 0.5rem 1rem;
-    font-size: 0.9rem;
-    border-radius: 50px;
-}
-
-/* Efectos para fórmulas */
-.formula-box {
-    font-family: 'Fira Code', 'Courier New', monospace;
-    font-weight: bold;
-    border: 2px solid #e9ecef;
-    background: linear-gradient(45deg, #f8f9fa, #ffffff);
-    position: relative;
-    overflow: hidden;
-}
-
-.formula-box::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: -100%;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(240, 147, 251, 0.1), transparent);
-    transition: left 0.5s;
-}
-
-.formula-box:hover::before {
-    left: 100%;
-}
-
-/* Animación para elementos destacados */
-@keyframes pulse {
-    0% { transform: scale(1); }
-    50% { transform: scale(1.05); }
-    100% { transform: scale(1); }
-}
-
-.nav .btn.active {
-    animation: pulse 2s infinite;
-}
-
-/* Mejoras para tablas */
-.table thead th {
-    border: none;
-    font-weight: 600;
-    text-transform: uppercase;
-    font-size: 0.85rem;
-    letter-spacing: 1px;
-}
-
-.table tbody tr:hover {
-    background-color: rgba(240, 147, 251, 0.1);
-    transform: scale(1.01);
+.btn:hover {
+    transform: translateY(-1px);
     transition: all 0.2s ease;
 }
 
-/* Iconos mejorados */
-.bi {
-    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
+.nav .btn.active {
+    background-color: #fff !important;
+    color: #0d6efd !important;
+    font-weight: bold;
 }
 
-/* Efectos de profundidad */
-.shadow-lg {
-    box-shadow: 0 20px 40px rgba(0,0,0,0.1) !important;
+.table tbody tr:hover {
+    background-color: rgba(13, 110, 253, 0.1);
 }
 
-/* Colores para residuos */
-.text-success { color: #28a745 !important; }
-.text-warning { color: #ffc107 !important; }
-.text-danger { color: #dc3545 !important; }
+.badge {
+    padding: 0.4rem 0.8rem;
+    border-radius: 20px;
+}
 </style>
 {% endblock %}

@@ -5,34 +5,37 @@
 
 {% block contenido %}
 <div class="container-fluid">
-    <div class="row">
+    <!-- Header principal -->
+    <div class="row mb-4">
         <div class="col-12">
-            <h1><i class="bi bi-grid"></i> Análisis de Tamaño de Partícula</h1>
-            <p class="lead">Análisis granulométrico con modelo Rosin-Rammler</p>
-            
-            <!-- Navegación entre modelos -->
-            <nav class="mb-4">
-                <div class="nav nav-tabs" id="nav-tab" role="tablist">
-                    <a class="nav-link" href="{{ url_for('tamizado.analisis_granulometrico') }}">
+            <div class="bg-primary text-white p-4 rounded shadow">
+                <h1 class="display-6 fw-bold mb-2">
+                    <i class="bi bi-grid-3x3-gap-fill me-3"></i>Análisis de Tamaño de Partícula
+                </h1>
+                <p class="lead mb-3">Análisis granulométrico con modelo Rosin-Rammler</p>
+                
+                <!-- Navegación entre modelos -->
+                <nav class="d-flex gap-2 flex-wrap">
+                    <a href="{{ url_for('tamizado.analisis_granulometrico') }}" class="btn btn-outline-light btn-sm">
                         <i class="bi bi-graph-up"></i> Gates-Gaudin-Schuhmann
                     </a>
-                    <a class="nav-link active" href="{{ url_for('tamizado.rosin_rammler') }}">
+                    <a href="{{ url_for('tamizado.rosin_rammler') }}" class="btn btn-light btn-sm active">
                         <i class="bi bi-graph-down"></i> Rosin-Rammler
                     </a>
-                    <a class="nav-link" href="{{ url_for('tamizado.regresion_lineal') }}">
+                    <a href="{{ url_for('tamizado.regresion_lineal') }}" class="btn btn-outline-light btn-sm">
                         <i class="bi bi-graph-up-arrow"></i> Regresión Lineal
                     </a>
-                </div>
-            </nav>
+                </nav>
+            </div>
         </div>
     </div>
 
     <!-- Formulario de entrada de datos -->
     <div class="row">
         <div class="col-md-8">
-            <div class="card">
-                <div class="card-header">
-                    <h5><i class="bi bi-clipboard-data"></i> Datos de Entrada</h5>
+            <div class="card shadow border-0">
+                <div class="card-header bg-warning text-dark">
+                    <h5 class="mb-0"><i class="bi bi-clipboard-data-fill me-2"></i>Datos de Entrada</h5>
                 </div>
                 <div class="card-body">
                     <form method="POST" id="formulario-rosin-rammler">
@@ -76,55 +79,38 @@
         </div>
 
         <div class="col-md-4">
-            <div class="card">
+            <div class="card shadow border-0">
                 <div class="card-header bg-info text-white">
-                    <h5><i class="bi bi-info-circle"></i> 2. Rosin-Rammler</h5>
+                    <h5 class="mb-0"><i class="bi bi-info-circle-fill me-2"></i>Modelo Rosin-Rammler</h5>
                 </div>
                 <div class="card-body">
-                    <div class="bg-primary text-white p-2 rounded mb-3">
-                        <h6><i class="bi bi-database"></i> Datos de entrada:</h6>
-                    </div>
-                    <ul class="mb-3">
+                    <h6><i class="bi bi-clipboard-data"></i> Datos de entrada:</h6>
+                    <ul class="small">
                         <li><strong>d</strong>: Tamaño de partícula (μm o mm)</li>
-                        <li><strong>d₀</strong>: Tamaño característico donde el 36.8% de las partículas son más grandes</li>
+                        <li><strong>d₀</strong>: Tamaño característico</li>
                         <li><strong>n</strong>: Parámetro de distribución</li>
-                        <li><strong>R(d)</strong>: % retenido acumulado (dato a calcular)</li>
+                        <li><strong>R(d)</strong>: % retenido acumulado</li>
                     </ul>
 
-                    <div class="bg-danger text-white p-2 rounded mb-3">
-                        <h6><i class="bi bi-calculator-fill"></i> Fórmula:</h6>
-                    </div>
+                    <h6><i class="bi bi-calculator-fill text-success"></i> Fórmula:</h6>
                     
-                    <div class="formula-main mb-3">
-                        <div class="text-center bg-light p-3 rounded border">
+                    <div class="bg-light p-3 border rounded mb-3">
+                        <div class="text-center">
                             <strong>R(d) = 100 × e^(-(d/d₀)ⁿ)</strong>
                         </div>
                     </div>
                     
-                    <div class="formula-alt mb-3">
-                        <strong>O también:</strong><br>
-                        <div class="bg-light p-2 rounded mt-2">
-                            ln[-ln(R(d)/100)] = n × ln(d) - n × ln(d₀)
-                        </div>
+                    <div class="bg-light p-3 border rounded mb-3">
+                        <strong>Para regresión:</strong><br>
+                        <code>ln[-ln(R(d)/100)] = n × ln(d) - n × ln(d₀)</code>
                     </div>
 
-                    <div class="bg-success text-white p-2 rounded mb-3">
-                        <h6><i class="bi bi-graph-up"></i> Gráfico recomendado:</h6>
-                    </div>
-                    <ul class="mb-3">
-                        <li><strong>Eje X:</strong> ln(d)</li>
-                        <li><strong>Eje Y:</strong> ln[-ln(R(d)/100)]</li>
-                        <li><strong>Tipo:</strong> Gráfico semilogarítmico (línea recta si el modelo es adecuado)</li>
+                    <h6><i class="bi bi-info-circle"></i> Interpretación:</h6>
+                    <ul class="small">
+                        <li>Usado para molienda fina o polvos</li>
+                        <li><strong>n</strong> define la dispersión</li>
+                        <li><strong>d₀</strong> define la centralidad</li>
                     </ul>
-
-                    <div class="bg-warning text-dark p-2 rounded">
-                        <h6><i class="bi bi-lightbulb"></i> Interpretación:</h6>
-                        <ul class="mb-0">
-                            <li>Muy usado en molienda fina o polvos.</li>
-                            <li>El parámetro <strong>n</strong> define la pendiente (dispersión).</li>
-                            <li><strong>d₀</strong> define la centralidad de la distribución.</li>
-                        </ul>
-                    </div>
                 </div>
             </div>
         </div>
@@ -134,9 +120,9 @@
     {% if tabla_datos %}
     <div class="row mt-4">
         <div class="col-12">
-            <div class="card">
-                <div class="card-header">
-                    <h5><i class="bi bi-table"></i> Tabla de Resultados Rosin-Rammler</h5>
+            <div class="card shadow border-0">
+                <div class="card-header bg-dark text-white">
+                    <h5 class="mb-0"><i class="bi bi-table me-2"></i>Tabla de Resultados Rosin-Rammler</h5>
                 </div>
                 <div class="card-body">
                     <div class="table-responsive">
@@ -173,9 +159,9 @@
     {% if grafico_principal %}
     <div class="row mt-4">
         <div class="col-12">
-            <div class="card">
-                <div class="card-header">
-                    <h5><i class="bi bi-graph-up"></i> Distribución Rosin-Rammler</h5>
+            <div class="card shadow border-0">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0"><i class="bi bi-graph-up me-2"></i>Distribución Rosin-Rammler</h5>
                 </div>
                 <div class="card-body">
                     <div id="grafico-principal"></div>
@@ -189,7 +175,7 @@
     {% if resultados_calculo %}
     <div class="row mt-4">
         <div class="col-md-6">
-            <div class="card">
+            <div class="card shadow border-0">
                 <div class="card-header bg-success text-white">
                     <h5><i class="bi bi-calculator"></i> Parámetros Rosin-Rammler</h5>
                 </div>
@@ -231,8 +217,8 @@
         </div>
 
         <div class="col-md-6">
-            <div class="card">
-                <div class="card-header">
+            <div class="card shadow border-0">
+                <div class="card-header bg-info text-white">
                     <h5><i class="bi bi-table"></i> Datos para Regresión</h5>
                 </div>
                 <div class="card-body">
@@ -267,10 +253,9 @@
     {% if grafico_semilog %}
     <div class="row mt-4">
         <div class="col-12">
-            <div class="card">
-                <div class="card-header">
+            <div class="card shadow border-0">
+                <div class="card-header bg-warning text-dark">
                     <h5><i class="bi bi-graph-up-arrow"></i> Gráfico Semilogarítmico para obtener parámetros</h5>
-                    <small class="text-muted">ln[-ln(R(d)/100)] = n × ln(d) - n × ln(d₀)</small>
                 </div>
                 <div class="card-body">
                     <div id="grafico-semilog"></div>
@@ -281,22 +266,6 @@
     {% endif %}
     {% endif %}
 </div>
-
-<style>
-.formula-main {
-    font-size: 1.2em;
-}
-
-.formula-alt {
-    font-size: 0.9em;
-}
-
-.nav-tabs .nav-link.active {
-    background-color: #0d6efd;
-    color: white;
-    border-color: #0d6efd;
-}
-</style>
 
 <script src="https://cdn.plot.ly/plotly-2.26.0.min.js"></script>
 <script>
@@ -356,4 +325,37 @@ var grafico_semilog = {{ grafico_semilog|safe }};
 Plotly.newPlot('grafico-semilog', grafico_semilog.data, grafico_semilog.layout, {responsive: true});
 {% endif %}
 </script>
+
+<style>
+/* Tema unificado para toda la aplicación */
+.card {
+    transition: all 0.3s ease;
+    border-radius: 8px;
+}
+
+.card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+}
+
+.btn:hover {
+    transform: translateY(-1px);
+    transition: all 0.2s ease;
+}
+
+.nav .btn.active {
+    background-color: #fff !important;
+    color: #0d6efd !important;
+    font-weight: bold;
+}
+
+.table tbody tr:hover {
+    background-color: rgba(13, 110, 253, 0.1);
+}
+
+.badge {
+    padding: 0.4rem 0.8rem;
+    border-radius: 20px;
+}
+</style>
 {% endblock %}
