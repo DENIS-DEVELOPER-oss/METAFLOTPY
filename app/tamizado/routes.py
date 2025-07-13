@@ -1,4 +1,4 @@
-    from flask import Blueprint, render_template, request, jsonify
+from flask import Blueprint, render_template, request, jsonify
 from app.tamizado.forms import FormularioTamizado
 import pandas as pd
 import numpy as np
@@ -11,7 +11,7 @@ bp_tamizado = Blueprint('tamizado', __name__)
 
 @bp_tamizado.route('/', methods=['GET', 'POST'])
 def analisis_granulometrico():
-        formulario = FormularioTamizado()
+    formulario = FormularioTamizado()
 
     resultados_calculo = None
     grafico_principal = None
@@ -43,7 +43,7 @@ def analisis_granulometrico():
                          tabla_datos=tabla_datos)
 
 def crear_tabla_granulometrica_especifica(aberturas, pesos_retenidos, peso_total):
-        """
+    """
     Crear tabla con cálculos según las fórmulas especificadas:
     1. % Retenido por malla: %Ri = (Ri/T) × 100
     2. % Acumulado retenido: %AcumRi = Σ(%Rj) desde j=1 hasta i
@@ -69,7 +69,7 @@ def crear_tabla_granulometrica_especifica(aberturas, pesos_retenidos, peso_total
     return df
 
 def crear_grafico_granulometrico(df):
-        """Crear gráfico principal de distribución granulométrica"""
+    """Crear gráfico principal de distribución granulométrica"""
     try:
         fig = go.Figure()
 
@@ -111,7 +111,7 @@ def crear_grafico_granulometrico(df):
         return None
 
 def crear_grafico_log_log_especifico(df):
-        """
+    """
     Crear gráfico log-log para obtener n según especificación:
     4. Logaritmos (para graficar y obtener n): log(di), log(%Pi)
     5. Regresión lineal en gráfico log-log para obtener n:
@@ -156,7 +156,7 @@ def crear_grafico_log_log_especifico(df):
         return None
 
 def calcular_regresion_especifica(df):
-        """
+    """
     Calcular regresión lineal según especificación:
     log(%Pi) = n × log(di)
     Usar mínimos cuadrados para obtener la pendiente n
