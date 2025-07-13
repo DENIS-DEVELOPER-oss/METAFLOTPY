@@ -205,7 +205,7 @@ def calcular_regresion_especifica(df):
 @bp_tamizado.route('/rosin-rammler', methods=['GET', 'POST'])
 def rosin_rammler():
     formulario = FormularioTamizado()
-    
+
     resultados_calculo = None
     grafico_principal = None
     grafico_semilog = None
@@ -241,17 +241,17 @@ def crear_tabla_rosin_rammler(aberturas, pesos_retenidos, peso_total):
         'abertura': aberturas,
         'peso_retenido': pesos_retenidos
     })
-    
+
     # Ordenar por abertura descendente
     df = df.sort_values('abertura', ascending=False).reset_index(drop=True)
-    
+
     # Cálculos básicos
     df['porcentaje_retenido'] = (df['peso_retenido'] / peso_total) * 100
     df['porcentaje_acumulado'] = df['porcentaje_retenido'].cumsum()
-    
+
     # R(d) para Rosin-Rammler (% retenido acumulado)
     df['R_d'] = df['porcentaje_acumulado']
-    
+
     return df
 
 def crear_grafico_rosin_rammler(df):
@@ -291,7 +291,7 @@ def crear_grafico_semilog_rosin_rammler(df):
     try:
         # Filtrar datos válidos
         df_valid = df[(df['R_d'] > 0) & (df['R_d'] < 100)].copy()
-        
+
         if len(df_valid) < 2:
             return None
 
@@ -300,7 +300,7 @@ def crear_grafico_semilog_rosin_rammler(df):
         # Calcular ln[-ln(R(d)/100)]
         ln_ln_R = []
         ln_d = []
-        
+
         for _, row in df_valid.iterrows():
             try:
                 R_fraction = row['R_d'] / 100
@@ -343,7 +343,7 @@ def calcular_parametros_rosin_rammler(df):
     """Calcular parámetros n y d₀ del modelo Rosin-Rammler"""
     try:
         df_valid = df[(df['R_d'] > 0) & (df['R_d'] < 100)].copy()
-        
+
         if len(df_valid) < 2:
             return None
 
@@ -351,17 +351,17 @@ def calcular_parametros_rosin_rammler(df):
         ln_d = []
         ln_ln_R = []
         tabla_logaritmos = []
-        
+
         for _, row in df_valid.iterrows():
             try:
                 R_fraction = row['R_d'] / 100
                 if 0 < R_fraction < 1:
                     ln_d_val = np.log(row['abertura'])
                     ln_ln_R_val = np.log(-np.log(R_fraction))
-                    
+
                     ln_d.append(ln_d_val)
                     ln_ln_R.append(ln_ln_R_val)
-                    
+
                     tabla_logaritmos.append({
                         'abertura': row['abertura'],
                         'R_d': row['R_d'],
@@ -374,13 +374,13 @@ def calcular_parametros_rosin_rammler(df):
         if len(ln_d) >= 2:
             # Regresión lineal: ln[-ln(R(d)/100)] = n × ln(d) - n × ln(d₀)
             slope, intercept, r_value, p_value, std_err = stats.linregress(ln_d, ln_ln_R)
-            
+
             n = slope  # Parámetro de distribución
             d0 = np.exp(-intercept / slope)  # Tamaño característico
             r2 = r_value ** 2
-            
+
             formula_rosin = f'R(d) = 100 × e^[-(d/{d0:.3f})^{n:.3f}]'
-            
+
             resultados = {
                 'n': n,
                 'd0': d0,
@@ -388,9 +388,80 @@ def calcular_parametros_rosin_rammler(df):
                 'formula_rosin': formula_rosin,
                 'tabla_logaritmos': tabla_logaritmos
             }
-            
+
             return resultados
 
     except Exception as e:
         print(f"Error calculando parámetros Rosin-Rammler: {e}")
         return None
+
+@bp_tamizado.route('/regresion-lineal', methods=['GET', 'POST'])
+def regresion_lineal():
+    formulario = FormularioTamizado()
+
+    resultados_calculo = None
+    grafico_principal = None
+    grafico_semilog = None
+    tabla_datos = None
+
+    if request.method == 'POST':
+        peso_total = float(request.form.get('peso_total', 0))
+        aberturas = [float(x) for x in request.form.getlist('abertura[]') if x]
+        pesos_retenidos = [float(x) for x in request.form.getlist('peso_retenido[]') if x]
+
+        if len(aberturas) == len(pesos_retenidos) and len(aberturas) > 0:
+            # Crear tabla básica
+            df = crear_tabla_granulometrica_especifica(aberturas, pesos_retenidos, peso_total)
+            tabla_datos = df.to_dict('records')
+
+            # Crear gráficos
+            grafico_principal = crear_grafico_granulometrico(df)
+            grafico_semilog = crear_grafico_log_log_especifico(df)
+
+            # Calcular regresión
+            resultados_calculo = calcular_regresion_especifica(df)
+
+    return render_template('tamizado/regresion_lineal.html',
+                         formulario=formulario,
+                         resultados_calculo=resultados_calculo,
+                         grafico_principal=grafico_principal,
+                         grafico_semilog=grafico_semilog,
+                         tabla_datos=tabla_datos)
+
+@bp_tamizado.route('/tamizado-dinamico', methods=['GET', 'POST'])
+def tamizado_dinamico():
+    formulario = FormularioTamizado()
+
+    resultados = None
+    grafico = None
+
+    if request.method == 'POST':
+        peso_total = float(request.form.get('peso_total', 0))
+        aberturas = [float(x) for x in request.form.getlist('abertura[]') if x]
+        pesos_retenidos = [float(x) for x in request.form.getlist('peso_retenido[]') if x]
+
+        if len(aberturas) == len(pesos_retenidos) and len(aberturas) > 0:
+            # Crear tabla básica
+            df = crear_tabla_granulometrica_especifica(aberturas, pesos_retenidos, peso_total)
+
+            # Crear gráfico
+            grafico = crear_grafico_granulometrico(df)
+
+            # Preparar resultados
+            resultados = {
+                'tabla': df.to_dict('records'),
+                'd10': 0.1,  # Placeholder values
+                'd30': 0.3,
+                'd50': 0.5,
+                'd60': 0.6,
+                'd80': 0.8,
+                'cu': 6.0,
+                'cc': 1.0,
+                'balance_ok': True,
+                'error_balance': 0.0
+            }
+
+    return render_template('tamizado/tamizado_dinamico.html',
+                         formulario=formulario,
+                         resultados=resultados,
+                         grafico=grafico)
