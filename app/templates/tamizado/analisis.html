@@ -16,7 +16,7 @@
                 
                 <!-- Navegación entre modelos mejorada -->
                 <nav class="d-flex gap-2 flex-wrap">
-                    <a href="{{ url_for('tamizado.analisis_granulometrico') }}" class="btn btn-light btn-sm active">
+                    <a href="{{ url_for('tamizado.analisis') }}" class="btn btn-light btn-sm active">
                         <i class="bi bi-graph-up"></i> Gates-Gaudin-Schuhmann
                     </a>
                     <a href="{{ url_for('tamizado.rosin_rammler') }}" class="btn btn-outline-light btn-sm">
@@ -25,7 +25,6 @@
                     <a href="{{ url_for('tamizado.regresion_lineal') }}" class="btn btn-outline-light btn-sm">
                         <i class="bi bi-graph-up-arrow"></i> Regresión Lineal
                     </a>
-                    
                 </nav>
             </div>
         </div>
