@@ -1,591 +1,481 @@
-from flask import Blueprint, render_template, request, jsonify
-from app.tamizado.forms import FormularioTamizado
-import pandas as pd
-import numpy as np
+from flask import Blueprint, render_template, request, flash
+from app.tamizado.forms import FormularioTamizado, FormularioRegresionLineal, FormularioRosinRammler
 import plotly.graph_objs as go
 import plotly.utils
 import json
+import pandas as pd
+import numpy as np
 from scipy import stats
+from scipy.optimize import curve_fit
+import math
 
 bp_tamizado = Blueprint('tamizado', __name__)
 
 @bp_tamizado.route('/', methods=['GET', 'POST'])
 def analisis_granulometrico():
     formulario = FormularioTamizado()
+    resultados = None
+    grafico_json = None
 
-    resultados_calculo = None
-    grafico_principal = None
-    grafico_log_log = None
-    tabla_datos = None
+    if formulario.validate_on_submit():
+        try:
+            # Obtener datos del formulario
+            peso_total = formulario.peso_total.data
+            retenidos = [
+                formulario.retenido_12_5.data or 0,
+                formulario.retenido_9_5.data or 0,
+                formulario.retenido_6_35.data or 0,
+                formulario.retenido_4_75.data or 0,
+                formulario.retenido_3_35.data or 0,
+                formulario.retenido_2_36.data or 0,
+                formulario.retenido_1_18.data or 0,
+                formulario.retenido_0_85.data or 0,
+                formulario.retenido_0_60.data or 0,
+                formulario.retenido_0_425.data or 0,
+                formulario.retenido_0_30.data or 0,
+                formulario.retenido_0_212.data or 0,
+                formulario.retenido_0_150.data or 0,
+                formulario.retenido_0_106.data or 0,
+                formulario.retenido_0_075.data or 0,
+                formulario.retenido_fondo.data or 0
+            ]
 
-    if request.method == 'POST':
-        peso_total = float(request.form.get('peso_total', 0))
-        aberturas = [float(x) for x in request.form.getlist('abertura[]') if x]
-        pesos_retenidos = [float(x) for x in request.form.getlist('peso_retenido[]') if x]
+            # Calcular análisis granulométrico
+            resultados = calcular_analisis_granulometrico(peso_total, retenidos)
 
-        if len(aberturas) == len(pesos_retenidos) and len(aberturas) > 0:
-            # Crear tabla de datos según las fórmulas especificadas
-            df = crear_tabla_granulometrica_especifica(aberturas, pesos_retenidos, peso_total)
-            tabla_datos = df.to_dict('records')
+            # Crear gráfico
+            grafico_json = crear_grafico_granulometrico(resultados)
 
-            # Crear gráficos según especificaciones
-            grafico_principal = crear_grafico_granulometrico(df)
-            grafico_log_log = crear_grafico_log_log_especifico(df)
-            
-            # Calcular regresión lineal para obtener n
-            resultados_calculo = calcular_regresion_especifica(df)
+        except Exception as e:
+            flash(f'Error en el cálculo: {str(e)}', 'error')
 
-    return render_template('tamizado/analisis.html',
-                         formulario=formulario,
-                         resultados_calculo=resultados_calculo,
-                         grafico_principal=grafico_principal,
-                         grafico_log_log=grafico_log_log,
-                         tabla_datos=tabla_datos)
-
-def crear_tabla_granulometrica_especifica(aberturas, pesos_retenidos, peso_total):
-    """
-    Crear tabla con cálculos según las fórmulas especificadas:
-    1. % Retenido por malla: %Ri = (Ri/T) × 100
-    2. % Acumulado retenido: %AcumRi = Σ(%Rj) desde j=1 hasta i
-    3. % Acumulado pasante: %Pi = 100 - %AcumRi
-    """
-    df = pd.DataFrame({
-        'abertura': aberturas,
-        'peso_retenido': pesos_retenidos
-    })
-
-    # Ordenar por abertura descendente
-    df = df.sort_values('abertura', ascending=False).reset_index(drop=True)
-
-    # 1. % Retenido por malla: %Ri = (Ri/T) × 100
-    df['porcentaje_retenido'] = (df['peso_retenido'] / peso_total) * 100
-
-    # 2. % Acumulado retenido: %AcumRi = Σ(%Rj) desde j=1 hasta i
-    df['porcentaje_acumulado'] = df['porcentaje_retenido'].cumsum()
-
-    # 3. % Acumulado pasante: %Pi = 100 - %AcumRi
-    df['porcentaje_pasante'] = 100 - df['porcentaje_acumulado']
-
-    return df
-
-def crear_grafico_granulometrico(df):
-    """Crear gráfico principal de distribución granulométrica"""
-    try:
-        fig = go.Figure()
-
-        # Curva de % pasante
-        fig.add_trace(go.Scatter(
-            x=df['abertura'],
-            y=df['porcentaje_pasante'],
-            mode='markers+lines',
-            name='% Acumulado Pasante',
-            marker=dict(size=8, color='blue'),
-            line=dict(color='blue', width=3)
-        ))
-
-        # Curva de % retenido acumulado
-        fig.add_trace(go.Scatter(
-            x=df['abertura'],
-            y=df['porcentaje_acumulado'],
-            mode='markers+lines',
-            name='% Acumulado Retenido',
-            marker=dict(size=8, color='red'),
-            line=dict(color='red', width=3)
-        ))
-
-        fig.update_layout(
-            title='Curvas Granulométricas',
-            xaxis_title='Tamaño de partícula (mm)',
-            yaxis_title='Porcentaje (%)',
-            xaxis_type='log',
-            xaxis_showgrid=True,
-            yaxis_showgrid=True,
-            hovermode='closest',
-            template='plotly_white'
-        )
-
-        return json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
-
-    except Exception as e:
-        print(f"Error creando gráfico granulométrico: {e}")
-        return None
-
-def crear_grafico_log_log_especifico(df):
-    """
-    Crear gráfico log-log para obtener n según especificación:
-    4. Logaritmos (para graficar y obtener n): log(di), log(%Pi)
-    5. Regresión lineal en gráfico log-log para obtener n:
-       Usa mínimos cuadrados para obtener la pendiente n de:
-       log(%Pi) = n × log(di)
-    """
-    try:
-        # Filtrar datos válidos para logaritmos
-        df_valid = df[(df['porcentaje_pasante'] > 0) & (df['porcentaje_pasante'] < 100)].copy()
-        
-        if len(df_valid) < 2:
-            return None
-
-        fig = go.Figure()
-
-        # Datos experimentales en log-log
-        fig.add_trace(go.Scatter(
-            x=df_valid['abertura'],
-            y=df_valid['porcentaje_pasante'],
-            mode='markers+lines',
-            name='Datos Experimentales',
-            marker=dict(size=10, color='blue'),
-            line=dict(color='blue', width=2, dash='dot')
-        ))
-
-        fig.update_layout(
-            title='Gráfico Log-Log para obtener n<br>log(%Pi) = n × log(di)',
-            xaxis_title='Tamaño de partícula di (mm)',
-            yaxis_title='% Acumulado Pasante %Pi (%)',
-            xaxis_type='log',
-            yaxis_type='log',
-            xaxis_showgrid=True,
-            yaxis_showgrid=True,
-            hovermode='closest',
-            template='plotly_white'
-        )
-
-        return json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
-
-    except Exception as e:
-        print(f"Error creando gráfico log-log: {e}")
-        return None
-
-def calcular_regresion_especifica(df):
-    """
-    Calcular regresión lineal según especificación:
-    log(%Pi) = n × log(di)
-    Usar mínimos cuadrados para obtener la pendiente n
-    """
-    try:
-        # Filtrar datos válidos para logaritmos
-        df_valid = df[(df['porcentaje_pasante'] > 0) & (df['porcentaje_pasante'] < 100)].copy()
-        
-        if len(df_valid) < 2:
-            return None
-
-        # 4. Logaritmos para graficar y obtener n
-        log_di = np.log10(df_valid['abertura'].values)
-        log_Pi = np.log10(df_valid['porcentaje_pasante'].values)
-
-        # 5. Regresión lineal: log(%Pi) = n × log(di)
-        # Usando mínimos cuadrados
-        slope, intercept, r_value, p_value, std_err = stats.linregress(log_di, log_Pi)
-
-        n = slope  # La pendiente es el exponente n
-        r2 = r_value ** 2
-
-        # Datos para la tabla de logaritmos
-        tabla_logaritmos = []
-        for i, row in df_valid.iterrows():
-            tabla_logaritmos.append({
-                'abertura': row['abertura'],
-                'porcentaje_pasante': row['porcentaje_pasante'],
-                'log_di': np.log10(row['abertura']),
-                'log_Pi': np.log10(row['porcentaje_pasante'])
-            })
-
-        resultados = {
-            'n': n,
-            'r2': r2,
-            'ecuacion': f'log(%Pi) = {n:.3f} × log(di) + {intercept:.3f}',
-            'tabla_logaritmos': tabla_logaritmos
-        }
-
-        return resultados
-
-    except Exception as e:
-        print(f"Error en cálculo de regresión: {e}")
-        return None
-
-@bp_tamizado.route('/rosin-rammler', methods=['GET', 'POST'])
-def rosin_rammler():
-    formulario = FormularioTamizado()
-
-    resultados_calculo = None
-    grafico_principal = None
-    grafico_semilog = None
-    tabla_datos = None
-
-    if request.method == 'POST':
-        aberturas = [float(x) for x in request.form.getlist('abertura[]') if x]
-        pesos_retenidos = [float(x) for x in request.form.getlist('peso_retenido[]') if x]
-        peso_total = float(request.form.get('peso_total', 0))
-
-        if len(aberturas) == len(pesos_retenidos) and len(aberturas) > 0:
-            # Crear tabla de datos para Rosin-Rammler
-            df = crear_tabla_rosin_rammler(aberturas, pesos_retenidos, peso_total)
-            tabla_datos = df.to_dict('records')
-
-            # Crear gráficos
-            grafico_principal = crear_grafico_rosin_rammler(df)
-            grafico_semilog = crear_grafico_semilog_rosin_rammler(df)
-            
-            # Calcular parámetros de Rosin-Rammler
-            resultados_calculo = calcular_parametros_rosin_rammler(df)
-
-    return render_template('tamizado/rosin_rammler.html',
-                         formulario=formulario,
-                         resultados_calculo=resultados_calculo,
-                         grafico_principal=grafico_principal,
-                         grafico_semilog=grafico_semilog,
-                         tabla_datos=tabla_datos)
-
-def crear_tabla_rosin_rammler(aberturas, pesos_retenidos, peso_total):
-    """
-    Crear tabla con cálculos para Rosin-Rammler:
-    R(d) = 100 * e^(-(d/d0)^n)
-    """
-    df = pd.DataFrame({
-        'abertura': aberturas,
-        'peso_retenido': pesos_retenidos
-    })
-
-    # Ordenar por abertura descendente
-    df = df.sort_values('abertura', ascending=False).reset_index(drop=True)
-
-    # % Retenido por malla
-    df['porcentaje_retenido'] = (df['peso_retenido'] / peso_total) * 100
-
-    # % Acumulado retenido
-    df['porcentaje_acumulado'] = df['porcentaje_retenido'].cumsum()
-
-    # R(d): % retenido acumulado (dato a calcular)
-    df['R_d'] = df['porcentaje_acumulado']
-
-    return df
-
-def crear_grafico_rosin_rammler(df):
-    """Crear gráfico principal de distribución Rosin-Rammler"""
-    try:
-        fig = go.Figure()
-
-        # Curva experimental R(d)
-        fig.add_trace(go.Scatter(
-            x=df['abertura'],
-            y=df['R_d'],
-            mode='markers+lines',
-            name='R(d) Experimental',
-            marker=dict(size=8, color='blue'),
-            line=dict(color='blue', width=3)
-        ))
-
-        fig.update_layout(
-            title='Distribución Rosin-Rammler<br>R(d) = 100 × e^(-(d/d₀)ⁿ)',
-            xaxis_title='Tamaño de partícula d (mm)',
-            yaxis_title='% Retenido Acumulado R(d) (%)',
-            xaxis_type='log',
-            xaxis_showgrid=True,
-            yaxis_showgrid=True,
-            hovermode='closest',
-            template='plotly_white'
-        )
-
-        return json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
-
-    except Exception as e:
-        print(f"Error creando gráfico Rosin-Rammler: {e}")
-        return None
-
-def crear_grafico_semilog_rosin_rammler(df):
-    """
-    Crear gráfico semilogarítmico para obtener parámetros:
-    ln[-ln(R(d)/100)] = n × ln(d) - n × ln(d₀)
-    """
-    try:
-        # Filtrar datos válidos para logaritmos
-        df_valid = df[(df['R_d'] > 0) & (df['R_d'] < 100)].copy()
-        
-        if len(df_valid) < 2:
-            return None
-
-        fig = go.Figure()
-
-        # Datos experimentales
-        ln_d = np.log(df_valid['abertura'].values)
-        ln_ln_R = np.log(-np.log(df_valid['R_d'].values / 100))
-
-        fig.add_trace(go.Scatter(
-            x=ln_d,
-            y=ln_ln_R,
-            mode='markers+lines',
-            name='Datos Experimentales',
-            marker=dict(size=10, color='red'),
-            line=dict(color='red', width=2, dash='dot')
-        ))
-
-        fig.update_layout(
-            title='Gráfico Semilogarítmico Rosin-Rammler<br>ln[-ln(R(d)/100)] = n × ln(d) - n × ln(d₀)',
-            xaxis_title='ln(d)',
-            yaxis_title='ln[-ln(R(d)/100)]',
-            xaxis_showgrid=True,
-            yaxis_showgrid=True,
-            hovermode='closest',
-            template='plotly_white'
-        )
-
-        return json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
-
-    except Exception as e:
-        print(f"Error creando gráfico semilog: {e}")
-        return None
-
-def calcular_parametros_rosin_rammler(df):
-    """
-    Calcular parámetros n y d₀ para Rosin-Rammler:
-    ln[-ln(R(d)/100)] = n × ln(d) - n × ln(d₀)
-    """
-    try:
-        # Filtrar datos válidos para logaritmos
-        df_valid = df[(df['R_d'] > 0) & (df['R_d'] < 100)].copy()
-        
-        if len(df_valid) < 2:
-            return None
-
-        # Calcular ln(d) y ln[-ln(R(d)/100)]
-        ln_d = np.log(df_valid['abertura'].values)
-        ln_ln_R = np.log(-np.log(df_valid['R_d'].values / 100))
-
-        # Regresión lineal
-        slope, intercept, r_value, p_value, std_err = stats.linregress(ln_d, ln_ln_R)
-
-        n = slope  # Parámetro de distribución
-        d0 = np.exp(-intercept / slope)  # Tamaño característico donde 36.8% son más grandes
-        r2 = r_value ** 2
-
-        # Datos para la tabla de logaritmos
-        tabla_logaritmos = []
-        for i, row in df_valid.iterrows():
-            ln_d_val = np.log(row['abertura'])
-            ln_ln_R_val = np.log(-np.log(row['R_d'] / 100))
-            tabla_logaritmos.append({
-                'abertura': row['abertura'],
-                'R_d': row['R_d'],
-                'ln_d': ln_d_val,
-                'ln_ln_R': ln_ln_R_val
-            })
-
-        resultados = {
-            'n': n,
-            'd0': d0,
-            'r2': r2,
-            'ecuacion': f'ln[-ln(R(d)/100)] = {n:.3f} × ln(d) - {n:.3f} × ln({d0:.3f})',
-            'formula_rosin': f'R(d) = 100 × e^(-(d/{d0:.3f})^{n:.3f})',
-            'tabla_logaritmos': tabla_logaritmos
-        }
-
-        return resultados
-
-    except Exception as e:
-        print(f"Error en cálculo de parámetros Rosin-Rammler: {e}")
-        return None
+    return render_template('tamizado/analisis.html', 
+                         formulario=formulario, 
+                         resultados=resultados,
+                         grafico=grafico_json)
 
 @bp_tamizado.route('/regresion-lineal', methods=['GET', 'POST'])
 def regresion_lineal():
-    formulario = FormularioTamizado()
+    formulario = FormularioRegresionLineal()
+    resultados = None
+    grafico_json = None
 
-    resultados_calculo = None
-    grafico_principal = None
-    grafico_dispersion = None
-    tabla_datos = None
+    if formulario.validate_on_submit():
+        try:
+            # Obtener datos del formulario
+            mallas = [
+                12.5, 9.5, 6.35, 4.75, 3.35, 2.36, 1.18, 0.85, 
+                0.60, 0.425, 0.30, 0.212, 0.150, 0.106, 0.075, 0.053
+            ]
 
-    if request.method == 'POST':
-        # Obtener datos de entrada
-        x_values = [float(x) for x in request.form.getlist('x_value[]') if x]
-        y_values = [float(x) for x in request.form.getlist('y_value[]') if x]
+            pasantes = [
+                formulario.pasante_12_5.data or 0,
+                formulario.pasante_9_5.data or 0,
+                formulario.pasante_6_35.data or 0,
+                formulario.pasante_4_75.data or 0,
+                formulario.pasante_3_35.data or 0,
+                formulario.pasante_2_36.data or 0,
+                formulario.pasante_1_18.data or 0,
+                formulario.pasante_0_85.data or 0,
+                formulario.pasante_0_60.data or 0,
+                formulario.pasante_0_425.data or 0,
+                formulario.pasante_0_30.data or 0,
+                formulario.pasante_0_212.data or 0,
+                formulario.pasante_0_150.data or 0,
+                formulario.pasante_0_106.data or 0,
+                formulario.pasante_0_075.data or 0,
+                formulario.pasante_fondo.data or 0
+            ]
 
-        if len(x_values) == len(y_values) and len(x_values) >= 2:
-            # Crear tabla de datos para regresión lineal
-            df = crear_tabla_regresion_lineal(x_values, y_values)
-            tabla_datos = df.to_dict('records')
+            # Filtrar datos válidos
+            datos_validos = [(m, p) for m, p in zip(mallas, pasantes) if p > 0]
 
-            # Crear gráficos
-            grafico_principal = crear_grafico_regresion_lineal(df)
-            grafico_dispersion = crear_grafico_dispersion(df)
-            
-            # Calcular parámetros de regresión usando mínimos cuadrados
-            resultados_calculo = calcular_regresion_empirica(df)
+            if len(datos_validos) < 3:
+                flash('Se necesitan al menos 3 puntos válidos para realizar la regresión', 'error')
+                return render_template('tamizado/regresion_lineal.html', formulario=formulario)
 
-    return render_template('tamizado/regresion_lineal.html',
-                         formulario=formulario,
-                         resultados_calculo=resultados_calculo,
-                         grafico_principal=grafico_principal,
-                         grafico_dispersion=grafico_dispersion,
-                         tabla_datos=tabla_datos)
+            # Calcular regresión lineal
+            resultados = calcular_regresion_lineal(datos_validos)
+            grafico_json = crear_grafico_regresion(datos_validos, resultados)
 
-def crear_tabla_regresion_lineal(x_values, y_values):
-    """
-    Crear tabla con datos para regresión lineal empírica:
-    y = a × x + b
-    """
-    df = pd.DataFrame({
-        'x': x_values,
-        'y': y_values
-    })
+        except Exception as e:
+            flash(f'Error en el cálculo: {str(e)}', 'error')
 
-    # Ordenar por x
-    df = df.sort_values('x').reset_index(drop=True)
+    return render_template('tamizado/regresion_lineal.html', 
+                         formulario=formulario, 
+                         resultados=resultados,
+                         grafico=grafico_json)
 
-    return df
+@bp_tamizado.route('/rosin-rammler', methods=['GET', 'POST'])
+def rosin_rammler():
+    formulario = FormularioRosinRammler()
+    resultados = None
+    grafico_json = None
 
-def crear_grafico_regresion_lineal(df):
-    """Crear gráfico principal con regresión lineal"""
+    if formulario.validate_on_submit():
+        try:
+            # Obtener datos del formulario
+            mallas = [
+                12.5, 9.5, 6.35, 4.75, 3.35, 2.36, 1.18, 0.85, 
+                0.60, 0.425, 0.30, 0.212, 0.150, 0.106, 0.075, 0.053
+            ]
+
+            pasantes = [
+                formulario.pasante_12_5.data or 0,
+                formulario.pasante_9_5.data or 0,
+                formulario.pasante_6_35.data or 0,
+                formulario.pasante_4_75.data or 0,
+                formulario.pasante_3_35.data or 0,
+                formulario.pasante_2_36.data or 0,
+                formulario.pasante_1_18.data or 0,
+                formulario.pasante_0_85.data or 0,
+                formulario.pasante_0_60.data or 0,
+                formulario.pasante_0_425.data or 0,
+                formulario.pasante_0_30.data or 0,
+                formulario.pasante_0_212.data or 0,
+                formulario.pasante_0_150.data or 0,
+                formulario.pasante_0_106.data or 0,
+                formulario.pasante_0_075.data or 0,
+                formulario.pasante_fondo.data or 0
+            ]
+
+            # Filtrar datos válidos
+            datos_validos = [(m, p) for m, p in zip(mallas, pasantes) if p > 0 and p < 100]
+
+            if len(datos_validos) < 4:
+                flash('Se necesitan al menos 4 puntos válidos para el ajuste Rosin-Rammler', 'error')
+                return render_template('tamizado/rosin_rammler.html', formulario=formulario)
+
+            # Calcular parámetros Rosin-Rammler
+            resultados = calcular_rosin_rammler(datos_validos)
+            grafico_json = crear_grafico_rosin_rammler(datos_validos, resultados)
+
+        except Exception as e:
+            flash(f'Error en el cálculo: {str(e)}', 'error')
+
+    return render_template('tamizado/rosin_rammler.html', 
+                         formulario=formulario, 
+                         resultados=resultados,
+                         grafico=grafico_json)
+
+def calcular_analisis_granulometrico(peso_total, retenidos):
+    """Calcular análisis granulométrico completo"""
+
+    # Mallas estándar ASTM
+    mallas = [
+        12.5, 9.5, 6.35, 4.75, 3.35, 2.36, 1.18, 0.85, 
+        0.60, 0.425, 0.30, 0.212, 0.150, 0.106, 0.075, 0.053
+    ]
+
+    # Calcular porcentajes retenidos
+    suma_retenidos = sum(retenidos)
+    porcentaje_retenido = [(r/peso_total)*100 for r in retenidos]
+
+    # Calcular porcentajes retenidos acumulados
+    retenido_acumulado = []
+    acum = 0
+    for p in porcentaje_retenido:
+        acum += p
+        retenido_acumulado.append(acum)
+
+    # Calcular porcentajes pasantes
+    pasante = [100 - r for r in retenido_acumulado]
+
+    # Crear tabla de resultados
+    tabla_resultados = []
+    for i in range(len(mallas)):
+        tabla_resultados.append({
+            'malla': mallas[i],
+            'peso_retenido': retenidos[i],
+            'porcentaje_retenido': round(porcentaje_retenido[i], 2),
+            'retenido_acumulado': round(retenido_acumulado[i], 2),
+            'pasante': round(pasante[i], 2)
+        })
+
+    # Calcular parámetros característicos
+    # D50 (mediana)
+    d50 = calcular_percentil(mallas, pasante, 50)
+    # D80 (tamaño al 80% pasante)
+    d80 = calcular_percentil(mallas, pasante, 80)
+    # D10 (tamaño al 10% pasante)
+    d10 = calcular_percentil(mallas, pasante, 10)
+
+    # Coeficiente de uniformidad
+    cu = d60 / d10 if d10 > 0 else 0
+    d60 = calcular_percentil(mallas, pasante, 60)
+
+    # Coeficiente de curvatura
+    d30 = calcular_percentil(mallas, pasante, 30)
+    cc = (d30**2) / (d60 * d10) if (d60 > 0 and d10 > 0) else 0
+
+    # Verificación del balance
+    balance_ok = abs(suma_retenidos - peso_total) < 0.01
+
+    return {
+        'tabla': tabla_resultados,
+        'peso_total': peso_total,
+        'suma_retenidos': suma_retenidos,
+        'balance_ok': balance_ok,
+        'error_balance': abs(suma_retenidos - peso_total),
+        'd10': round(d10, 3),
+        'd30': round(d30, 3),
+        'd50': round(d50, 3),
+        'd60': round(d60, 3),
+        'd80': round(d80, 3),
+        'cu': round(cu, 2),
+        'cc': round(cc, 2),
+        'mallas': mallas,
+        'pasante': pasante
+    }
+
+def calcular_percentil(mallas, pasantes, percentil):
+    """Calcular percentil usando interpolación lineal"""
+    for i in range(len(pasantes)-1):
+        if pasantes[i] >= percentil >= pasantes[i+1]:
+            # Interpolación lineal
+            x1, y1 = math.log10(mallas[i]), pasantes[i]
+            x2, y2 = math.log10(mallas[i+1]), pasantes[i+1]
+
+            if y1 != y2:
+                x = x1 + (percentil - y1) * (x2 - x1) / (y2 - y1)
+                return 10**x
+
+    return 0
+
+def calcular_regresion_lineal(datos):
+    """Calcular regresión lineal en escala log-log"""
+    mallas = [d[0] for d in datos]
+    pasantes = [d[1] for d in datos]
+
+    # Transformar a escala logarítmica
+    log_mallas = [math.log10(m) for m in mallas]
+    log_pasantes = [math.log10(p) for p in pasantes if p > 0]
+    log_mallas_validas = [log_mallas[i] for i, p in enumerate(pasantes) if p > 0]
+
+    # Calcular regresión lineal
+    slope, intercept, r_value, p_value, std_err = stats.linregress(log_mallas_validas, log_pasantes)
+
+    # Calcular R²
+    r_squared = r_value**2
+
+    # Generar puntos para la línea de regresión
+    x_pred = np.linspace(min(log_mallas_validas), max(log_mallas_validas), 100)
+    y_pred = slope * x_pred + intercept
+
+    # Convertir de vuelta a escala normal
+    mallas_pred = [10**x for x in x_pred]
+    pasantes_pred = [10**y for y in y_pred]
+
+    return {
+        'pendiente': round(slope, 4),
+        'intercepto': round(intercept, 4),
+        'r_cuadrado': round(r_squared, 4),
+        'correlacion': round(r_value, 4),
+        'p_value': round(p_value, 6),
+        'error_estandar': round(std_err, 4),
+        'ecuacion': f'log(Y) = {slope:.4f} × log(X) + {intercept:.4f}',
+        'mallas_pred': mallas_pred,
+        'pasantes_pred': pasantes_pred,
+        'datos_originales': datos
+    }
+
+def calcular_rosin_rammler(datos):
+    """Calcular parámetros de la distribución Rosin-Rammler"""
+    mallas = np.array([d[0] for d in datos])
+    pasantes = np.array([d[1] for d in datos])
+
+    # La ecuación de Rosin-Rammler: Y = 100 * exp(-(x/x0)^n)
+    # Donde Y = % pasante, x = tamaño de partícula, x0 = tamaño característico, n = módulo de uniformidad
+
+    # Transformación: ln(ln(100/Y)) = n*ln(x) - n*ln(x0)
+    # Filtrar datos válidos (evitar log(0))
+    datos_validos = [(m, p) for m, p in zip(mallas, pasantes) if 0 < p < 100]
+
+    if len(datos_validos) < 4:
+        raise ValueError("Se necesitan al menos 4 puntos válidos para el ajuste Rosin-Rammler")
+
+    mallas_validas = np.array([d[0] for d in datos_validos])
+    pasantes_validas = np.array([d[1] for d in datos_validos])
+
+    # Transformación de Rosin-Rammler
     try:
-        fig = go.Figure()
+        y_transform = np.log(np.log(100.0 / pasantes_validas))
+        x_transform = np.log(mallas_validas)
 
-        # Datos experimentales
-        fig.add_trace(go.Scatter(
-            x=df['x'],
-            y=df['y'],
-            mode='markers',
-            name='Datos Experimentales',
-            marker=dict(size=10, color='blue'),
-            text=[f'({x:.3f}, {y:.3f})' for x, y in zip(df['x'], df['y'])],
-            hovertemplate='<b>Punto experimental</b><br>x: %{x:.3f}<br>y: %{y:.3f}<extra></extra>'
-        ))
+        # Regresión lineal en coordenadas transformadas
+        slope, intercept, r_value, p_value, std_err = stats.linregress(x_transform, y_transform)
 
-        # Línea de regresión
-        x_min, x_max = df['x'].min(), df['x'].max()
-        x_range = np.linspace(x_min, x_max, 100)
-        
-        # Calcular parámetros de regresión
-        slope, intercept, r_value, p_value, std_err = stats.linregress(df['x'], df['y'])
-        y_pred = slope * x_range + intercept
+        # Parámetros Rosin-Rammler
+        n = slope  # Módulo de uniformidad
+        x0 = np.exp(-intercept / slope)  # Tamaño característico
 
-        fig.add_trace(go.Scatter(
-            x=x_range,
-            y=y_pred,
-            mode='lines',
-            name=f'y = {slope:.4f}x + {intercept:.4f}',
-            line=dict(color='red', width=3),
-            hovertemplate='<b>Línea de regresión</b><br>x: %{x:.3f}<br>y: %{y:.3f}<extra></extra>'
-        ))
+        # Calcular R²
+        r_squared = r_value**2
 
-        fig.update_layout(
-            title='Regresión Lineal (Ajuste de curva empírica)<br>y = a × x + b',
-            xaxis_title='x: Tamaño de partícula (generalmente en escala logarítmica)',
-            yaxis_title='y: % acumulado pasante o retenido',
-            xaxis_showgrid=True,
-            yaxis_showgrid=True,
-            hovermode='closest',
-            template='plotly_white',
-            legend=dict(x=0.02, y=0.98)
-        )
+        # Generar curva ajustada
+        x_pred = np.linspace(min(mallas_validas), max(mallas_validas), 100)
+        y_pred = 100 * np.exp(-(x_pred / x0)**n)
 
-        return json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
+        # Calcular percentiles importantes
+        d50 = x0 * (np.log(2))**(1/n)  # Mediana
+        d80 = x0 * (np.log(5))**(1/n)  # D80
+        d10 = x0 * (np.log(100/90))**(1/n)  # D10
 
-    except Exception as e:
-        print(f"Error creando gráfico regresión lineal: {e}")
-        return None
-
-def crear_grafico_dispersion(df):
-    """Crear gráfico de dispersión con línea de tendencia"""
-    try:
-        fig = go.Figure()
-
-        # Datos experimentales
-        fig.add_trace(go.Scatter(
-            x=df['x'],
-            y=df['y'],
-            mode='markers+lines',
-            name='Diagrama de dispersión',
-            marker=dict(size=8, color='green'),
-            line=dict(color='green', width=2, dash='dot')
-        ))
-
-        fig.update_layout(
-            title='Diagrama de dispersión con línea de tendencia',
-            xaxis_title='x: Tamaño (log(d)) o d directamente',
-            yaxis_title='y: % acumulado pasante',
-            xaxis_showgrid=True,
-            yaxis_showgrid=True,
-            hovermode='closest',
-            template='plotly_white'
-        )
-
-        return json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
-
-    except Exception as e:
-        print(f"Error creando gráfico dispersión: {e}")
-        return None
-
-def calcular_regresion_empirica(df):
-    """
-    Calcular regresión lineal empírica usando método de mínimos cuadrados:
-    y = a × x + b
-    
-    Fórmulas:
-    a = (n∑xiyi - ∑xi∑yi) / (n∑xi² - (∑xi)²)
-    b = (∑yi - a∑xi) / n
-    """
-    try:
-        n = len(df)
-        if n < 2:
-            return None
-
-        x = df['x'].values
-        y = df['y'].values
-
-        # Calcular sumas necesarias
-        sum_x = np.sum(x)
-        sum_y = np.sum(y)
-        sum_xy = np.sum(x * y)
-        sum_x2 = np.sum(x ** 2)
-
-        # Calcular parámetros usando fórmulas de mínimos cuadrados
-        a = (n * sum_xy - sum_x * sum_y) / (n * sum_x2 - sum_x ** 2)
-        b = (sum_y - a * sum_x) / n
-
-        # Calcular R² usando scipy para verificación
-        slope, intercept, r_value, p_value, std_err = stats.linregress(x, y)
-        r2 = r_value ** 2
-
-        # Crear tabla de cálculos intermedios
-        tabla_calculos = []
-        for i in range(n):
-            xi = x[i]
-            yi = y[i]
-            xi_yi = xi * yi
-            xi2 = xi ** 2
-            y_pred = a * xi + b
-            residuo = yi - y_pred
-            
-            tabla_calculos.append({
-                'i': i + 1,
-                'xi': xi,
-                'yi': yi,
-                'xi_yi': xi_yi,
-                'xi2': xi2,
-                'y_pred': y_pred,
-                'residuo': residuo
-            })
-
-        # Calcular sumas para mostrar en tabla
-        sumas = {
-            'sum_x': sum_x,
-            'sum_y': sum_y,
-            'sum_xy': sum_xy,
-            'sum_x2': sum_x2
+        return {
+            'n': round(n, 4),
+            'x0': round(x0, 4),
+            'r_cuadrado': round(r_squared, 4),
+            'correlacion': round(r_value, 4),
+            'ecuacion': f'Y = 100 × exp(-({x0:.3f}/x)^{n:.3f})',
+            'd10': round(d10, 3),
+            'd50': round(d50, 3),
+            'd80': round(d80, 3),
+            'mallas_pred': x_pred.tolist(),
+            'pasantes_pred': y_pred.tolist(),
+            'datos_originales': datos_validos,
+            'interpretacion': {
+                'uniformidad': 'Alta uniformidad' if n > 3 else 'Baja uniformidad' if n < 1.5 else 'Uniformidad moderada',
+                'distribucion': f'El tamaño característico es {x0:.3f} mm',
+                'ajuste': 'Excelente ajuste' if r_squared > 0.95 else 'Buen ajuste' if r_squared > 0.90 else 'Ajuste aceptable'
+            }
         }
 
-        resultados = {
-            'a': a,
-            'b': b,
-            'r2': r2,
-            'n': n,
-            'ecuacion': f'y = {a:.4f}x + {b:.4f}',
-            'tabla_calculos': tabla_calculos,
-            'sumas': sumas,
-            'formula_a': f'a = ({n}×{sum_xy:.2f} - {sum_x:.2f}×{sum_y:.2f}) / ({n}×{sum_x2:.2f} - ({sum_x:.2f})²)',
-            'formula_b': f'b = ({sum_y:.2f} - {a:.4f}×{sum_x:.2f}) / {n}'
-        }
-
-        return resultados
-
     except Exception as e:
-        print(f"Error en cálculo de regresión empírica: {e}")
-        return None
+        raise ValueError(f"Error en el cálculo Rosin-Rammler: {str(e)}")
+
+def crear_grafico_granulometrico(resultados):
+    """Crear gráfico de curva granulométrica"""
+    fig = go.Figure()
+
+    # Curva granulométrica (% pasante vs tamaño)
+    fig.add_trace(go.Scatter(
+        x=resultados['mallas'],
+        y=resultados['pasante'],
+        mode='lines+markers',
+        name='Curva Granulométrica',
+        line=dict(color='blue', width=2),
+        marker=dict(size=6)
+    ))
+
+    # Líneas de percentiles importantes
+    percentiles = [
+        (resultados['d10'], 10, 'D10'),
+        (resultados['d50'], 50, 'D50'),
+        (resultados['d80'], 80, 'D80')
+    ]
+
+    for d_val, perc, label in percentiles:
+        if d_val > 0:
+            fig.add_vline(
+                x=d_val, 
+                line_dash="dash", 
+                line_color="red",
+                annotation_text=f"{label}={d_val:.3f}mm"
+            )
+            fig.add_hline(
+                y=perc, 
+                line_dash="dash", 
+                line_color="red"
+            )
+
+    fig.update_layout(
+        title='Curva Granulométrica',
+        xaxis_title='Tamaño de Partícula (mm)',
+        yaxis_title='Porcentaje Pasante (%)',
+        xaxis_type='log',
+        height=500,
+        showlegend=True,
+        template='plotly_white'
+    )
+
+    return json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
+
+def crear_grafico_regresion(datos, resultados):
+    """Crear gráfico de regresión lineal"""
+    fig = go.Figure()
+
+    # Datos originales
+    mallas_orig = [d[0] for d in datos]
+    pasantes_orig = [d[1] for d in datos]
+
+    fig.add_trace(go.Scatter(
+        x=mallas_orig,
+        y=pasantes_orig,
+        mode='markers',
+        name='Datos Experimentales',
+        marker=dict(size=8, color='blue')
+    ))
+
+    # Línea de regresión
+    fig.add_trace(go.Scatter(
+        x=resultados['mallas_pred'],
+        y=resultados['pasantes_pred'],
+        mode='lines',
+        name=f'Regresión (R²={resultados["r_cuadrado"]:.4f})',
+        line=dict(color='red', width=2)
+    ))
+
+    fig.update_layout(
+        title='Regresión Lineal - Escala Log-Log',
+        xaxis_title='Tamaño de Partícula (mm)',
+        yaxis_title='Porcentaje Pasante (%)',
+        xaxis_type='log',
+        yaxis_type='log',
+        height=500,
+        showlegend=True,
+        template='plotly_white'
+    )
+
+    return json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
+
+def crear_grafico_rosin_rammler(datos, resultados):
+    """Crear gráfico de ajuste Rosin-Rammler"""
+    fig = go.Figure()
+
+    # Datos originales
+    mallas_orig = [d[0] for d in datos]
+    pasantes_orig = [d[1] for d in datos]
+
+    fig.add_trace(go.Scatter(
+        x=mallas_orig,
+        y=pasantes_orig,
+        mode='markers',
+        name='Datos Experimentales',
+        marker=dict(size=8, color='blue')
+    ))
+
+    # Curva ajustada Rosin-Rammler
+    fig.add_trace(go.Scatter(
+        x=resultados['mallas_pred'],
+        y=resultados['pasantes_pred'],
+        mode='lines',
+        name=f'Rosin-Rammler (R²={resultados["r_cuadrado"]:.4f})',
+        line=dict(color='red', width=2)
+    ))
+
+    # Líneas de percentiles
+    percentiles = [
+        (resultados['d10'], 10, 'D10'),
+        (resultados['d50'], 50, 'D50'),
+        (resultados['d80'], 80, 'D80')
+    ]
+
+    for d_val, perc, label in percentiles:
+        fig.add_vline(
+            x=d_val, 
+            line_dash="dash", 
+            line_color="gray",
+            annotation_text=f"{label}={d_val:.3f}mm"
+        )
+
+    fig.update_layout(
+        title='Distribución Rosin-Rammler',
+        xaxis_title='Tamaño de Partícula (mm)',
+        yaxis_title='Porcentaje Pasante (%)',
+        xaxis_type='log',
+        height=500,
+        showlegend=True,
+        template='plotly_white'
+    )
+
+    return json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
