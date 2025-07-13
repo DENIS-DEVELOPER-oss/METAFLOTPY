@@ -1,3 +1,4 @@
+
 {% extends "base.html" %}
 
 {% block titulo %}Utilitarios - MetaFlotPy{% endblock %}
@@ -6,47 +7,635 @@
 <div class="container-fluid">
     <div class="row">
         <div class="col-12">
-            <h1><i class="bi bi-tools"></i> Utilitarios</h1>
-            <p class="lead">Herramientas de conversión y cálculos auxiliares</p>
-        </div>
-    </div>
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2><i class="bi bi-tools"></i> Utilitarios Metalúrgicos</h2>
+            </div>
 
-    <div class="row">
-        <div class="col-md-6 col-lg-4 mb-4">
-            <div class="card">
+            <!-- 1. Conversores de unidades -->
+            <div class="card mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0"><i class="bi bi-arrow-left-right"></i> 1. Conversores de unidades</h5>
+                </div>
                 <div class="card-body">
-                    <h5 class="card-title">
-                        <i class="bi bi-arrow-left-right text-primary"></i> Conversores
-                    </h5>
-                    <p class="card-text">Conversión de unidades métricas e imperiales.</p>
-                    <a href="{{ url_for('utilitarios.conversores') }}" class="btn btn-primary">Acceder</a>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6>Subtitularios:</h6>
+                            <div class="mb-3">
+                                <label class="form-label">Toneladas → kg → g</label>
+                                <div class="input-group">
+                                    <input type="number" class="form-control" id="toneladas" placeholder="Toneladas">
+                                    <span class="input-group-text">t</span>
+                                </div>
+                                <div class="mt-2">
+                                    <span id="kg-result">0 kg</span> | <span id="g-result">0 g</span>
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">μm → mm → pulgadas</label>
+                                <div class="input-group">
+                                    <input type="number" class="form-control" id="micrometros" placeholder="Micrómetros">
+                                    <span class="input-group-text">μm</span>
+                                </div>
+                                <div class="mt-2">
+                                    <span id="mm-result">0 mm</span> | <span id="pulgadas-result">0 pulgadas</span>
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">m³ → litros → galones</label>
+                                <div class="input-group">
+                                    <input type="number" class="form-control" id="metros-cubicos" placeholder="Metros cúbicos">
+                                    <span class="input-group-text">m³</span>
+                                </div>
+                                <div class="mt-2">
+                                    <span id="litros-result">0 litros</span> | <span id="galones-result">0 galones</span>
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">°C ↔ °F ↔ K</label>
+                                <div class="row">
+                                    <div class="col-4">
+                                        <input type="number" class="form-control" id="celsius" placeholder="°C">
+                                    </div>
+                                    <div class="col-4">
+                                        <input type="number" class="form-control" id="fahrenheit" placeholder="°F">
+                                    </div>
+                                    <div class="col-4">
+                                        <input type="number" class="form-control" id="kelvin" placeholder="K">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">USD ↔ moneda local</label>
+                                <div class="input-group">
+                                    <input type="number" class="form-control" id="usd" placeholder="USD">
+                                    <input type="number" class="form-control" id="tipo-cambio" placeholder="Tipo cambio">
+                                    <span class="input-group-text" id="local-result">0</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <h6>Ley (%) ↔ g/t ↔ ppm ↔ oz/t</h6>
+                            <div class="row">
+                                <div class="col-6">
+                                    <input type="number" class="form-control mb-2" id="ley-porcentaje" placeholder="Ley (%)" step="0.001">
+                                </div>
+                                <div class="col-6">
+                                    <input type="number" class="form-control mb-2" id="ley-gt" placeholder="g/t">
+                                </div>
+                                <div class="col-6">
+                                    <input type="number" class="form-control mb-2" id="ley-ppm" placeholder="ppm">
+                                </div>
+                                <div class="col-6">
+                                    <input type="number" class="form-control mb-2" id="ley-ozt" placeholder="oz/t">
+                                </div>
+                            </div>
+                            
+                            <div class="alert alert-info mt-3">
+                                <strong>Fórmulas:</strong><br>
+                                Ley (g/t) = (% Ley × 10⁴) / 100<br>
+                                ppm = g/t
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
-        </div>
 
-        <div class="col-md-6 col-lg-4 mb-4">
-            <div class="card">
+            <!-- 2. Cálculo de densidad de pulpa -->
+            <div class="card mb-4">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0"><i class="bi bi-droplet"></i> 2. Cálculo de densidad de pulpa</h5>
+                </div>
                 <div class="card-body">
-                    <h5 class="card-title">
-                        <i class="bi bi-calculator text-info"></i> Calculadoras
-                    </h5>
-                    <p class="card-text">Calculadoras especializadas para metalurgia.</p>
-                    <button class="btn btn-info" disabled>Próximamente</button>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6>Datos de entrada:</h6>
+                            <div class="mb-3">
+                                <label class="form-label">% de sólidos en peso</label>
+                                <input type="number" class="form-control" id="solidos-peso" placeholder="% sólidos" step="0.1">
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">ρ<sub>s</sub>: Densidad del sólido (g/cm³ o t/m³)</label>
+                                <input type="number" class="form-control" id="densidad-solido" placeholder="Densidad sólido" step="0.01" value="2.7">
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">ρ<sub>l</sub>: Densidad del líquido (normalmente agua = 1 g/cm³)</label>
+                                <input type="number" class="form-control" id="densidad-liquido" placeholder="Densidad líquido" step="0.01" value="1.0">
+                            </div>
+                            <button class="btn btn-success" onclick="calcularDensidadPulpa()">Calcular</button>
+                        </div>
+                        <div class="col-md-6">
+                            <h6>Fórmula:</h6>
+                            <div class="alert alert-light">
+                                <div class="text-center">
+                                    <strong>ρ<sub>pulpa</sub> = </strong>
+                                    <div class="fraction">
+                                        <div class="numerator">100</div>
+                                        <div class="denominator">%<sub>s</sub>/ρ<sub>s</sub> + (100-%<sub>s</sub>)/ρ<sub>l</sub></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div id="resultado-densidad-pulpa" class="alert alert-success" style="display:none;">
+                                <h6>Resultado:</h6>
+                                <div id="densidad-pulpa-valor"></div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
-        </div>
 
-        <div class="col-md-6 col-lg-4 mb-4">
-            <div class="card">
+            <!-- 3. Cálculo de porcentaje de sólidos en pulpa -->
+            <div class="card mb-4">
+                <div class="card-header bg-warning text-dark">
+                    <h5 class="mb-0"><i class="bi bi-percent"></i> 3. Cálculo de porcentaje de sólidos en pulpa</h5>
+                </div>
                 <div class="card-body">
-                    <h5 class="card-title">
-                        <i class="bi bi-table text-success"></i> Tablas de Referencia
-                    </h5>
-                    <p class="card-text">Tablas de densidades, propiedades de minerales.</p>
-                    <button class="btn btn-success" disabled>Próximamente</button>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6>Datos de entrada:</h6>
+                            <div class="mb-3">
+                                <label class="form-label">ρ: Densidad de la pulpa (g/cm³)</label>
+                                <input type="number" class="form-control" id="densidad-pulpa-input" placeholder="Densidad pulpa" step="0.01">
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">ρ<sub>s</sub>: Densidad del sólido</label>
+                                <input type="number" class="form-control" id="densidad-solido-2" placeholder="Densidad sólido" step="0.01" value="2.7">
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">ρ<sub>l</sub>: Densidad del líquido</label>
+                                <input type="number" class="form-control" id="densidad-liquido-2" placeholder="Densidad líquido" step="0.01" value="1.0">
+                            </div>
+                            <button class="btn btn-warning" onclick="calcularPorcentajeSolidos()">Calcular</button>
+                        </div>
+                        <div class="col-md-6">
+                            <h6>Fórmula:</h6>
+                            <div class="alert alert-light">
+                                <div class="text-center">
+                                    <strong>%S = </strong>
+                                    <div class="fraction">
+                                        <div class="numerator">(ρ - ρ<sub>l</sub>)</div>
+                                        <div class="denominator">(ρ<sub>s</sub> - ρ<sub>l</sub>)</div>
+                                    </div>
+                                    <strong> × 100</strong>
+                                </div>
+                            </div>
+                            <div id="resultado-porcentaje-solidos" class="alert alert-warning" style="display:none;">
+                                <h6>Resultado:</h6>
+                                <div id="porcentaje-solidos-valor"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 4. Cálculo de volumen y peso de mineral -->
+            <div class="card mb-4">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0"><i class="bi bi-cube"></i> 4. Cálculo de volumen y peso de mineral</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6>Datos de entrada:</h6>
+                            <div class="mb-3">
+                                <label class="form-label">ρ: Densidad del mineral</label>
+                                <input type="number" class="form-control" id="densidad-mineral" placeholder="Densidad" step="0.01">
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">V: Volumen del recipiente o pila</label>
+                                <input type="number" class="form-control" id="volumen-recipiente" placeholder="Volumen" step="0.01">
+                            </div>
+                            <button class="btn btn-info" onclick="calcularPesoMineral()">Calcular</button>
+                        </div>
+                        <div class="col-md-6">
+                            <h6>Fórmula:</h6>
+                            <div class="alert alert-light">
+                                <div class="text-center">
+                                    <strong>Peso (t) = V × ρ</strong>
+                                </div>
+                            </div>
+                            <div id="resultado-peso-mineral" class="alert alert-info" style="display:none;">
+                                <h6>Resultado:</h6>
+                                <div id="peso-mineral-valor"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 5. Estimador de contenido metálico teórico -->
+            <div class="card mb-4">
+                <div class="card-header bg-secondary text-white">
+                    <h5 class="mb-0"><i class="bi bi-gem"></i> 5. Estimador de contenido metálico teórico</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6>Datos de entrada:</h6>
+                            <div class="mb-3">
+                                <label class="form-label">Q: Toneladas</label>
+                                <input type="number" class="form-control" id="toneladas-metal" placeholder="Toneladas" step="0.01">
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">L: Ley (%) o g/t</label>
+                                <input type="number" class="form-control" id="ley-metal" placeholder="Ley" step="0.001">
+                            </div>
+                            <button class="btn btn-secondary" onclick="calcularContenidoMetalico()">Calcular</button>
+                        </div>
+                        <div class="col-md-6">
+                            <h6>Fórmula:</h6>
+                            <div class="alert alert-light">
+                                <div class="text-center text-danger">
+                                    <strong>Metal contenido (ton) = Q (ton) × L(ley) × \frac{1}{100} \sqrt{Q(t)} \cdot \cos(100°) \sqrt{\text{Metal content}}</strong>
+                                </div>
+                            </div>
+                            <div id="resultado-contenido-metalico" class="alert alert-secondary" style="display:none;">
+                                <h6>Resultado:</h6>
+                                <div id="contenido-metalico-valor"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 6. Selector de mallas estándar -->
+            <div class="card mb-4">
+                <div class="card-header bg-dark text-white">
+                    <h5 class="mb-0"><i class="bi bi-grid"></i> 6. Selector de mallas estándar</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <h6>Mostrar tabla de:</h6>
+                            <div class="btn-group mb-3" role="group">
+                                <button type="button" class="btn btn-outline-dark" onclick="mostrarMallas('abertura')">Abertura (mm o μm)</button>
+                                <button type="button" class="btn btn-outline-dark" onclick="mostrarMallas('astm')">Número ASTM</button>
+                                <button type="button" class="btn btn-outline-dark" onclick="mostrarMallas('tyler')">Número Tyler</button>
+                                <button type="button" class="btn btn-outline-dark" onclick="mostrarMallas('acumulado')">% acumulado típico (editable)</button>
+                            </div>
+                            
+                            <div id="tabla-mallas-container">
+                                <div class="alert alert-info">
+                                    <strong><i class="bi bi-info-circle"></i> Útil para agilizar ingreso de datos en granulometría.</strong>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 7. Calculadora rápida de potencia (Bond) -->
+            <div class="card mb-4">
+                <div class="card-header bg-danger text-white">
+                    <h5 class="mb-0"><i class="bi bi-lightning"></i> 7. Calculadora rápida de potencia (Bond)</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6>Entrada rápida:</h6>
+                            <div class="mb-3">
+                                <label class="form-label">Wi, F80, P80</label>
+                                <div class="input-group">
+                                    <input type="number" class="form-control" id="wi" placeholder="Wi" step="0.1">
+                                    <input type="number" class="form-control" id="f80" placeholder="F80" step="0.1">
+                                    <input type="number" class="form-control" id="p80" placeholder="P80" step="0.1">
+                                </div>
+                            </div>
+                            <button class="btn btn-danger" onclick="calcularPotenciaBond()">Calcular</button>
+                        </div>
+                        <div class="col-md-6">
+                            <div id="resultado-potencia-bond" class="alert alert-danger" style="display:none;">
+                                <h6><i class="bi bi-lightning"></i> Devuelve potencia estimada (kWh/t)</h6>
+                                <div id="potencia-bond-valor"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 8. Códigos de colores para mineralogía y metalografía -->
+            <div class="card mb-4">
+                <div class="card-header" style="background: linear-gradient(90deg, #ff6b6b, #4ecdc4, #45b7d1, #96ceb4, #ffeaa7, #dda0dd);">
+                    <h5 class="mb-0 text-white"><i class="bi bi-palette"></i> 8. Códigos de colores para mineralogía y metalografía</h5>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-info">
+                        <strong><i class="bi bi-info-circle"></i> Tabla editable o descargable para reportes y visualización</strong>
+                    </div>
+                    
+                    <div class="table-responsive">
+                        <table class="table table-striped table-bordered" id="tabla-colores">
+                            <thead class="table-dark">
+                                <tr>
+                                    <th>Mineral</th>
+                                    <th>Color</th>
+                                    <th>Código Hex</th>
+                                    <th>Uso típico</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Pirita</td>
+                                    <td><span class="badge" style="background-color: #FFD700; color: black;">Dorado</span></td>
+                                    <td>#FFD700</td>
+                                    <td>Microscopía de menas</td>
+                                </tr>
+                                <tr>
+                                    <td>Calcopirita</td>
+                                    <td><span class="badge" style="background-color: #B8860B; color: white;">Amarillo latón</span></td>
+                                    <td>#B8860B</td>
+                                    <td>Mapeo mineralógico</td>
+                                </tr>
+                                <tr>
+                                    <td>Cuarzo</td>
+                                    <td><span class="badge" style="background-color: #F5F5F5; color: black;">Blanco grisáceo</span></td>
+                                    <td>#F5F5F5</td>
+                                    <td>Petrografía</td>
+                                </tr>
+                                <tr>
+                                    <td>Magnetita</td>
+                                    <td><span class="badge" style="background-color: #2F2F2F; color: white;">Negro</span></td>
+                                    <td>#2F2F2F</td>
+                                    <td>Análisis de hierro</td>
+                                </tr>
+                                <tr>
+                                    <td>Galena</td>
+                                    <td><span class="badge" style="background-color: #708090; color: white;">Gris plomo</span></td>
+                                    <td>#708090</td>
+                                    <td>Sulfuros de plomo</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <button class="btn btn-primary" onclick="exportarTablaColores()">
+                        <i class="bi bi-download"></i> Exportar tabla
+                    </button>
                 </div>
             </div>
         </div>
     </div>
 </div>
+
+<style>
+.fraction {
+    display: inline-block;
+    vertical-align: middle;
+    text-align: center;
+}
+.numerator {
+    border-bottom: 1px solid black;
+    padding: 0 5px;
+}
+.denominator {
+    padding: 0 5px;
+    font-size: 0.9em;
+}
+</style>
+
+<script>
+// 1. Conversores de unidades
+document.getElementById('toneladas').addEventListener('input', function() {
+    const t = parseFloat(this.value) || 0;
+    document.getElementById('kg-result').textContent = (t * 1000).toFixed(2) + ' kg';
+    document.getElementById('g-result').textContent = (t * 1000000).toFixed(0) + ' g';
+});
+
+document.getElementById('micrometros').addEventListener('input', function() {
+    const um = parseFloat(this.value) || 0;
+    document.getElementById('mm-result').textContent = (um / 1000).toFixed(4) + ' mm';
+    document.getElementById('pulgadas-result').textContent = (um / 25400).toFixed(6) + ' pulgadas';
+});
+
+document.getElementById('metros-cubicos').addEventListener('input', function() {
+    const m3 = parseFloat(this.value) || 0;
+    document.getElementById('litros-result').textContent = (m3 * 1000).toFixed(2) + ' litros';
+    document.getElementById('galones-result').textContent = (m3 * 264.172).toFixed(2) + ' galones';
+});
+
+// Temperatura
+document.getElementById('celsius').addEventListener('input', function() {
+    const c = parseFloat(this.value);
+    if (!isNaN(c)) {
+        document.getElementById('fahrenheit').value = (c * 9/5 + 32).toFixed(2);
+        document.getElementById('kelvin').value = (c + 273.15).toFixed(2);
+    }
+});
+
+document.getElementById('fahrenheit').addEventListener('input', function() {
+    const f = parseFloat(this.value);
+    if (!isNaN(f)) {
+        const c = (f - 32) * 5/9;
+        document.getElementById('celsius').value = c.toFixed(2);
+        document.getElementById('kelvin').value = (c + 273.15).toFixed(2);
+    }
+});
+
+document.getElementById('kelvin').addEventListener('input', function() {
+    const k = parseFloat(this.value);
+    if (!isNaN(k)) {
+        const c = k - 273.15;
+        document.getElementById('celsius').value = c.toFixed(2);
+        document.getElementById('fahrenheit').value = (c * 9/5 + 32).toFixed(2);
+    }
+});
+
+// Moneda
+document.getElementById('usd').addEventListener('input', calcularMoneda);
+document.getElementById('tipo-cambio').addEventListener('input', calcularMoneda);
+
+function calcularMoneda() {
+    const usd = parseFloat(document.getElementById('usd').value) || 0;
+    const tipoCambio = parseFloat(document.getElementById('tipo-cambio').value) || 1;
+    document.getElementById('local-result').textContent = (usd * tipoCambio).toFixed(2);
+}
+
+// Conversiones de ley
+document.getElementById('ley-porcentaje').addEventListener('input', function() {
+    const pct = parseFloat(this.value);
+    if (!isNaN(pct)) {
+        const gt = pct * 10000 / 100;
+        document.getElementById('ley-gt').value = gt.toFixed(2);
+        document.getElementById('ley-ppm').value = gt.toFixed(2);
+        document.getElementById('ley-ozt').value = (gt / 31.1035).toFixed(4);
+    }
+});
+
+document.getElementById('ley-gt').addEventListener('input', function() {
+    const gt = parseFloat(this.value);
+    if (!isNaN(gt)) {
+        document.getElementById('ley-porcentaje').value = (gt * 100 / 10000).toFixed(4);
+        document.getElementById('ley-ppm').value = gt.toFixed(2);
+        document.getElementById('ley-ozt').value = (gt / 31.1035).toFixed(4);
+    }
+});
+
+// 2. Densidad de pulpa
+function calcularDensidadPulpa() {
+    const ps = parseFloat(document.getElementById('solidos-peso').value);
+    const rho_s = parseFloat(document.getElementById('densidad-solido').value);
+    const rho_l = parseFloat(document.getElementById('densidad-liquido').value);
+    
+    if (isNaN(ps) || isNaN(rho_s) || isNaN(rho_l)) {
+        alert('Por favor complete todos los campos');
+        return;
+    }
+    
+    const denominador = (ps / rho_s) + ((100 - ps) / rho_l);
+    const rho_pulpa = 100 / denominador;
+    
+    document.getElementById('resultado-densidad-pulpa').style.display = 'block';
+    document.getElementById('densidad-pulpa-valor').innerHTML = 
+        `<strong>ρ<sub>pulpa</sub> = ${rho_pulpa.toFixed(3)} g/cm³</strong>`;
+}
+
+// 3. Porcentaje de sólidos
+function calcularPorcentajeSolidos() {
+    const rho = parseFloat(document.getElementById('densidad-pulpa-input').value);
+    const rho_s = parseFloat(document.getElementById('densidad-solido-2').value);
+    const rho_l = parseFloat(document.getElementById('densidad-liquido-2').value);
+    
+    if (isNaN(rho) || isNaN(rho_s) || isNaN(rho_l)) {
+        alert('Por favor complete todos los campos');
+        return;
+    }
+    
+    const porcentaje_s = ((rho - rho_l) / (rho_s - rho_l)) * 100;
+    
+    document.getElementById('resultado-porcentaje-solidos').style.display = 'block';
+    document.getElementById('porcentaje-solidos-valor').innerHTML = 
+        `<strong>%S = ${porcentaje_s.toFixed(2)}%</strong>`;
+}
+
+// 4. Peso del mineral
+function calcularPesoMineral() {
+    const rho = parseFloat(document.getElementById('densidad-mineral').value);
+    const v = parseFloat(document.getElementById('volumen-recipiente').value);
+    
+    if (isNaN(rho) || isNaN(v)) {
+        alert('Por favor complete todos los campos');
+        return;
+    }
+    
+    const peso = v * rho;
+    
+    document.getElementById('resultado-peso-mineral').style.display = 'block';
+    document.getElementById('peso-mineral-valor').innerHTML = 
+        `<strong>Peso = ${peso.toFixed(3)} toneladas</strong>`;
+}
+
+// 5. Contenido metálico
+function calcularContenidoMetalico() {
+    const q = parseFloat(document.getElementById('toneladas-metal').value);
+    const l = parseFloat(document.getElementById('ley-metal').value);
+    
+    if (isNaN(q) || isNaN(l)) {
+        alert('Por favor complete todos los campos');
+        return;
+    }
+    
+    const contenido = q * l / 100; // Simplificada
+    
+    document.getElementById('resultado-contenido-metalico').style.display = 'block';
+    document.getElementById('contenido-metalico-valor').innerHTML = 
+        `<strong>Metal contenido = ${contenido.toFixed(3)} toneladas</strong><br>
+         <small>Metal contenido = ${(contenido * 1000).toFixed(1)} kg</small>`;
+}
+
+// 6. Mallas estándar
+function mostrarMallas(tipo) {
+    const container = document.getElementById('tabla-mallas-container');
+    
+    const mallas = [
+        {abertura: 25.4, astm: 1, tyler: 1, pct: 0},
+        {abertura: 19.0, astm: 1.5, tyler: 1.5, pct: 5},
+        {abertura: 12.7, astm: 2.5, tyler: 2.5, pct: 15},
+        {abertura: 9.51, astm: 3.5, tyler: 3.5, pct: 25},
+        {abertura: 6.73, astm: 5, tyler: 5, pct: 35},
+        {abertura: 4.76, astm: 7, tyler: 7, pct: 45},
+        {abertura: 3.36, astm: 10, tyler: 9, pct: 55},
+        {abertura: 2.38, astm: 14, tyler: 12, pct: 65},
+        {abertura: 1.68, astm: 20, tyler: 16, pct: 75},
+        {abertura: 1.19, astm: 28, tyler: 24, pct: 80},
+        {abertura: 0.841, astm: 40, tyler: 32, pct: 85},
+        {abertura: 0.595, astm: 60, tyler: 48, pct: 90},
+        {abertura: 0.420, astm: 80, tyler: 65, pct: 95},
+        {abertura: 0.297, astm: 120, tyler: 100, pct: 98},
+        {abertura: 0.210, astm: 170, tyler: 150, pct: 99},
+        {abertura: 0.149, astm: 230, tyler: 200, pct: 99.5},
+        {abertura: 0.074, astm: 400, tyler: 325, pct: 100}
+    ];
+    
+    let tabla = '<table class="table table-striped table-sm"><thead class="table-dark"><tr>';
+    tabla += '<th>Abertura (mm)</th><th>ASTM</th><th>Tyler</th>';
+    if (tipo === 'acumulado') tabla += '<th>% Acumulado (editable)</th>';
+    tabla += '</tr></thead><tbody>';
+    
+    mallas.forEach((malla, index) => {
+        tabla += '<tr>';
+        tabla += `<td>${malla.abertura}</td>`;
+        tabla += `<td>${malla.astm}</td>`;
+        tabla += `<td>${malla.tyler}</td>`;
+        if (tipo === 'acumulado') {
+            tabla += `<td><input type="number" class="form-control form-control-sm" value="${malla.pct}" step="0.1"></td>`;
+        }
+        tabla += '</tr>';
+    });
+    
+    tabla += '</tbody></table>';
+    container.innerHTML = tabla;
+}
+
+// 7. Potencia Bond
+function calcularPotenciaBond() {
+    const wi = parseFloat(document.getElementById('wi').value);
+    const f80 = parseFloat(document.getElementById('f80').value);
+    const p80 = parseFloat(document.getElementById('p80').value);
+    
+    if (isNaN(wi) || isNaN(f80) || isNaN(p80)) {
+        alert('Por favor complete todos los campos');
+        return;
+    }
+    
+    const potencia = wi * (10 / Math.sqrt(p80) - 10 / Math.sqrt(f80));
+    
+    document.getElementById('resultado-potencia-bond').style.display = 'block';
+    document.getElementById('potencia-bond-valor').innerHTML = 
+        `<strong>Potencia = ${potencia.toFixed(2)} kWh/t</strong>`;
+}
+
+// 8. Exportar tabla de colores
+function exportarTablaColores() {
+    const tabla = document.getElementById('tabla-colores');
+    let csv = 'Mineral,Color,Código Hex,Uso típico\n';
+    
+    for (let i = 1; i < tabla.rows.length; i++) {
+        const row = tabla.rows[i];
+        const datos = [
+            row.cells[0].textContent,
+            row.cells[1].textContent,
+            row.cells[2].textContent,
+            row.cells[3].textContent
+        ];
+        csv += datos.join(',') + '\n';
+    }
+    
+    const blob = new Blob([csv], {type: 'text/csv'});
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'colores_mineralogicos.csv';
+    a.click();
+    window.URL.revokeObjectURL(url);
+}
+
+// Inicializar la primera tabla de mallas
+document.addEventListener('DOMContentLoaded', function() {
+    mostrarMallas('abertura');
+});
+</script>
 {% endblock %}
