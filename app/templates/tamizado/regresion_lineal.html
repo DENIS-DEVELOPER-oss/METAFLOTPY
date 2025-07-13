@@ -1,14 +1,14 @@
 
 {% extends "base.html" %}
 
-{% block titulo %}Análisis Rosin-Rammler - MetaFlotPy{% endblock %}
+{% block titulo %}Regresión Lineal Empírica - MetaFlotPy{% endblock %}
 
 {% block contenido %}
 <div class="container-fluid">
     <div class="row">
         <div class="col-12">
             <h1><i class="bi bi-grid"></i> Análisis de Tamaño de Partícula</h1>
-            <p class="lead">Análisis granulométrico con modelo Rosin-Rammler</p>
+            <p class="lead">Regresión Lineal (Ajuste de curva empírica)</p>
             
             <!-- Navegación entre modelos -->
             <nav class="mb-4">
@@ -16,10 +16,10 @@
                     <a class="nav-link" href="{{ url_for('tamizado.analisis_granulometrico') }}">
                         <i class="bi bi-graph-up"></i> Gates-Gaudin-Schuhmann
                     </a>
-                    <a class="nav-link active" href="{{ url_for('tamizado.rosin_rammler') }}">
+                    <a class="nav-link" href="{{ url_for('tamizado.rosin_rammler') }}">
                         <i class="bi bi-graph-down"></i> Rosin-Rammler
                     </a>
-                    <a class="nav-link" href="{{ url_for('tamizado.regresion_lineal') }}">
+                    <a class="nav-link active" href="{{ url_for('tamizado.regresion_lineal') }}">
                         <i class="bi bi-graph-up-arrow"></i> Regresión Lineal
                     </a>
                 </div>
@@ -35,28 +35,24 @@
                     <h5><i class="bi bi-clipboard-data"></i> Datos de Entrada</h5>
                 </div>
                 <div class="card-body">
-                    <form method="POST" id="formulario-rosin-rammler">
-                        <div class="row">
-                            <div class="col-md-12">
-                                <div class="mb-3">
-                                    <label for="peso_total" class="form-label">Peso Total de Muestra (g)</label>
-                                    <input type="number" class="form-control" id="peso_total" name="peso_total" step="0.01" required>
-                                    <div class="form-text">Peso total de la muestra para análisis</div>
-                                </div>
-                            </div>
+                    <form method="POST" id="formulario-regresion">
+                        <h6><i class="bi bi-table"></i> Pares de datos (xi, yi)</h6>
+                        <div class="alert alert-info">
+                            <strong>Nota:</strong> Ingrese los pares de datos. Se tienen pares de datos (xi, yi) donde:
+                            <br><strong>x:</strong> Tamaño de partícula (generalmente en escala logarítmica)
+                            <br><strong>y:</strong> % acumulado pasante o retenido
                         </div>
-
-                        <h6><i class="bi bi-table"></i> Datos de Mallas</h6>
-                        <div id="tabla-mallas">
+                        
+                        <div id="tabla-datos">
                             <table class="table table-bordered">
                                 <thead class="table-dark">
                                     <tr>
-                                        <th>d: Tamaño de partícula (μm o mm)</th>
-                                        <th>Peso retenido (g)</th>
+                                        <th>x: Tamaño de partícula</th>
+                                        <th>y: % acumulado pasante o retenido</th>
                                         <th>Acción</th>
                                     </tr>
                                 </thead>
-                                <tbody id="filas-mallas">
+                                <tbody id="filas-datos">
                                     <!-- Las filas se generan dinámicamente -->
                                 </tbody>
                             </table>
@@ -64,10 +60,10 @@
 
                         <div class="text-center mt-3">
                             <button type="button" class="btn btn-secondary me-2" onclick="agregarFila()">
-                                <i class="bi bi-plus-circle"></i> Agregar Malla
+                                <i class="bi bi-plus-circle"></i> Agregar Punto
                             </button>
                             <button type="submit" class="btn btn-primary">
-                                <i class="bi bi-calculator"></i> Calcular Análisis Rosin-Rammler
+                                <i class="bi bi-calculator"></i> Calcular Regresión Lineal
                             </button>
                         </div>
                     </form>
@@ -78,17 +74,16 @@
         <div class="col-md-4">
             <div class="card">
                 <div class="card-header bg-info text-white">
-                    <h5><i class="bi bi-info-circle"></i> 2. Rosin-Rammler</h5>
+                    <h5><i class="bi bi-info-circle"></i> 3. Regresión Lineal (Ajuste de curva empírica)</h5>
                 </div>
                 <div class="card-body">
                     <div class="bg-primary text-white p-2 rounded mb-3">
                         <h6><i class="bi bi-database"></i> Datos de entrada:</h6>
                     </div>
                     <ul class="mb-3">
-                        <li><strong>d</strong>: Tamaño de partícula (μm o mm)</li>
-                        <li><strong>d₀</strong>: Tamaño característico donde el 36.8% de las partículas son más grandes</li>
-                        <li><strong>n</strong>: Parámetro de distribución</li>
-                        <li><strong>R(d)</strong>: % retenido acumulado (dato a calcular)</li>
+                        <li><strong>x</strong>: Tamaño de partícula (generalmente en escala logarítmica)</li>
+                        <li><strong>y</strong>: % acumulado pasante o retenido</li>
+                        <li>Se tienen pares de datos (x<sub>i</sub>, y<sub>i</sub>)</li>
                     </ul>
 
                     <div class="bg-danger text-white p-2 rounded mb-3">
@@ -97,14 +92,28 @@
                     
                     <div class="formula-main mb-3">
                         <div class="text-center bg-light p-3 rounded border">
-                            <strong>R(d) = 100 × e^(-(d/d₀)ⁿ)</strong>
+                            <strong>y = a × x + b</strong>
                         </div>
                     </div>
                     
-                    <div class="formula-alt mb-3">
-                        <strong>O también:</strong><br>
-                        <div class="bg-light p-2 rounded mt-2">
-                            ln[-ln(R(d)/100)] = n × ln(d) - n × ln(d₀)
+                    <div class="mb-3">
+                        <strong>donde:</strong>
+                        <ul class="mt-2">
+                            <li><strong>a</strong>: pendiente</li>
+                            <li><strong>b</strong>: intersección</li>
+                        </ul>
+                    </div>
+
+                    <div class="bg-warning text-dark p-2 rounded mb-3">
+                        <strong>Usa método de mínimos cuadrados:</strong>
+                    </div>
+                    
+                    <div class="formula-minimos mb-3">
+                        <div class="bg-light p-2 rounded mb-2">
+                            <small><strong>a = </strong>(n∑x<sub>i</sub>y<sub>i</sub> - ∑x<sub>i</sub>∑y<sub>i</sub>) / (n∑x<sub>i</sub>² - (∑x<sub>i</sub>)²)</small>
+                        </div>
+                        <div class="bg-light p-2 rounded">
+                            <small><strong>b = </strong>(∑y<sub>i</sub> - a∑x<sub>i</sub>) / n</small>
                         </div>
                     </div>
 
@@ -112,17 +121,16 @@
                         <h6><i class="bi bi-graph-up"></i> Gráfico recomendado:</h6>
                     </div>
                     <ul class="mb-3">
-                        <li><strong>Eje X:</strong> ln(d)</li>
-                        <li><strong>Eje Y:</strong> ln[-ln(R(d)/100)]</li>
-                        <li><strong>Tipo:</strong> Gráfico semilogarítmico (línea recta si el modelo es adecuado)</li>
+                        <li><strong>Eje X:</strong> Tamaño (log(d)) o d directamente</li>
+                        <li><strong>Eje Y:</strong> % acumulado pasante</li>
+                        <li><strong>Tipo:</strong> Diagrama de dispersión con línea de tendencia</li>
                     </ul>
 
-                    <div class="bg-warning text-dark p-2 rounded">
+                    <div class="bg-secondary text-white p-2 rounded">
                         <h6><i class="bi bi-lightbulb"></i> Interpretación:</h6>
                         <ul class="mb-0">
-                            <li>Muy usado en molienda fina o polvos.</li>
-                            <li>El parámetro <strong>n</strong> define la pendiente (dispersión).</li>
-                            <li><strong>d₀</strong> define la centralidad de la distribución.</li>
+                            <li>Se puede usar para ajustar cualquier modelo.</li>
+                            <li>El R² (coeficiente de determinación) indica qué tan bueno es el ajuste.</li>
                         </ul>
                     </div>
                 </div>
@@ -136,28 +144,24 @@
         <div class="col-12">
             <div class="card">
                 <div class="card-header">
-                    <h5><i class="bi bi-table"></i> Tabla de Resultados Rosin-Rammler</h5>
+                    <h5><i class="bi bi-table"></i> Tabla de Datos de Entrada</h5>
                 </div>
                 <div class="card-body">
                     <div class="table-responsive">
                         <table class="table table-striped table-hover">
                             <thead class="table-dark">
                                 <tr>
-                                    <th>Tamaño d (mm)</th>
-                                    <th>Peso Retenido (g)</th>
-                                    <th>% Retenido</th>
-                                    <th>% Retenido Acum.</th>
-                                    <th>R(d) (%)</th>
+                                    <th>Punto</th>
+                                    <th>x<sub>i</sub></th>
+                                    <th>y<sub>i</sub></th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {% for fila in tabla_datos %}
                                 <tr>
-                                    <td>{{ "%.3f"|format(fila.abertura) }}</td>
-                                    <td>{{ "%.2f"|format(fila.peso_retenido) }}</td>
-                                    <td>{{ "%.2f"|format(fila.porcentaje_retenido) }}</td>
-                                    <td>{{ "%.2f"|format(fila.porcentaje_acumulado) }}</td>
-                                    <td>{{ "%.2f"|format(fila.R_d) }}</td>
+                                    <td>{{ loop.index }}</td>
+                                    <td>{{ "%.4f"|format(fila.x) }}</td>
+                                    <td>{{ "%.4f"|format(fila.y) }}</td>
                                 </tr>
                                 {% endfor %}
                             </tbody>
@@ -175,7 +179,7 @@
         <div class="col-12">
             <div class="card">
                 <div class="card-header">
-                    <h5><i class="bi bi-graph-up"></i> Distribución Rosin-Rammler</h5>
+                    <h5><i class="bi bi-graph-up"></i> Regresión Lineal</h5>
                 </div>
                 <div class="card-body">
                     <div id="grafico-principal"></div>
@@ -185,33 +189,37 @@
     </div>
     {% endif %}
 
-    <!-- Resultados de Parámetros -->
+    <!-- Resultados de Regresión -->
     {% if resultados_calculo %}
     <div class="row mt-4">
         <div class="col-md-6">
             <div class="card">
                 <div class="card-header bg-success text-white">
-                    <h5><i class="bi bi-calculator"></i> Parámetros Rosin-Rammler</h5>
+                    <h5><i class="bi bi-calculator"></i> Parámetros de Regresión</h5>
                 </div>
                 <div class="card-body">
                     <table class="table table-sm">
                         <tr>
-                            <td><strong>Parámetro de distribución (n):</strong></td>
-                            <td><span class="badge bg-primary fs-6">{{ "%.4f"|format(resultados_calculo.n) }}</span></td>
+                            <td><strong>Pendiente (a):</strong></td>
+                            <td><span class="badge bg-primary fs-6">{{ "%.6f"|format(resultados_calculo.a) }}</span></td>
                         </tr>
                         <tr>
-                            <td><strong>Tamaño característico (d₀):</strong></td>
-                            <td><span class="badge bg-warning fs-6">{{ "%.4f"|format(resultados_calculo.d0) }} mm</span></td>
+                            <td><strong>Intersección (b):</strong></td>
+                            <td><span class="badge bg-warning fs-6">{{ "%.6f"|format(resultados_calculo.b) }}</span></td>
                         </tr>
                         <tr>
                             <td><strong>Coeficiente de determinación (R²):</strong></td>
-                            <td><span class="badge bg-info fs-6">{{ "%.4f"|format(resultados_calculo.r2) }}</span></td>
+                            <td><span class="badge bg-info fs-6">{{ "%.6f"|format(resultados_calculo.r2) }}</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Número de puntos (n):</strong></td>
+                            <td><span class="badge bg-secondary fs-6">{{ resultados_calculo.n }}</span></td>
                         </tr>
                     </table>
 
                     <div class="alert alert-primary mt-3">
                         <h6><i class="bi bi-formula"></i> Ecuación final:</h6>
-                        <code>{{ resultados_calculo.formula_rosin }}</code>
+                        <code>{{ resultados_calculo.ecuacion }}</code>
                     </div>
 
                     <div class="alert alert-info mt-3">
@@ -226,6 +234,14 @@
                         <span class="badge bg-danger">Ajuste pobre</span> (R² < 0.80)
                         {% endif %}
                     </div>
+
+                    <div class="bg-light p-3 rounded mt-3">
+                        <h6><i class="bi bi-calculator-fill"></i> Cálculo de parámetros:</h6>
+                        <small>
+                            <strong>a = </strong>{{ resultados_calculo.formula_a }}<br>
+                            <strong>b = </strong>{{ resultados_calculo.formula_b }}
+                        </small>
+                    </div>
                 </div>
             </div>
         </div>
@@ -233,28 +249,43 @@
         <div class="col-md-6">
             <div class="card">
                 <div class="card-header">
-                    <h5><i class="bi bi-table"></i> Datos para Regresión</h5>
+                    <h5><i class="bi bi-table"></i> Tabla de Cálculos</h5>
                 </div>
                 <div class="card-body">
                     <div class="table-responsive">
                         <table class="table table-sm table-striped">
                             <thead>
                                 <tr>
-                                    <th>d (mm)</th>
-                                    <th>R(d) (%)</th>
-                                    <th>ln(d)</th>
-                                    <th>ln[-ln(R(d)/100)]</th>
+                                    <th>i</th>
+                                    <th>x<sub>i</sub></th>
+                                    <th>y<sub>i</sub></th>
+                                    <th>x<sub>i</sub>y<sub>i</sub></th>
+                                    <th>x<sub>i</sub>²</th>
+                                    <th>y pred</th>
+                                    <th>Residuo</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                {% for fila in resultados_calculo.tabla_logaritmos %}
+                                {% for fila in resultados_calculo.tabla_calculos %}
                                 <tr>
-                                    <td>{{ "%.3f"|format(fila.abertura) }}</td>
-                                    <td>{{ "%.2f"|format(fila.R_d) }}</td>
-                                    <td>{{ "%.4f"|format(fila.ln_d) }}</td>
-                                    <td>{{ "%.4f"|format(fila.ln_ln_R) }}</td>
+                                    <td>{{ fila.i }}</td>
+                                    <td>{{ "%.3f"|format(fila.xi) }}</td>
+                                    <td>{{ "%.3f"|format(fila.yi) }}</td>
+                                    <td>{{ "%.3f"|format(fila.xi_yi) }}</td>
+                                    <td>{{ "%.3f"|format(fila.xi2) }}</td>
+                                    <td>{{ "%.3f"|format(fila.y_pred) }}</td>
+                                    <td>{{ "%.3f"|format(fila.residuo) }}</td>
                                 </tr>
                                 {% endfor %}
+                                <tr class="table-info">
+                                    <td><strong>Σ</strong></td>
+                                    <td><strong>{{ "%.3f"|format(resultados_calculo.sumas.sum_x) }}</strong></td>
+                                    <td><strong>{{ "%.3f"|format(resultados_calculo.sumas.sum_y) }}</strong></td>
+                                    <td><strong>{{ "%.3f"|format(resultados_calculo.sumas.sum_xy) }}</strong></td>
+                                    <td><strong>{{ "%.3f"|format(resultados_calculo.sumas.sum_x2) }}</strong></td>
+                                    <td>-</td>
+                                    <td>-</td>
+                                </tr>
                             </tbody>
                         </table>
                     </div>
@@ -263,17 +294,16 @@
         </div>
     </div>
 
-    <!-- Gráfico Semilogarítmico -->
-    {% if grafico_semilog %}
+    <!-- Gráfico de dispersión -->
+    {% if grafico_dispersion %}
     <div class="row mt-4">
         <div class="col-12">
             <div class="card">
                 <div class="card-header">
-                    <h5><i class="bi bi-graph-up-arrow"></i> Gráfico Semilogarítmico para obtener parámetros</h5>
-                    <small class="text-muted">ln[-ln(R(d)/100)] = n × ln(d) - n × ln(d₀)</small>
+                    <h5><i class="bi bi-graph-up-arrow"></i> Diagrama de dispersión con línea de tendencia</h5>
                 </div>
                 <div class="card-body">
-                    <div id="grafico-semilog"></div>
+                    <div id="grafico-dispersion"></div>
                 </div>
             </div>
         </div>
@@ -287,8 +317,8 @@
     font-size: 1.2em;
 }
 
-.formula-alt {
-    font-size: 0.9em;
+.formula-minimos {
+    font-size: 0.85em;
 }
 
 .nav-tabs .nav-link.active {
@@ -300,18 +330,18 @@
 
 <script src="https://cdn.plot.ly/plotly-2.26.0.min.js"></script>
 <script>
-// Función para agregar filas de mallas dinámicamente
+// Función para agregar filas de datos dinámicamente
 function agregarFila() {
-    const tbody = document.getElementById('filas-mallas');
+    const tbody = document.getElementById('filas-datos');
     const numFilas = tbody.children.length;
 
     const fila = document.createElement('tr');
     fila.innerHTML = `
         <td>
-            <input type="number" class="form-control" name="abertura[]" step="0.001" placeholder="ej: 1000" required>
+            <input type="number" class="form-control" name="x_value[]" step="0.0001" placeholder="ej: 1.5" required>
         </td>
         <td>
-            <input type="number" class="form-control" name="peso_retenido[]" step="0.01" placeholder="ej: 25.50" required>
+            <input type="number" class="form-control" name="y_value[]" step="0.0001" placeholder="ej: 85.5" required>
         </td>
         <td>
             <button type="button" class="btn btn-sm btn-danger" onclick="eliminarFila(this)">
@@ -329,18 +359,27 @@ function eliminarFila(boton) {
 
 // Agregar algunas filas iniciales
 document.addEventListener('DOMContentLoaded', function() {
-    // Agregar 8 filas iniciales
-    for (let i = 0; i < 8; i++) {
+    // Agregar 6 filas iniciales
+    for (let i = 0; i < 6; i++) {
         agregarFila();
     }
 
-    // Llenar con valores predeterminados comunes en micrones
-    const aberturas = [4750, 2360, 1180, 600, 300, 150, 75, 37];
-    const inputs_abertura = document.querySelectorAll('input[name="abertura[]"]');
+    // Llenar con valores de ejemplo para demostración
+    const ejemplos_x = [0.5, 1.0, 1.5, 2.0, 2.5, 3.0];
+    const ejemplos_y = [95.2, 87.8, 78.5, 65.3, 48.9, 28.7];
+    
+    const inputs_x = document.querySelectorAll('input[name="x_value[]"]');
+    const inputs_y = document.querySelectorAll('input[name="y_value[]"]');
 
-    aberturas.forEach((abertura, index) => {
-        if (inputs_abertura[index]) {
-            inputs_abertura[index].value = abertura;
+    ejemplos_x.forEach((valor, index) => {
+        if (inputs_x[index]) {
+            inputs_x[index].value = valor;
+        }
+    });
+
+    ejemplos_y.forEach((valor, index) => {
+        if (inputs_y[index]) {
+            inputs_y[index].value = valor;
         }
     });
 });
@@ -351,9 +390,9 @@ var grafico_principal = {{ grafico_principal|safe }};
 Plotly.newPlot('grafico-principal', grafico_principal.data, grafico_principal.layout, {responsive: true});
 {% endif %}
 
-{% if grafico_semilog %}
-var grafico_semilog = {{ grafico_semilog|safe }};
-Plotly.newPlot('grafico-semilog', grafico_semilog.data, grafico_semilog.layout, {responsive: true});
+{% if grafico_dispersion %}
+var grafico_dispersion = {{ grafico_dispersion|safe }};
+Plotly.newPlot('grafico-dispersion', grafico_dispersion.data, grafico_dispersion.layout, {responsive: true});
 {% endif %}
 </script>
 {% endblock %}

@@ -383,3 +383,209 @@ def calcular_parametros_rosin_rammler(df):
     except Exception as e:
         print(f"Error en cálculo de parámetros Rosin-Rammler: {e}")
         return None
+
+@bp_tamizado.route('/regresion-lineal', methods=['GET', 'POST'])
+def regresion_lineal():
+    formulario = FormularioTamizado()
+
+    resultados_calculo = None
+    grafico_principal = None
+    grafico_dispersion = None
+    tabla_datos = None
+
+    if request.method == 'POST':
+        # Obtener datos de entrada
+        x_values = [float(x) for x in request.form.getlist('x_value[]') if x]
+        y_values = [float(x) for x in request.form.getlist('y_value[]') if x]
+
+        if len(x_values) == len(y_values) and len(x_values) >= 2:
+            # Crear tabla de datos para regresión lineal
+            df = crear_tabla_regresion_lineal(x_values, y_values)
+            tabla_datos = df.to_dict('records')
+
+            # Crear gráficos
+            grafico_principal = crear_grafico_regresion_lineal(df)
+            grafico_dispersion = crear_grafico_dispersion(df)
+            
+            # Calcular parámetros de regresión usando mínimos cuadrados
+            resultados_calculo = calcular_regresion_empirica(df)
+
+    return render_template('tamizado/regresion_lineal.html',
+                         formulario=formulario,
+                         resultados_calculo=resultados_calculo,
+                         grafico_principal=grafico_principal,
+                         grafico_dispersion=grafico_dispersion,
+                         tabla_datos=tabla_datos)
+
+def crear_tabla_regresion_lineal(x_values, y_values):
+    """
+    Crear tabla con datos para regresión lineal empírica:
+    y = a × x + b
+    """
+    df = pd.DataFrame({
+        'x': x_values,
+        'y': y_values
+    })
+
+    # Ordenar por x
+    df = df.sort_values('x').reset_index(drop=True)
+
+    return df
+
+def crear_grafico_regresion_lineal(df):
+    """Crear gráfico principal con regresión lineal"""
+    try:
+        fig = go.Figure()
+
+        # Datos experimentales
+        fig.add_trace(go.Scatter(
+            x=df['x'],
+            y=df['y'],
+            mode='markers',
+            name='Datos Experimentales',
+            marker=dict(size=10, color='blue'),
+            text=[f'({x:.3f}, {y:.3f})' for x, y in zip(df['x'], df['y'])],
+            hovertemplate='<b>Punto experimental</b><br>x: %{x:.3f}<br>y: %{y:.3f}<extra></extra>'
+        ))
+
+        # Línea de regresión
+        x_min, x_max = df['x'].min(), df['x'].max()
+        x_range = np.linspace(x_min, x_max, 100)
+        
+        # Calcular parámetros de regresión
+        slope, intercept, r_value, p_value, std_err = stats.linregress(df['x'], df['y'])
+        y_pred = slope * x_range + intercept
+
+        fig.add_trace(go.Scatter(
+            x=x_range,
+            y=y_pred,
+            mode='lines',
+            name=f'y = {slope:.4f}x + {intercept:.4f}',
+            line=dict(color='red', width=3),
+            hovertemplate='<b>Línea de regresión</b><br>x: %{x:.3f}<br>y: %{y:.3f}<extra></extra>'
+        ))
+
+        fig.update_layout(
+            title='Regresión Lineal (Ajuste de curva empírica)<br>y = a × x + b',
+            xaxis_title='x: Tamaño de partícula (generalmente en escala logarítmica)',
+            yaxis_title='y: % acumulado pasante o retenido',
+            xaxis_showgrid=True,
+            yaxis_showgrid=True,
+            hovermode='closest',
+            template='plotly_white',
+            legend=dict(x=0.02, y=0.98)
+        )
+
+        return json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
+
+    except Exception as e:
+        print(f"Error creando gráfico regresión lineal: {e}")
+        return None
+
+def crear_grafico_dispersion(df):
+    """Crear gráfico de dispersión con línea de tendencia"""
+    try:
+        fig = go.Figure()
+
+        # Datos experimentales
+        fig.add_trace(go.Scatter(
+            x=df['x'],
+            y=df['y'],
+            mode='markers+lines',
+            name='Diagrama de dispersión',
+            marker=dict(size=8, color='green'),
+            line=dict(color='green', width=2, dash='dot')
+        ))
+
+        fig.update_layout(
+            title='Diagrama de dispersión con línea de tendencia',
+            xaxis_title='x: Tamaño (log(d)) o d directamente',
+            yaxis_title='y: % acumulado pasante',
+            xaxis_showgrid=True,
+            yaxis_showgrid=True,
+            hovermode='closest',
+            template='plotly_white'
+        )
+
+        return json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
+
+    except Exception as e:
+        print(f"Error creando gráfico dispersión: {e}")
+        return None
+
+def calcular_regresion_empirica(df):
+    """
+    Calcular regresión lineal empírica usando método de mínimos cuadrados:
+    y = a × x + b
+    
+    Fórmulas:
+    a = (n∑xiyi - ∑xi∑yi) / (n∑xi² - (∑xi)²)
+    b = (∑yi - a∑xi) / n
+    """
+    try:
+        n = len(df)
+        if n < 2:
+            return None
+
+        x = df['x'].values
+        y = df['y'].values
+
+        # Calcular sumas necesarias
+        sum_x = np.sum(x)
+        sum_y = np.sum(y)
+        sum_xy = np.sum(x * y)
+        sum_x2 = np.sum(x ** 2)
+
+        # Calcular parámetros usando fórmulas de mínimos cuadrados
+        a = (n * sum_xy - sum_x * sum_y) / (n * sum_x2 - sum_x ** 2)
+        b = (sum_y - a * sum_x) / n
+
+        # Calcular R² usando scipy para verificación
+        slope, intercept, r_value, p_value, std_err = stats.linregress(x, y)
+        r2 = r_value ** 2
+
+        # Crear tabla de cálculos intermedios
+        tabla_calculos = []
+        for i in range(n):
+            xi = x[i]
+            yi = y[i]
+            xi_yi = xi * yi
+            xi2 = xi ** 2
+            y_pred = a * xi + b
+            residuo = yi - y_pred
+            
+            tabla_calculos.append({
+                'i': i + 1,
+                'xi': xi,
+                'yi': yi,
+                'xi_yi': xi_yi,
+                'xi2': xi2,
+                'y_pred': y_pred,
+                'residuo': residuo
+            })
+
+        # Calcular sumas para mostrar en tabla
+        sumas = {
+            'sum_x': sum_x,
+            'sum_y': sum_y,
+            'sum_xy': sum_xy,
+            'sum_x2': sum_x2
+        }
+
+        resultados = {
+            'a': a,
+            'b': b,
+            'r2': r2,
+            'n': n,
+            'ecuacion': f'y = {a:.4f}x + {b:.4f}',
+            'tabla_calculos': tabla_calculos,
+            'sumas': sumas,
+            'formula_a': f'a = ({n}×{sum_xy:.2f} - {sum_x:.2f}×{sum_y:.2f}) / ({n}×{sum_x2:.2f} - ({sum_x:.2f})²)',
+            'formula_b': f'b = ({sum_y:.2f} - {a:.4f}×{sum_x:.2f}) / {n}'
+        }
+
+        return resultados
+
+    except Exception as e:
+        print(f"Error en cálculo de regresión empírica: {e}")
+        return None
