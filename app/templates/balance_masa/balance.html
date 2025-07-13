@@ -230,6 +230,19 @@
                 <div class="card-header">
                     <h5><i class="bi bi-clipboard-data"></i> Resultados del Balance</h5>
                 </div>
+    {% elif formulario.validate_on_submit() %}
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="alert alert-danger">
+                <h5><i class="bi bi-exclamation-triangle"></i> Error en los datos</h5>
+                <p>Debe ingresar exactamente 2 valores válidos (mayores que 0) para calcular el tercero automáticamente.</p>
+                <p>Verifique que ha ingresado los valores correctamente en los campos correspondientes.</p>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+    
+    {% if resultados %}
                 <div class="card-body">
                     <div class="row">
                         <div class="col-md-6">

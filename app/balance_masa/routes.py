@@ -41,31 +41,31 @@ def calcular_balance_masa(formulario):
 
 def calcular_circuito_directo(formulario):
     """Circuito Cerrado Directo: F = P + R"""
-    # Obtener valores del formulario
-    f = formulario.f_alimentacion.data
-    p = formulario.p_producto.data
-    r = formulario.r_rechazo.data
+    # Obtener valores del formulario, convertir None a 0
+    f = formulario.f_alimentacion.data if formulario.f_alimentacion.data is not None else 0
+    p = formulario.p_producto.data if formulario.p_producto.data is not None else 0
+    r = formulario.r_rechazo.data if formulario.r_rechazo.data is not None else 0
     
-    # Contar cuántos valores válidos se han ingresado
-    valores_validos = []
-    if f is not None and f > 0:
-        valores_validos.append(('f', f))
-    if p is not None and p > 0:
-        valores_validos.append(('p', p))
-    if r is not None and r > 0:
-        valores_validos.append(('r', r))
+    # Contar cuántos valores válidos se han ingresado (mayores que 0)
+    valores_validos = 0
+    if f > 0:
+        valores_validos += 1
+    if p > 0:
+        valores_validos += 1
+    if r > 0:
+        valores_validos += 1
     
-    # Necesitamos al menos 2 valores para calcular el tercero
-    if len(valores_validos) >= 2:
-        # Calcular el valor faltante usando F = P + R
-        if f is None or f == 0:
-            f = p + r if p and r else 0
-        elif p is None or p == 0:
-            p = f - r if f and r else 0
-        elif r is None or r == 0:
-            r = f - p if f and p else 0
-    else:
+    # Necesitamos exactamente 2 valores para calcular el tercero
+    if valores_validos < 2:
         return None  # No hay suficientes datos
+    
+    # Calcular el valor faltante usando F = P + R
+    if f <= 0:  # Calcular F
+        f = p + r
+    elif p <= 0:  # Calcular P
+        p = f - r
+    elif r <= 0:  # Calcular R
+        r = f - p
     
     # Validar que los valores sean positivos y coherentes
     f = max(0, f) if f else 0
@@ -96,31 +96,31 @@ def calcular_circuito_directo(formulario):
 
 def calcular_circuito_inverso(formulario):
     """Circuito Cerrado Inverso: F + R = P"""
-    # Obtener valores del formulario
-    f = formulario.f_alimentacion_inv.data
-    r = formulario.r_rechazo_inv.data
-    p = formulario.p_producto_inv.data
+    # Obtener valores del formulario, convertir None a 0
+    f = formulario.f_alimentacion_inv.data if formulario.f_alimentacion_inv.data is not None else 0
+    r = formulario.r_rechazo_inv.data if formulario.r_rechazo_inv.data is not None else 0
+    p = formulario.p_producto_inv.data if formulario.p_producto_inv.data is not None else 0
     
-    # Contar cuántos valores válidos se han ingresado
-    valores_validos = []
-    if f is not None and f > 0:
-        valores_validos.append(('f', f))
-    if r is not None and r > 0:
-        valores_validos.append(('r', r))
-    if p is not None and p > 0:
-        valores_validos.append(('p', p))
+    # Contar cuántos valores válidos se han ingresado (mayores que 0)
+    valores_validos = 0
+    if f > 0:
+        valores_validos += 1
+    if r > 0:
+        valores_validos += 1
+    if p > 0:
+        valores_validos += 1
     
-    # Necesitamos al menos 2 valores para calcular el tercero
-    if len(valores_validos) >= 2:
-        # Calcular el valor faltante usando F + R = P
-        if f is None or f == 0:
-            f = p - r if p and r else 0
-        elif r is None or r == 0:
-            r = p - f if p and f else 0
-        elif p is None or p == 0:
-            p = f + r if f and r else 0
-    else:
+    # Necesitamos exactamente 2 valores para calcular el tercero
+    if valores_validos < 2:
         return None  # No hay suficientes datos
+    
+    # Calcular el valor faltante usando F + R = P
+    if f <= 0:  # Calcular F
+        f = p - r
+    elif r <= 0:  # Calcular R
+        r = p - f
+    elif p <= 0:  # Calcular P
+        p = f + r
     
     # Validar que los valores sean positivos
     f = max(0, f) if f else 0
