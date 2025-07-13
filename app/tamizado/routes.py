@@ -1,13 +1,13 @@
     from flask import Blueprint, render_template, request, jsonify
-    from app.tamizado.forms import FormularioTamizado
-    import pandas as pd
-    import numpy as np
-    import plotly.graph_objs as go
-    import plotly.utils
-    import json
-    from scipy import stats
+from app.tamizado.forms import FormularioTamizado
+import pandas as pd
+import numpy as np
+import plotly.graph_objs as go
+import plotly.utils
+import json
+from scipy import stats
 
-    bp_tamizado = Blueprint('tamizado', __name__)
+bp_tamizado = Blueprint('tamizado', __name__)
 
     @bp_tamizado.route('/', methods=['GET', 'POST'])
     def analisis_granulometrico():
