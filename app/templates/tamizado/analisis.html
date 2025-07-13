@@ -1,5 +1,7 @@
+
 {% extends "base.html" %}
-```{% block titulo %}Análisis Granulométrico - MetaFlotPy{% endblock %}
+
+{% block titulo %}Análisis Granulométrico - MetaFlotPy{% endblock %}
 
 {% block contenido %}
 <div class="container-fluid">
@@ -22,8 +24,9 @@
                         <div class="row">
                             <div class="col-md-12">
                                 <div class="mb-3">
-                                    <label for="peso_total" class="form-label">Peso Total de Muestra (g)</label>
+                                    <label for="peso_total" class="form-label">Peso Total de Muestra T (g)</label>
                                     <input type="number" class="form-control" id="peso_total" name="peso_total" step="0.01" required>
+                                    <div class="form-text">T: Peso total de muestra (g) → campo único</div>
                                 </div>
                             </div>
                         </div>
@@ -31,10 +34,10 @@
                         <h6><i class="bi bi-table"></i> Datos de Mallas</h6>
                         <div id="tabla-mallas">
                             <table class="table table-bordered">
-                                <thead>
+                                <thead class="table-dark">
                                     <tr>
-                                        <th>Abertura d (mm)</th>
-                                        <th>Peso Retenido (g)</th>
+                                        <th>Tamaño de partícula d<sub>i</sub> (mm)</th>
+                                        <th>Peso retenido R<sub>i</sub> (g)</th>
                                         <th>Acción</th>
                                     </tr>
                                 </thead>
@@ -59,43 +62,44 @@
 
         <div class="col-md-4">
             <div class="card">
-                <div class="card-header">
-                    <h5><i class="bi bi-info-circle"></i> Datos de entrada esperados</h5>
+                <div class="card-header bg-info text-white">
+                    <h5><i class="bi bi-info-circle"></i> Datos de entrada esperados:</h5>
                 </div>
                 <div class="card-body">
-                    <h6><i class="bi bi-clipboard-data"></i> Datos de entrada:</h6>
-                    <ul class="small">
+                    <ul class="mb-3">
                         <li><strong>T</strong>: Peso total de muestra (g) → campo único</li>
                         <li><strong>d<sub>i</sub></strong>: Tamaño de partícula (por malla, en mm o μm)</li>
                         <li><strong>R<sub>i</sub></strong>: Peso retenido en cada malla (g)</li>
                     </ul>
 
-                    <h6><i class="bi bi-calculator-fill text-success"></i> PASOS DE CÁLCULO</h6>
+                    <div class="bg-success text-white p-2 rounded mb-3">
+                        <h6><i class="bi bi-calculator-fill"></i> PASOS DE CÁLCULO</h6>
+                    </div>
                     
-                    <div class="bg-light p-3 border rounded mb-2">
+                    <div class="step-box mb-2">
                         <strong>1. % Retenido por malla:</strong><br>
-                        <code>%R<sub>i</sub> = R<sub>i</sub>/T × 100</code>
+                        <div class="formula-box">%R<sub>i</sub> = <span class="fraction">R<sub>i</sub><span class="divider"></span>T</span> × 100</div>
                     </div>
                     
-                    <div class="bg-light p-3 border rounded mb-2">
+                    <div class="step-box mb-2">
                         <strong>2. % Acumulado retenido:</strong><br>
-                        <code>%AcumR<sub>i</sub> = Σ%R<sub>j</sub></code> (j=1 hasta i)
+                        <div class="formula-box">%AcumR<sub>i</sub> = ∑<sub>j=1</sub><sup>i</sup> %R<sub>j</sub></div>
                     </div>
                     
-                    <div class="bg-light p-3 border rounded mb-2">
+                    <div class="step-box mb-2">
                         <strong>3. % Acumulado pasante:</strong><br>
-                        <code>%P<sub>i</sub> = 100 - %AcumR<sub>i</sub></code>
+                        <div class="formula-box">%P<sub>i</sub> = 100 - %AcumR<sub>i</sub></div>
                     </div>
                     
-                    <div class="bg-light p-3 border rounded mb-2">
-                        <strong>4. Logaritmos (para graficar):</strong><br>
-                        <code>log(d<sub>i</sub>), log(%P<sub>i</sub>)</code>
+                    <div class="step-box mb-2">
+                        <strong>4. Logaritmos (para graficar y obtener n):</strong><br>
+                        <div class="formula-box">log(d<sub>i</sub>), log(%P<sub>i</sub>)</div>
                     </div>
                     
-                    <div class="bg-light p-3 border rounded">
-                        <strong>5. Regresión lineal log-log:</strong><br>
-                        <code>log(%P<sub>i</sub>) = n × log(d<sub>i</sub>)</code><br>
-                        <small>Usa mínimos cuadrados para obtener la pendiente <strong>n</strong></small>
+                    <div class="step-box">
+                        <strong>5. Regresión lineal en gráfico log-log para obtener n:</strong><br>
+                        <div class="formula-box">log(%P<sub>i</sub>) = n × log(d<sub>i</sub>)</div>
+                        <small class="text-muted">Usa mínimos cuadrados para obtener la pendiente <strong>n</strong> de:</small>
                     </div>
                 </div>
             </div>
@@ -115,11 +119,11 @@
                         <table class="table table-striped table-hover">
                             <thead class="table-dark">
                                 <tr>
-                                    <th>Abertura d (mm)</th>
-                                    <th>Peso Retenido (g)</th>
-                                    <th>% Retenido</th>
-                                    <th>% Retenido Acum.</th>
-                                    <th>% Pasante P(d)</th>
+                                    <th>Tamaño d<sub>i</sub> (mm)</th>
+                                    <th>Peso Retenido R<sub>i</sub> (g)</th>
+                                    <th>% Retenido %R<sub>i</sub></th>
+                                    <th>% Retenido Acum. %AcumR<sub>i</sub></th>
+                                    <th>% Pasante %P<sub>i</sub></th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -237,6 +241,7 @@
             <div class="card">
                 <div class="card-header">
                     <h5><i class="bi bi-graph-up-arrow"></i> Gráfico Log-Log para obtener n</h5>
+                    <small class="text-muted">log(%P<sub>i</sub>) = n × log(d<sub>i</sub>)</small>
                 </div>
                 <div class="card-body">
                     <div id="grafico-log-log"></div>
@@ -248,7 +253,39 @@
     {% endif %}
 </div>
 
-<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+<style>
+.step-box {
+    background-color: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 5px;
+    padding: 10px;
+}
+
+.formula-box {
+    background-color: #e9ecef;
+    border-radius: 3px;
+    padding: 5px 8px;
+    font-family: 'Courier New', monospace;
+    font-weight: bold;
+    margin-top: 5px;
+}
+
+.fraction {
+    display: inline-block;
+    position: relative;
+    vertical-align: middle;
+    letter-spacing: 0.001em;
+    text-align: center;
+}
+
+.fraction .divider {
+    border-top: 1px solid #000;
+    display: block;
+    margin: 0 2px;
+}
+</style>
+
+<script src="https://cdn.plot.ly/plotly-2.26.0.min.js"></script>
 <script>
 // Función para agregar filas de mallas dinámicamente
 function agregarFila() {
