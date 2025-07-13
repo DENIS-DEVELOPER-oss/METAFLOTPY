@@ -1,0 +1,162 @@
+
+{% extends "base.html" %}
+
+{% block titulo %}Almacenamiento - MetaFlotPy{% endblock %}
+
+{% block contenido %}
+<div class="container-fluid">
+    <!-- Header -->
+    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+        <h1 class="h2">
+            <i class="bi bi-archive text-secondary"></i> 5. Equipos de Almacenamiento (silos, tolvas)
+        </h1>
+        <a href="{{ url_for('dimensionamiento.dimensionamiento') }}" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left"></i> Volver
+        </a>
+    </div>
+
+    <div class="row">
+        <!-- Formulario de entrada -->
+        <div class="col-md-6">
+            <div class="card shadow-sm">
+                <div class="card-header bg-secondary text-white">
+                    <h5><i class="bi bi-input-cursor-text"></i> Datos de entrada</h5>
+                </div>
+                <div class="card-body">
+                    <form method="POST">
+                        <div class="mb-3">
+                            <label class="form-label">
+                                <strong>ρm:</strong> Densidad del material (t/m³)
+                            </label>
+                            <input type="number" class="form-control" name="densidad_material" 
+                                   step="0.01" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">
+                                <strong>H:</strong> Altura del silo (m)
+                            </label>
+                            <input type="number" class="form-control" name="altura_silo" 
+                                   step="0.01" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">
+                                <strong>D:</strong> Diámetro de tolva o silo (m)
+                            </label>
+                            <input type="number" class="form-control" name="diametro_silo" 
+                                   step="0.01" required>
+                        </div>
+
+                        <button type="submit" class="btn btn-secondary w-100">
+                            <i class="bi bi-calculator"></i> Calcular Capacidad
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Fórmulas -->
+            <div class="card shadow-sm mt-4">
+                <div class="card-header bg-danger text-white">
+                    <h5><i class="bi bi-calculator"></i> Fórmulas</h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <h6>Volumen del silo:</h6>
+                        <div class="formula-box bg-light p-2 rounded">
+                            <code>V = (π/4) · D² · H</code>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <h6>Capacidad (en toneladas):</h6>
+                        <div class="formula-box bg-light p-2 rounded">
+                            <code>Capacidad = V · ρm</code>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Interpretación -->
+            <div class="card shadow-sm mt-4">
+                <div class="card-header bg-info text-white">
+                    <h5><i class="bi bi-lightbulb"></i> Interpretación</h5>
+                </div>
+                <div class="card-body">
+                    <ul class="mb-0">
+                        <li>Permite calcular capacidad de almacenamiento según diseño.</li>
+                        <li>Útil para dimensionar reservas operativas y pulmón logístico.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Resultados -->
+        <div class="col-md-6">
+            {% if resultados %}
+            <div class="card shadow-sm">
+                <div class="card-header bg-success text-white">
+                    <h5><i class="bi bi-check-circle"></i> Resultados de Cálculo</h5>
+                </div>
+                <div class="card-body">
+                    <table class="table table-bordered">
+                        <tr>
+                            <td><strong>Densidad material (ρm):</strong></td>
+                            <td><span class="badge bg-primary fs-6">{{ resultados.densidad_material }} t/m³</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Altura silo (H):</strong></td>
+                            <td><span class="badge bg-info fs-6">{{ resultados.altura_silo }} m</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Diámetro silo (D):</strong></td>
+                            <td><span class="badge bg-warning fs-6">{{ resultados.diametro_silo }} m</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Volumen silo (V):</strong></td>
+                            <td><span class="badge bg-success fs-6">{{ resultados.volumen_silo }} m³</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Capacidad total:</strong></td>
+                            <td><span class="badge bg-secondary fs-6">{{ resultados.capacidad_toneladas }} toneladas</span></td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Gráfico -->
+            {% if grafico %}
+            <div class="card shadow-sm mt-4">
+                <div class="card-header bg-dark text-white">
+                    <h5><i class="bi bi-bar-chart"></i> Visualización</h5>
+                </div>
+                <div class="card-body">
+                    <div id="grafico-almacenamiento"></div>
+                </div>
+            </div>
+            {% endif %}
+
+            {% else %}
+            <div class="card shadow-sm">
+                <div class="card-header bg-secondary text-white">
+                    <h5><i class="bi bi-info-circle"></i> Información</h5>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted">
+                        Complete los datos de entrada para calcular la capacidad de almacenamiento.
+                    </p>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+{% if grafico %}
+<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+<script>
+    var graficoData = {{ grafico|safe }};
+    Plotly.newPlot('grafico-almacenamiento', graficoData.data, graficoData.layout);
+</script>
+{% endif %}
+{% endblock %}

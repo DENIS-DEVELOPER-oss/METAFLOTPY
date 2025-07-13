@@ -1,0 +1,174 @@
+
+{% extends "base.html" %}
+
+{% block titulo %}Separadores - MetaFlotPy{% endblock %}
+
+{% block contenido %}
+<div class="container-fluid">
+    <!-- Header -->
+    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+        <h1 class="h2">
+            <i class="bi bi-arrow-down-up text-warning"></i> 4. Equipos Separadores (jigs, mesas, espirales)
+        </h1>
+        <a href="{{ url_for('dimensionamiento.dimensionamiento') }}" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left"></i> Volver
+        </a>
+    </div>
+
+    <div class="row">
+        <!-- Formulario de entrada -->
+        <div class="col-md-6">
+            <div class="card shadow-sm">
+                <div class="card-header bg-warning text-white">
+                    <h5><i class="bi bi-input-cursor-text"></i> Datos de entrada</h5>
+                </div>
+                <div class="card-body">
+                    <form method="POST">
+                        <div class="mb-3">
+                            <label class="form-label">
+                                <strong>ρs:</strong> Densidad del mineral (g/cm³)
+                            </label>
+                            <input type="number" class="form-control" name="densidad_mineral" 
+                                   step="0.01" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">
+                                <strong>ρf:</strong> Densidad de la ganga (g/cm³)
+                            </label>
+                            <input type="number" class="form-control" name="densidad_ganga" 
+                                   step="0.01" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">
+                                <strong>d:</strong> Tamaño de partícula (m)
+                            </label>
+                            <input type="number" class="form-control" name="tamano_particula" 
+                                   step="0.000001" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">
+                                <strong>g:</strong> Aceleración gravitacional (m/s²)
+                            </label>
+                            <input type="number" class="form-control" name="aceleracion_gravitacional" 
+                                   step="0.01" value="9.81" required>
+                        </div>
+
+                        <button type="submit" class="btn btn-warning w-100">
+                            <i class="bi bi-calculator"></i> Calcular Parámetros
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Fórmulas -->
+            <div class="card shadow-sm mt-4">
+                <div class="card-header bg-danger text-white">
+                    <h5><i class="bi bi-calculator"></i> Fórmulas</h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <h6>Factor de concentración:</h6>
+                        <div class="formula-box bg-light p-2 rounded">
+                            <code>C = (ρs - ρf) / ρf</code>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <h6>Velocidad terminal (Stokes):</h6>
+                        <div class="formula-box bg-light p-2 rounded">
+                            <code>vt = (g · d² · (ρs - ρf)) / (18 · μ)</code>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Interpretación -->
+            <div class="card shadow-sm mt-4">
+                <div class="card-header bg-info text-white">
+                    <h5><i class="bi bi-lightbulb"></i> Interpretación</h5>
+                </div>
+                <div class="card-body">
+                    <ul class="mb-0">
+                        <li>Ayuda a predecir la separación efectiva por densidad.</li>
+                        <li>Importante en separación gravimétrica primaria.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Resultados -->
+        <div class="col-md-6">
+            {% if resultados %}
+            <div class="card shadow-sm">
+                <div class="card-header bg-success text-white">
+                    <h5><i class="bi bi-check-circle"></i> Resultados de Cálculo</h5>
+                </div>
+                <div class="card-body">
+                    <table class="table table-bordered">
+                        <tr>
+                            <td><strong>Densidad mineral (ρs):</strong></td>
+                            <td><span class="badge bg-primary fs-6">{{ resultados.densidad_mineral }} g/cm³</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Densidad ganga (ρf):</strong></td>
+                            <td><span class="badge bg-info fs-6">{{ resultados.densidad_ganga }} g/cm³</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Diferencia densidades:</strong></td>
+                            <td><span class="badge bg-warning fs-6">{{ resultados.diferencia_densidad }} g/cm³</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Factor concentración (C):</strong></td>
+                            <td><span class="badge bg-success fs-6">{{ resultados.factor_concentracion }}</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Velocidad terminal (vt):</strong></td>
+                            <td><span class="badge bg-secondary fs-6">{{ resultados.velocidad_terminal }} m/s</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Tamaño partícula (d):</strong></td>
+                            <td><span class="badge bg-dark fs-6">{{ resultados.tamano_particula }} m</span></td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Gráfico -->
+            {% if grafico %}
+            <div class="card shadow-sm mt-4">
+                <div class="card-header bg-dark text-white">
+                    <h5><i class="bi bi-scatter-chart"></i> Visualización</h5>
+                </div>
+                <div class="card-body">
+                    <div id="grafico-separadores"></div>
+                </div>
+            </div>
+            {% endif %}
+
+            {% else %}
+            <div class="card shadow-sm">
+                <div class="card-header bg-secondary text-white">
+                    <h5><i class="bi bi-info-circle"></i> Información</h5>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted">
+                        Complete los datos de entrada para calcular los parámetros de separación gravitacional.
+                    </p>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+{% if grafico %}
+<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+<script>
+    var graficoData = {{ grafico|safe }};
+    Plotly.newPlot('grafico-separadores', graficoData.data, graficoData.layout);
+</script>
+{% endif %}
+{% endblock %}

@@ -1,3 +1,4 @@
+
 {% extends "base.html" %}
 
 {% block titulo %}Dimensionamiento - MetaFlotPy{% endblock %}
@@ -12,38 +13,148 @@
     </div>
 
     <div class="row">
+        <!-- 1. Molino de Barras -->
         <div class="col-md-6 col-lg-4 mb-4">
-            <div class="card">
+            <div class="card h-100 shadow-sm border-primary">
                 <div class="card-body">
                     <h5 class="card-title">
-                        <i class="bi bi-circle text-primary"></i> Molinos
+                        <i class="bi bi-circle text-primary"></i> 1. Molino de Barras
                     </h5>
-                    <p class="card-text">Dimensionamiento de molinos de bolas y SAG.</p>
-                    <a href="{{ url_for('dimensionamiento.molinos') }}" class="btn btn-primary">Acceder</a>
+                    <p class="card-text">
+                        Dimensionamiento para etapa primaria de molienda.
+                        <br><small class="text-muted">Ideal para materiales con dureza media.</small>
+                    </p>
+                    <ul class="list-unstyled small">
+                        <li>• Capacidad de tratamiento</li>
+                        <li>• Índice de trabajo de Bond</li>
+                        <li>• Granulometrías P80, F80</li>
+                        <li>• Densidad y relación L/D</li>
+                    </ul>
+                    <a href="{{ url_for('dimensionamiento.molino_barras') }}" class="btn btn-primary">
+                        <i class="bi bi-calculator"></i> Calcular
+                    </a>
                 </div>
             </div>
         </div>
 
+        <!-- 2. Molino de Bolas -->
         <div class="col-md-6 col-lg-4 mb-4">
-            <div class="card">
+            <div class="card h-100 shadow-sm border-success">
                 <div class="card-body">
                     <h5 class="card-title">
-                        <i class="bi bi-droplet text-info"></i> Celdas de Flotación
+                        <i class="bi bi-circle-fill text-success"></i> 2. Molino de Bolas
                     </h5>
-                    <p class="card-text">Cálculo de volumen y número de celdas requeridas.</p>
-                    <button class="btn btn-info" disabled>Próximamente</button>
+                    <p class="card-text">
+                        Etapa secundaria de molienda.
+                        <br><small class="text-muted">Se combina con clasificador o hidrociclón.</small>
+                    </p>
+                    <ul class="list-unstyled small">
+                        <li>• Potencia requerida</li>
+                        <li>• Volumen útil</li>
+                        <li>• Dimensiones optimizadas</li>
+                        <li>• Alta eficiencia</li>
+                    </ul>
+                    <a href="{{ url_for('dimensionamiento.molino_bolas') }}" class="btn btn-success">
+                        <i class="bi bi-calculator"></i> Calcular
+                    </a>
                 </div>
             </div>
         </div>
 
+        <!-- 3. Hidrociclones -->
         <div class="col-md-6 col-lg-4 mb-4">
-            <div class="card">
+            <div class="card h-100 shadow-sm border-info">
                 <div class="card-body">
                     <h5 class="card-title">
-                        <i class="bi bi-funnel text-success"></i> Espesadores
+                        <i class="bi bi-funnel text-info"></i> 3. Hidrociclones
                     </h5>
-                    <p class="card-text">Dimensionamiento de espesadores y clarificadores.</p>
-                    <button class="btn btn-success" disabled>Próximamente</button>
+                    <p class="card-text">
+                        Equipos clasificadores por tamaño.
+                        <br><small class="text-muted">Mejora eficiencia controlando presión y densidad.</small>
+                    </p>
+                    <ul class="list-unstyled small">
+                        <li>• Caudal de operación</li>
+                        <li>• Tamaño de corte d50</li>
+                        <li>• Densidades sólido/líquido</li>
+                        <li>• Ley de Stokes</li>
+                    </ul>
+                    <a href="{{ url_for('dimensionamiento.hidrociclones') }}" class="btn btn-info">
+                        <i class="bi bi-calculator"></i> Calcular
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- 4. Separadores Gravitacionales -->
+        <div class="col-md-6 col-lg-4 mb-4">
+            <div class="card h-100 shadow-sm border-warning">
+                <div class="card-body">
+                    <h5 class="card-title">
+                        <i class="bi bi-arrow-down-up text-warning"></i> 4. Separadores
+                    </h5>
+                    <p class="card-text">
+                        Jigs, mesas, espirales gravitacionales.
+                        <br><small class="text-muted">Separación efectiva por densidad.</small>
+                    </p>
+                    <ul class="list-unstyled small">
+                        <li>• Densidad del mineral</li>
+                        <li>• Densidad de la ganga</li>
+                        <li>• Tamaño de partícula</li>
+                        <li>• Factor de concentración</li>
+                    </ul>
+                    <a href="{{ url_for('dimensionamiento.separadores') }}" class="btn btn-warning">
+                        <i class="bi bi-calculator"></i> Calcular
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- 5. Almacenamiento -->
+        <div class="col-md-6 col-lg-4 mb-4">
+            <div class="card h-100 shadow-sm border-secondary">
+                <div class="card-body">
+                    <h5 class="card-title">
+                        <i class="bi bi-archive text-secondary"></i> 5. Almacenamiento
+                    </h5>
+                    <p class="card-text">
+                        Silos y tolvas de almacenamiento.
+                        <br><small class="text-muted">Dimensionamiento de reservas operativas.</small>
+                    </p>
+                    <ul class="list-unstyled small">
+                        <li>• Densidad del material</li>
+                        <li>• Altura del silo</li>
+                        <li>• Diámetro requerido</li>
+                        <li>• Capacidad en toneladas</li>
+                    </ul>
+                    <a href="{{ url_for('dimensionamiento.almacenamiento') }}" class="btn btn-secondary">
+                        <i class="bi bi-calculator"></i> Calcular
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Información adicional -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="alert alert-info">
+                <h5><i class="bi bi-info-circle"></i> Información sobre Dimensionamiento</h5>
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6>Molinos:</h6>
+                        <ul>
+                            <li>Barras: Etapa primaria, relación L/D = 1.4-1.6</li>
+                            <li>Bolas: Etapa secundaria, relación L/D = 1.0-1.2</li>
+                        </ul>
+                    </div>
+                    <div class="col-md-6">
+                        <h6>Clasificación y Separación:</h6>
+                        <ul>
+                            <li>Hidrociclones: Clasificación por tamaño</li>
+                            <li>Separadores: Concentración gravitacional</li>
+                            <li>Almacenamiento: Capacidad según diseño</li>
+                        </ul>
+                    </div>
                 </div>
             </div>
         </div>

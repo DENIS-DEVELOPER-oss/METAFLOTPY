@@ -1,0 +1,207 @@
+
+{% extends "base.html" %}
+
+{% block titulo %}Molino de Barras - MetaFlotPy{% endblock %}
+
+{% block contenido %}
+<div class="container-fluid">
+    <!-- Header -->
+    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+        <h1 class="h2">
+            <i class="bi bi-circle text-primary"></i> 1. Dimensionamiento de Molino de Barras
+        </h1>
+        <a href="{{ url_for('dimensionamiento.dimensionamiento') }}" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left"></i> Volver
+        </a>
+    </div>
+
+    <div class="row">
+        <!-- Formulario de entrada -->
+        <div class="col-md-6">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h5><i class="bi bi-input-cursor-text"></i> Datos de entrada</h5>
+                </div>
+                <div class="card-body">
+                    <form method="POST">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">
+                                        <strong>F:</strong> Capacidad de tratamiento (t/h)
+                                    </label>
+                                    <input type="number" class="form-control" name="capacidad_tratamiento" 
+                                           step="0.01" required>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">
+                                        <strong>Wi:</strong> Índice de trabajo de Bond (kWh/t)
+                                    </label>
+                                    <input type="number" class="form-control" name="indice_trabajo" 
+                                           step="0.01" required>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">
+                                        <strong>P80:</strong> Tamaño producto (μm o mm)
+                                    </label>
+                                    <input type="number" class="form-control" name="p80_producto" 
+                                           step="0.01" required>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">
+                                        <strong>F80:</strong> Tamaño alimentación (μm o mm)
+                                    </label>
+                                    <input type="number" class="form-control" name="f80_alimentacion" 
+                                           step="0.01" required>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">
+                                        <strong>ρb:</strong> Densidad de carga (ton/m³)
+                                    </label>
+                                    <input type="number" class="form-control" name="densidad_carga" 
+                                           step="0.01" value="2.5" required>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">
+                                        <strong>L/D:</strong> Relación largo/diámetro (1.4-1.6)
+                                    </label>
+                                    <input type="number" class="form-control" name="relacion_largo_diametro" 
+                                           step="0.1" value="1.5" min="1.4" max="1.6" required>
+                                </div>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary w-100">
+                            <i class="bi bi-calculator"></i> Calcular Dimensiones
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Fórmulas -->
+            <div class="card shadow-sm mt-4">
+                <div class="card-header bg-danger text-white">
+                    <h5><i class="bi bi-calculator"></i> Fórmulas</h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <h6>1. Potencia de Bond:</h6>
+                        <div class="formula-box bg-light p-2 rounded">
+                            <code>W = 10 · Wi · F · (1/√P80 - 1/√F80)</code>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <h6>2. Volumen útil del molino:</h6>
+                        <div class="formula-box bg-light p-2 rounded">
+                            <code>V = F / (ρb · carga)</code>
+                            <small class="text-muted d-block">(carga: fracción de llenado típica ≈ 0.4)</small>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <h6>3. Dimensiones del molino (asumiendo cilíndrico):</h6>
+                        <div class="formula-box bg-light p-2 rounded">
+                            <code>V = π/4 · D² · L ⇒ L = V/(π/4 · D²)</code>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Resultados -->
+        <div class="col-md-6">
+            {% if resultados %}
+            <div class="card shadow-sm">
+                <div class="card-header bg-success text-white">
+                    <h5><i class="bi bi-check-circle"></i> Resultados de Cálculo</h5>
+                </div>
+                <div class="card-body">
+                    <table class="table table-bordered">
+                        <tr>
+                            <td><strong>Potencia de Bond (W):</strong></td>
+                            <td><span class="badge bg-primary fs-6">{{ resultados.potencia_bond }} kW</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Volumen útil (V):</strong></td>
+                            <td><span class="badge bg-info fs-6">{{ resultados.volumen_util }} m³</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Diámetro (D):</strong></td>
+                            <td><span class="badge bg-warning fs-6">{{ resultados.diametro }} m</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Longitud (L):</strong></td>
+                            <td><span class="badge bg-success fs-6">{{ resultados.longitud }} m</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Relación L/D:</strong></td>
+                            <td>{{ resultados.relacion_L_D }}</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Fracción de carga:</strong></td>
+                            <td>{{ resultados.carga_fraccion }}</td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Gráfico -->
+            {% if grafico %}
+            <div class="card shadow-sm mt-4">
+                <div class="card-header bg-dark text-white">
+                    <h5><i class="bi bi-bar-chart"></i> Visualización</h5>
+                </div>
+                <div class="card-body">
+                    <div id="grafico-molino-barras"></div>
+                </div>
+            </div>
+            {% endif %}
+
+            {% else %}
+            <div class="card shadow-sm">
+                <div class="card-header bg-secondary text-white">
+                    <h5><i class="bi bi-info-circle"></i> Información</h5>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted">
+                        Complete los datos de entrada para calcular las dimensiones del molino de barras.
+                    </p>
+                    <div class="alert alert-info">
+                        <h6>Interpretación:</h6>
+                        <ul class="mb-0">
+                            <li>Permite calcular dimensiones ideales de un molino de barras para etapa primaria de molienda.</li>
+                            <li>Ideal para materiales con dureza media y necesidades de clasificación posterior.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+{% if grafico %}
+<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+<script>
+    var graficoData = {{ grafico|safe }};
+    Plotly.newPlot('grafico-molino-barras', graficoData.data, graficoData.layout);
+</script>
+{% endif %}
+{% endblock %}

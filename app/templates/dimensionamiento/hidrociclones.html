@@ -1,0 +1,186 @@
+
+{% extends "base.html" %}
+
+{% block titulo %}Hidrociclones - MetaFlotPy{% endblock %}
+
+{% block contenido %}
+<div class="container-fluid">
+    <!-- Header -->
+    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+        <h1 class="h2">
+            <i class="bi bi-funnel text-info"></i> 3. Equipos Clasificadores (hidrociclones)
+        </h1>
+        <a href="{{ url_for('dimensionamiento.dimensionamiento') }}" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left"></i> Volver
+        </a>
+    </div>
+
+    <div class="row">
+        <!-- Formulario de entrada -->
+        <div class="col-md-6">
+            <div class="card shadow-sm">
+                <div class="card-header bg-info text-white">
+                    <h5><i class="bi bi-input-cursor-text"></i> Datos de entrada</h5>
+                </div>
+                <div class="card-body">
+                    <form method="POST">
+                        <div class="mb-3">
+                            <label class="form-label">
+                                <strong>Q:</strong> Caudal (m³/h)
+                            </label>
+                            <input type="number" class="form-control" name="caudal" 
+                                   step="0.01" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">
+                                <strong>d50c:</strong> Tamaño de corte (μm)
+                            </label>
+                            <input type="number" class="form-control" name="tamano_corte" 
+                                   step="0.01" required>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">
+                                        <strong>ρs, ρl:</strong> Densidad sólido/líquido
+                                    </label>
+                                    <input type="number" class="form-control" name="densidad_solido" 
+                                           placeholder="Densidad sólido" step="0.01" required>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">&nbsp;</label>
+                                    <input type="number" class="form-control" name="densidad_liquido" 
+                                           placeholder="Densidad líquido" step="0.01" value="1.0" required>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">
+                                <strong>μ:</strong> Viscosidad dinámica (Pa·s)
+                            </label>
+                            <input type="number" class="form-control" name="viscosidad" 
+                                   step="0.000001" value="0.001" required>
+                        </div>
+
+                        <button type="submit" class="btn btn-info w-100">
+                            <i class="bi bi-calculator"></i> Calcular Parámetros
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Fórmulas -->
+            <div class="card shadow-sm mt-4">
+                <div class="card-header bg-danger text-white">
+                    <h5><i class="bi bi-calculator"></i> Fórmulas</h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <h6>Ley de Stokes (simplificada para d50):</h6>
+                        <div class="formula-box bg-light p-2 rounded">
+                            <code>d50c ≈ √(18μ · Q / (Δρ · g · A))</code>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <h6>Relación flujo:</h6>
+                        <div class="formula-box bg-light p-2 rounded">
+                            <code>Q = A · v</code>
+                            <small class="text-muted d-block">(A = área sección ciclón, v = velocidad)</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Interpretación -->
+            <div class="card shadow-sm mt-4">
+                <div class="card-header bg-warning text-white">
+                    <h5><i class="bi bi-lightbulb"></i> Interpretación</h5>
+                </div>
+                <div class="card-body">
+                    <ul class="mb-0">
+                        <li>Se calcula el tamaño de partícula que pasa al rebose.</li>
+                        <li>Mejora la eficiencia si se controla presión y densidad.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Resultados -->
+        <div class="col-md-6">
+            {% if resultados %}
+            <div class="card shadow-sm">
+                <div class="card-header bg-success text-white">
+                    <h5><i class="bi bi-check-circle"></i> Resultados de Cálculo</h5>
+                </div>
+                <div class="card-body">
+                    <table class="table table-bordered">
+                        <tr>
+                            <td><strong>Caudal (Q):</strong></td>
+                            <td><span class="badge bg-primary fs-6">{{ resultados.caudal }} m³/h</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Tamaño de corte (d50c):</strong></td>
+                            <td><span class="badge bg-info fs-6">{{ resultados.tamano_corte }} μm</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Diferencia densidades (Δρ):</strong></td>
+                            <td><span class="badge bg-warning fs-6">{{ resultados.delta_rho }} g/cm³</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Área requerida (A):</strong></td>
+                            <td><span class="badge bg-success fs-6">{{ resultados.area_requerida }} m²</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Velocidad (v):</strong></td>
+                            <td><span class="badge bg-secondary fs-6">{{ resultados.velocidad }} m/s</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Diámetro ciclón equivalente:</strong></td>
+                            <td><span class="badge bg-dark fs-6">{{ resultados.diametro_ciclon }} m</span></td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Gráfico -->
+            {% if grafico %}
+            <div class="card shadow-sm mt-4">
+                <div class="card-header bg-dark text-white">
+                    <h5><i class="bi bi-scatter-chart"></i> Visualización</h5>
+                </div>
+                <div class="card-body">
+                    <div id="grafico-hidrociclones"></div>
+                </div>
+            </div>
+            {% endif %}
+
+            {% else %}
+            <div class="card shadow-sm">
+                <div class="card-header bg-secondary text-white">
+                    <h5><i class="bi bi-info-circle"></i> Información</h5>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted">
+                        Complete los datos de entrada para calcular los parámetros del hidrociclón.
+                    </p>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+{% if grafico %}
+<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+<script>
+    var graficoData = {{ grafico|safe }};
+    Plotly.newPlot('grafico-hidrociclones', graficoData.data, graficoData.layout);
+</script>
+{% endif %}
+{% endblock %}
