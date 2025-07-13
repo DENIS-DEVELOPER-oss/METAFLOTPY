@@ -30,7 +30,234 @@
                     <h5 class="mb-0"><i class="bi bi-sliders me-2"></i>Tamizado Dinámico</h5>
                     <small class="opacity-75">Máxima flexibilidad</small>
                 </div>
+                <div class="card-body d-flex flex-column">
+                    <h6 class="card-subtitle mb-3 text-muted">Análisis personalizable con entrada dinámica de datos</h6>
+                    
+                    <ul class="list-unstyled mb-4 flex-grow-1">
+                        <li><i class="bi bi-check-circle text-success me-2"></i>Entrada de datos flexible</li>
+                        <li><i class="bi bi-check-circle text-success me-2"></i>Múltiples modelos matemáticos</li>
+                        <li><i class="bi bi-check-circle text-success me-2"></i>Análisis comparativo</li>
+                        <li><i class="bi bi-check-circle text-success me-2"></i>Visualización avanzada</li>
+                    </ul>
+                    
+                    <div class="mt-auto">
+                        <a href="{{ url_for('tamizado.tamizado_dinamico') }}" class="btn btn-success btn-lg w-100">
+                            <i class="bi bi-sliders me-2"></i>Acceder
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 1. Gates-Gaudin-Schuhmann -->
+        <div class="col-lg-6 col-xl-4 mb-4">
+            <div class="card h-100 shadow-lg border-0 rounded-4 card-hover">
+                <div class="card-header bg-gradient-primary text-white rounded-top-4">
+                    <h5 class="mb-0"><i class="bi bi-graph-up me-2"></i>Gates-Gaudin-Schuhmann</h5>
+                    <small class="opacity-75">Modelo clásico</small>
+                </div>
+                <div class="card-body d-flex flex-column">
+                    <h6 class="card-subtitle mb-3 text-muted">Análisis granulométrico con modelo GGS</h6>
+                    
+                    <ul class="list-unstyled mb-4 flex-grow-1">
+                        <li><i class="bi bi-check-circle text-primary me-2"></i>Curvas granulométricas</li>
+                        <li><i class="bi bi-check-circle text-primary me-2"></i>Regresión log-log</li>
+                        <li><i class="bi bi-check-circle text-primary me-2"></i>Obtención del exponente n</li>
+                        <li><i class="bi bi-check-circle text-primary me-2"></i>Análisis estadístico</li>
+                    </ul>
+                    
+                    <div class="mt-auto">
+                        <a href="{{ url_for('tamizado.analisis_granulometrico') }}" class="btn btn-primary btn-lg w-100">
+                            <i class="bi bi-graph-up me-2"></i>Acceder
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 2. Rosin-Rammler -->
+        <div class="col-lg-6 col-xl-4 mb-4">
+            <div class="card h-100 shadow-lg border-0 rounded-4 card-hover">
+                <div class="card-header bg-gradient-warning text-white rounded-top-4">
+                    <h5 class="mb-0"><i class="bi bi-graph-down me-2"></i>Rosin-Rammler</h5>
+                    <small class="opacity-75">Distribución exponencial</small>
+                </div>
+                <div class="card-body d-flex flex-column">
+                    <h6 class="card-subtitle mb-3 text-muted">Modelo exponencial para materiales fracturados</h6>
+                    
+                    <ul class="list-unstyled mb-4 flex-grow-1">
+                        <li><i class="bi bi-check-circle text-warning me-2"></i>Parámetros n y d₀</li>
+                        <li><i class="bi bi-check-circle text-warning me-2"></i>Gráfico semilogarítmico</li>
+                        <li><i class="bi bi-check-circle text-warning me-2"></i>Tamaño característico</li>
+                        <li><i class="bi bi-check-circle text-warning me-2"></i>Ajuste exponencial</li>
+                    </ul>
+                    
+                    <div class="mt-auto">
+                        <a href="{{ url_for('tamizado.rosin_rammler') }}" class="btn btn-warning btn-lg w-100">
+                            <i class="bi bi-graph-down me-2"></i>Acceder
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 3. Regresión Lineal -->
+        <div class="col-lg-6 col-xl-4 mb-4">
+            <div class="card h-100 shadow-lg border-0 rounded-4 card-hover">
+                <div class="card-header bg-gradient-info text-white rounded-top-4">
+                    <h5 class="mb-0"><i class="bi bi-graph-up-arrow me-2"></i>Regresión Lineal</h5>
+                    <small class="opacity-75">Ajuste empírico</small>
+                </div>
+                <div class="card-body d-flex flex-column">
+                    <h6 class="card-subtitle mb-3 text-muted">Ajuste de curva empírica con mínimos cuadrados</h6>
+                    
+                    <ul class="list-unstyled mb-4 flex-grow-1">
+                        <li><i class="bi bi-check-circle text-info me-2"></i>Método de mínimos cuadrados</li>
+                        <li><i class="bi bi-check-circle text-info me-2"></i>Coeficiente de determinación R²</li>
+                        <li><i class="bi bi-check-circle text-info me-2"></i>Diagrama de dispersión</li>
+                        <li><i class="bi bi-check-circle text-info me-2"></i>Línea de tendencia</li>
+                    </ul>
+                    
+                    <div class="mt-auto">
+                        <a href="{{ url_for('tamizado.regresion_lineal') }}" class="btn btn-info btn-lg w-100">
+                            <i class="bi bi-graph-up-arrow me-2"></i>Acceder
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Información adicional -->
+    <div class="row mt-5">
+        <div class="col-12">
+            <div class="card shadow-lg border-0 rounded-4">
+                <div class="card-header bg-gradient-dark text-white rounded-top-4">
+                    <h5 class="mb-0"><i class="bi bi-info-circle-fill me-2"></i>Información Técnica</h5>
+                </div>
                 <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6><i class="bi bi-gear me-2"></i>Funcionalidades Comunes</h6>
+                            <ul class="list-unstyled">
+                                <li><i class="bi bi-check2 text-success me-2"></i>Entrada de datos por mallas ASTM</li>
+                                <li><i class="bi bi-check2 text-success me-2"></i>Cálculos automáticos de porcentajes</li>
+                                <li><i class="bi bi-check2 text-success me-2"></i>Gráficos interactivos con Plotly</li>
+                                <li><i class="bi bi-check2 text-success me-2"></i>Tablas de resultados detalladas</li>
+                                <li><i class="bi bi-check2 text-success me-2"></i>Análisis estadístico completo</li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <h6><i class="bi bi-lightbulb me-2"></i>Recomendaciones de Uso</h6>
+                            <div class="alert alert-info">
+                                <strong>Gates-Gaudin-Schuhmann:</strong> Ideal para materiales naturales y productos de molienda convencional.
+                            </div>
+                            <div class="alert alert-warning">
+                                <strong>Rosin-Rammler:</strong> Excelente para materiales fracturados y productos de trituración.
+                            </div>
+                            <div class="alert alert-success">
+                                <strong>Regresión Lineal:</strong> Útil para ajustes empíricos y comparación de modelos.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+/* Gradientes personalizados */
+.bg-gradient-primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.bg-gradient-success {
+    background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+}
+
+.bg-gradient-warning {
+    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+}
+
+.bg-gradient-info {
+    background: linear-gradient(135deg, #667eea 0%, #f093fb 100%);
+}
+
+.bg-gradient-dark {
+    background: linear-gradient(135deg, #232526 0%, #414345 100%);
+}
+
+.hero-section {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+/* Efectos de hover para cards */
+.card-hover {
+    transition: all 0.3s ease;
+}
+
+.card-hover:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+}
+
+/* Efectos para botones */
+.btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+    transition: all 0.3s ease;
+}
+
+/* Bordes redondeados */
+.rounded-4 {
+    border-radius: 1rem !important;
+}
+
+.rounded-top-4 {
+    border-top-left-radius: 1rem !important;
+    border-top-right-radius: 1rem !important;
+}
+
+/* Mejoras para iconos */
+.bi {
+    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
+}
+
+/* Efectos de profundidad */
+.shadow-lg {
+    box-shadow: 0 20px 40px rgba(0,0,0,0.1) !important;
+}
+
+/* Animaciones suaves */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.card {
+    animation: fadeInUp 0.6s ease-out;
+}
+
+.card:nth-child(2) {
+    animation-delay: 0.1s;
+}
+
+.card:nth-child(3) {
+    animation-delay: 0.2s;
+}
+
+.card:nth-child(4) {
+    animation-delay: 0.3s;
+}
+</style>
+{% endblock %}s="card-body">
                     <div class="mb-3">
                         <h6><i class="bi bi-gear"></i> Características:</h6>
                         <ul class="small">

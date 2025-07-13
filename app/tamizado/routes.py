@@ -612,3 +612,11 @@ def calcular_regresion_lineal_empirica(df):
     except Exception as e:
         print(f"Error en cálculo de regresión lineal empírica: {e}")
         return None
+
+@bp_tamizado.route('/tamizado-dinamico', methods=['GET', 'POST'])
+def tamizado_dinamico():
+    """Ruta para tamizado dinámico - funcionalidad futura"""
+    formulario = FormularioTamizado()
+    
+    return render_template('tamizado/tamizado_dinamico.html',
+                         formulario=formulario)
