@@ -1,9 +1,26 @@
 
 from flask_wtf import FlaskForm
-from wtforms import FloatField, SubmitField, FieldList, FormField
+from wtforms import FloatField, SubmitField, FieldList, FormField, StringField, HiddenField
 from wtforms.validators import DataRequired, NumberRange, Optional
 
+class MallaForm(FlaskForm):
+    """Formulario para una malla individual"""
+    nombre = StringField('Nombre de Malla', validators=[DataRequired()])
+    abertura = FloatField('Abertura (mm)', validators=[DataRequired(), NumberRange(min=0.001)])
+    peso_retenido = FloatField('Peso Retenido (g)', validators=[Optional(), NumberRange(min=0)])
+
+class FormularioTamizadoDinamico(FlaskForm):
+    """Formulario dinámico para tamizado con mallas personalizables"""
+    peso_total = FloatField('Peso Total de Muestra (g)', 
+                           validators=[DataRequired(), NumberRange(min=0.1)])
+    
+    # Campos ocultos para manejar las mallas dinámicamente
+    mallas_data = HiddenField('Datos de Mallas')
+    
+    calcular = SubmitField('Calcular Análisis Granulométrico')
+
 class FormularioTamizado(FlaskForm):
+    """Formulario original mantenido para compatibilidad"""
     peso_total = FloatField('Peso Total de Muestra (g)', 
                            validators=[DataRequired(), NumberRange(min=0.1)])
     

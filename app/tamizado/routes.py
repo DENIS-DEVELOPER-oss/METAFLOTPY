@@ -1,5 +1,5 @@
 from flask import Blueprint, render_template, request, flash
-from app.tamizado.forms import FormularioTamizado, FormularioRegresionLineal, FormularioRosinRammler
+from app.tamizado.forms import FormularioTamizado, FormularioRegresionLineal, FormularioRosinRammler, FormularioTamizadoDinamico
 import plotly.graph_objs as go
 import plotly.utils
 import json
@@ -15,6 +15,46 @@ bp_tamizado = Blueprint('tamizado', __name__)
 def analisis_granulometrico():
     """Página principal del módulo de análisis de tamaño de partícula"""
     return render_template('tamizado/index.html')
+
+@bp_tamizado.route('/tamizado-dinamico', methods=['GET', 'POST'])
+def tamizado_dinamico():
+    """Análisis granulométrico con mallas dinámicas personalizables"""
+    formulario = FormularioTamizadoDinamico()
+    resultados = None
+    grafico_json = None
+
+    if formulario.validate_on_submit():
+        try:
+            # Procesar datos de mallas desde JSON
+            import json
+            mallas_data = json.loads(formulario.mallas_data.data or '[]')
+            peso_total = formulario.peso_total.data
+            
+            if not mallas_data:
+                flash('Debe agregar al menos una malla para realizar el análisis', 'error')
+                return render_template('tamizado/tamizado_dinamico.html', formulario=formulario)
+
+            # Ordenar mallas por abertura (descendente)
+            mallas_data.sort(key=lambda x: float(x.get('abertura', 0)), reverse=True)
+            
+            # Extraer datos para el cálculo
+            aberturas = [float(m['abertura']) for m in mallas_data]
+            retenidos = [float(m.get('peso_retenido', 0)) for m in mallas_data]
+            nombres = [m['nombre'] for m in mallas_data]
+
+            # Calcular análisis granulométrico dinámico
+            resultados = calcular_analisis_granulometrico_dinamico(peso_total, aberturas, retenidos, nombres)
+
+            # Crear gráfico
+            grafico_json = crear_grafico_granulometrico(resultados)
+
+        except Exception as e:
+            flash(f'Error en el cálculo: {str(e)}', 'error')
+
+    return render_template('tamizado/tamizado_dinamico.html', 
+                         formulario=formulario, 
+                         resultados=resultados,
+                         grafico=grafico_json)
 
 @bp_tamizado.route('/gates-gaudin-schuhmann', methods=['GET', 'POST'])
 def gates_gaudin_schuhmann():
@@ -162,6 +202,67 @@ def rosin_rammler():
                          formulario=formulario, 
                          resultados=resultados,
                          grafico=grafico_json)
+
+def calcular_analisis_granulometrico_dinamico(peso_total, aberturas, retenidos, nombres):
+    """Calcular análisis granulométrico con mallas dinámicas"""
+    
+    # Calcular porcentajes retenidos
+    suma_retenidos = sum(retenidos)
+    porcentaje_retenido = [(r/peso_total)*100 for r in retenidos]
+
+    # Calcular porcentajes retenidos acumulados
+    retenido_acumulado = []
+    acum = 0
+    for p in porcentaje_retenido:
+        acum += p
+        retenido_acumulado.append(acum)
+
+    # Calcular porcentajes pasantes
+    pasante = [100 - r for r in retenido_acumulado]
+
+    # Crear tabla de resultados
+    tabla_resultados = []
+    for i in range(len(aberturas)):
+        tabla_resultados.append({
+            'nombre': nombres[i],
+            'malla': aberturas[i],
+            'peso_retenido': retenidos[i],
+            'porcentaje_retenido': round(porcentaje_retenido[i], 2),
+            'retenido_acumulado': round(retenido_acumulado[i], 2),
+            'pasante': round(pasante[i], 2)
+        })
+
+    # Calcular parámetros característicos usando las aberturas dinámicas
+    d50 = calcular_percentil(aberturas, pasante, 50)
+    d80 = calcular_percentil(aberturas, pasante, 80)
+    d10 = calcular_percentil(aberturas, pasante, 10)
+    d60 = calcular_percentil(aberturas, pasante, 60)
+    d30 = calcular_percentil(aberturas, pasante, 30)
+
+    # Coeficientes
+    cu = d60 / d10 if d10 > 0 else 0
+    cc = (d30**2) / (d60 * d10) if (d60 > 0 and d10 > 0) else 0
+
+    # Verificación del balance
+    balance_ok = abs(suma_retenidos - peso_total) < 0.01
+
+    return {
+        'tabla': tabla_resultados,
+        'peso_total': peso_total,
+        'suma_retenidos': suma_retenidos,
+        'balance_ok': balance_ok,
+        'error_balance': abs(suma_retenidos - peso_total),
+        'd10': round(d10, 3),
+        'd30': round(d30, 3),
+        'd50': round(d50, 3),
+        'd60': round(d60, 3),
+        'd80': round(d80, 3),
+        'cu': round(cu, 2),
+        'cc': round(cc, 2),
+        'mallas': aberturas,
+        'pasante': pasante,
+        'nombres': nombres
+    }
 
 def calcular_analisis_granulometrico(peso_total, retenidos):
     """Calcular análisis granulométrico completo"""

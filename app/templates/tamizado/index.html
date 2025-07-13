@@ -13,6 +13,40 @@
     </div>
 
     <div class="row">
+        <!-- 0. Tamizado Dinámico -->
+        <div class="col-lg-4 mb-4">
+            <div class="card h-100 border-success">
+                <div class="card-header bg-success text-white">
+                    <h5><i class="bi bi-sliders"></i> Tamizado Dinámico</h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <h6><i class="bi bi-gear"></i> Características:</h6>
+                        <ul class="small">
+                            <li><strong>Mallas personalizables:</strong> Agregar/quitar según necesidad</li>
+                            <li><strong>Mallas estándar ASTM:</strong> Cargar con un clic</li>
+                            <li><strong>Flexibilidad total:</strong> Cualquier abertura y nombre</li>
+                            <li><strong>Análisis completo:</strong> Curvas y parámetros característicos</li>
+                        </ul>
+                    </div>
+
+                    <div class="mb-3">
+                        <h6><i class="bi bi-star-fill text-warning"></i> Recomendado para:</h6>
+                        <ul class="small">
+                            <li>Mallas no estándar</li>
+                            <li>Análisis específicos</li>
+                            <li>Flexibilidad máxima</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="card-footer">
+                    <a href="{{ url_for('tamizado.tamizado_dinamico') }}" class="btn btn-success w-100">
+                        <i class="bi bi-play-circle"></i> Usar Tamizado Dinámico
+                    </a>
+                </div>
+            </div>
+        </div>
+
         <!-- 1. Gates-Gaudin-Schuhmann -->
         <div class="col-lg-4 mb-4">
             <div class="card h-100">

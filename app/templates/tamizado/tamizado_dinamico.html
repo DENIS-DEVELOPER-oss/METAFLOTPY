@@ -1,0 +1,334 @@
+
+{% extends "base.html" %}
+
+{% block titulo %}Tamizado Dinámico - MetaFlotPy{% endblock %}
+
+{% block contenido %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{{ url_for('tamizado.analisis_granulometrico') }}">Análisis de Tamaño de Partícula</a></li>
+                    <li class="breadcrumb-item active">Tamizado Dinámico</li>
+                </ol>
+            </nav>
+            <h1><i class="bi bi-sliders"></i> Tamizado Dinámico</h1>
+            <p class="lead">Análisis granulométrico con mallas personalizables</p>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h5><i class="bi bi-clipboard-data"></i> Configuración de Mallas</h5>
+                </div>
+                <div class="card-body">
+                    <!-- Controles para mallas -->
+                    <div class="row mb-3">
+                        <div class="col-md-3">
+                            <label class="form-label">Nombre de Malla</label>
+                            <input type="text" id="nuevo-nombre" class="form-control" placeholder="Ej: No. 20">
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Abertura (mm)</label>
+                            <input type="number" id="nueva-abertura" class="form-control" step="0.001" placeholder="0.85">
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Peso Retenido (g)</label>
+                            <input type="number" id="nuevo-peso" class="form-control" step="0.01" placeholder="0.00">
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">&nbsp;</label>
+                            <div>
+                                <button type="button" class="btn btn-success" onclick="agregarMalla()">
+                                    <i class="bi bi-plus-circle"></i> Agregar
+                                </button>
+                                <button type="button" class="btn btn-info" onclick="cargarMallasEstandar()">
+                                    <i class="bi bi-grid"></i> ASTM
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Tabla de mallas -->
+                    <div class="table-responsive">
+                        <table class="table table-bordered" id="tabla-mallas">
+                            <thead class="table-dark">
+                                <tr>
+                                    <th>Nombre</th>
+                                    <th>Abertura (mm)</th>
+                                    <th>Peso Retenido (g)</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody id="cuerpo-tabla-mallas">
+                                <!-- Las mallas se agregarán dinámicamente aquí -->
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Formulario principal -->
+                    <form method="POST" id="formulario-tamizado-dinamico">
+                        {{ formulario.hidden_tag() }}
+                        
+                        <div class="mb-3">
+                            {{ formulario.peso_total.label(class="form-label") }}
+                            {{ formulario.peso_total(class="form-control") }}
+                        </div>
+
+                        {{ formulario.mallas_data() }}
+
+                        <div class="text-center">
+                            {{ formulario.calcular(class="btn btn-primary btn-lg", id="btn-calcular") }}
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header bg-info text-white">
+                    <h5><i class="bi bi-info-circle"></i> Instrucciones</h5>
+                </div>
+                <div class="card-body">
+                    <h6><i class="bi bi-1-circle"></i> Agregar Mallas</h6>
+                    <p class="small">Complete el nombre, abertura y peso retenido, luego haga clic en "Agregar".</p>
+                    
+                    <h6><i class="bi bi-2-circle"></i> Mallas Estándar</h6>
+                    <p class="small">Haga clic en "ASTM" para cargar mallas estándar ASTM predefinidas.</p>
+                    
+                    <h6><i class="bi bi-3-circle"></i> Editar/Eliminar</h6>
+                    <p class="small">Use los botones de acción para editar o eliminar mallas.</p>
+                    
+                    <h6><i class="bi bi-4-circle"></i> Calcular</h6>
+                    <p class="small">Ingrese el peso total y haga clic en "Calcular" para obtener resultados.</p>
+
+                    <div class="alert alert-warning mt-3">
+                        <strong>Nota:</strong> Las mallas se ordenarán automáticamente por abertura (mayor a menor).
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Resultados -->
+    {% if resultados %}
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5><i class="bi bi-table"></i> Resultados del Análisis Granulométrico</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead class="table-dark">
+                                <tr>
+                                    <th>Malla</th>
+                                    <th>Abertura (mm)</th>
+                                    <th>Peso Retenido (g)</th>
+                                    <th>% Retenido</th>
+                                    <th>% Retenido Acum.</th>
+                                    <th>% Pasante</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for fila in resultados.tabla %}
+                                <tr>
+                                    <td>{{ fila.nombre }}</td>
+                                    <td>{{ "%.3f"|format(fila.malla) }}</td>
+                                    <td>{{ "%.2f"|format(fila.peso_retenido) }}</td>
+                                    <td>{{ "%.2f"|format(fila.porcentaje_retenido) }}</td>
+                                    <td>{{ "%.2f"|format(fila.retenido_acumulado) }}</td>
+                                    <td>{{ "%.2f"|format(fila.pasante) }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="row mt-3">
+                        <div class="col-md-6">
+                            <h6>Parámetros Característicos:</h6>
+                            <table class="table table-sm">
+                                <tr><td>D10:</td><td><span class="badge bg-info">{{ resultados.d10 }} mm</span></td></tr>
+                                <tr><td>D30:</td><td><span class="badge bg-info">{{ resultados.d30 }} mm</span></td></tr>
+                                <tr><td>D50:</td><td><span class="badge bg-info">{{ resultados.d50 }} mm</span></td></tr>
+                                <tr><td>D60:</td><td><span class="badge bg-info">{{ resultados.d60 }} mm</span></td></tr>
+                                <tr><td>D80:</td><td><span class="badge bg-info">{{ resultados.d80 }} mm</span></td></tr>
+                            </table>
+                        </div>
+                        <div class="col-md-6">
+                            <h6>Coeficientes:</h6>
+                            <table class="table table-sm">
+                                <tr><td>Coef. Uniformidad (Cu):</td><td><span class="badge bg-success">{{ resultados.cu }}</span></td></tr>
+                                <tr><td>Coef. Curvatura (Cc):</td><td><span class="badge bg-success">{{ resultados.cc }}</span></td></tr>
+                                <tr><td>Balance:</td><td>
+                                    {% if resultados.balance_ok %}
+                                    <span class="badge bg-success">OK</span>
+                                    {% else %}
+                                    <span class="badge bg-warning">Error: {{ "%.2f"|format(resultados.error_balance) }}g</span>
+                                    {% endif %}
+                                </td></tr>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Gráfico -->
+    {% if grafico %}
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5><i class="bi bi-graph-up"></i> Curva Granulométrica</h5>
+                </div>
+                <div class="card-body">
+                    <div id="grafico-granulometrico"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+    {% endif %}
+</div>
+
+<script src="https://cdn.plot.ly/plotly-2.26.0.min.js"></script>
+<script>
+// Variables globales
+let mallas = [];
+
+// Mallas estándar ASTM
+const mallasEstandar = [
+    {nombre: '1/2"', abertura: 12.5, peso_retenido: 0},
+    {nombre: '3/8"', abertura: 9.5, peso_retenido: 0},
+    {nombre: '1/4"', abertura: 6.35, peso_retenido: 0},
+    {nombre: 'No. 4', abertura: 4.75, peso_retenido: 0},
+    {nombre: 'No. 6', abertura: 3.35, peso_retenido: 0},
+    {nombre: 'No. 8', abertura: 2.36, peso_retenido: 0},
+    {nombre: 'No. 16', abertura: 1.18, peso_retenido: 0},
+    {nombre: 'No. 20', abertura: 0.85, peso_retenido: 0},
+    {nombre: 'No. 30', abertura: 0.60, peso_retenido: 0},
+    {nombre: 'No. 40', abertura: 0.425, peso_retenido: 0},
+    {nombre: 'No. 50', abertura: 0.30, peso_retenido: 0},
+    {nombre: 'No. 70', abertura: 0.212, peso_retenido: 0},
+    {nombre: 'No. 100', abertura: 0.150, peso_retenido: 0},
+    {nombre: 'No. 140', abertura: 0.106, peso_retenido: 0},
+    {nombre: 'No. 200', abertura: 0.075, peso_retenido: 0},
+    {nombre: 'Fondo', abertura: 0.053, peso_retenido: 0}
+];
+
+function agregarMalla() {
+    const nombre = document.getElementById('nuevo-nombre').value.trim();
+    const abertura = parseFloat(document.getElementById('nueva-abertura').value);
+    const peso = parseFloat(document.getElementById('nuevo-peso').value) || 0;
+
+    if (!nombre || !abertura || abertura <= 0) {
+        alert('Por favor, complete el nombre y abertura válida de la malla.');
+        return;
+    }
+
+    // Verificar si ya existe una malla con la misma abertura
+    if (mallas.find(m => Math.abs(m.abertura - abertura) < 0.001)) {
+        alert('Ya existe una malla con esa abertura.');
+        return;
+    }
+
+    mallas.push({nombre, abertura, peso_retenido: peso});
+    actualizarTablaMallas();
+    limpiarFormulario();
+}
+
+function cargarMallasEstandar() {
+    if (confirm('¿Desea cargar las mallas estándar ASTM? Esto reemplazará las mallas actuales.')) {
+        mallas = [...mallasEstandar];
+        actualizarTablaMallas();
+    }
+}
+
+function eliminarMalla(index) {
+    if (confirm('¿Está seguro de eliminar esta malla?')) {
+        mallas.splice(index, 1);
+        actualizarTablaMallas();
+    }
+}
+
+function editarMalla(index) {
+    const malla = mallas[index];
+    document.getElementById('nuevo-nombre').value = malla.nombre;
+    document.getElementById('nueva-abertura').value = malla.abertura;
+    document.getElementById('nuevo-peso').value = malla.peso_retenido;
+    
+    eliminarMalla(index);
+}
+
+function actualizarPeso(index, nuevoPeso) {
+    mallas[index].peso_retenido = parseFloat(nuevoPeso) || 0;
+    actualizarCampoOculto();
+}
+
+function actualizarTablaMallas() {
+    // Ordenar mallas por abertura (descendente)
+    mallas.sort((a, b) => b.abertura - a.abertura);
+    
+    const tbody = document.getElementById('cuerpo-tabla-mallas');
+    tbody.innerHTML = '';
+
+    mallas.forEach((malla, index) => {
+        const fila = document.createElement('tr');
+        fila.innerHTML = `
+            <td>${malla.nombre}</td>
+            <td>${malla.abertura}</td>
+            <td>
+                <input type="number" class="form-control form-control-sm" 
+                       value="${malla.peso_retenido}" step="0.01" min="0"
+                       onchange="actualizarPeso(${index}, this.value)">
+            </td>
+            <td>
+                <button type="button" class="btn btn-sm btn-warning me-1" onclick="editarMalla(${index})">
+                    <i class="bi bi-pencil"></i>
+                </button>
+                <button type="button" class="btn btn-sm btn-danger" onclick="eliminarMalla(${index})">
+                    <i class="bi bi-trash"></i>
+                </button>
+            </td>
+        `;
+        tbody.appendChild(fila);
+    });
+
+    actualizarCampoOculto();
+}
+
+function actualizarCampoOculto() {
+    document.getElementById('mallas_data').value = JSON.stringify(mallas);
+}
+
+function limpiarFormulario() {
+    document.getElementById('nuevo-nombre').value = '';
+    document.getElementById('nueva-abertura').value = '';
+    document.getElementById('nuevo-peso').value = '';
+}
+
+// Validación del formulario
+document.getElementById('formulario-tamizado-dinamico').addEventListener('submit', function(e) {
+    if (mallas.length === 0) {
+        e.preventDefault();
+        alert('Debe agregar al menos una malla para realizar el análisis.');
+        return;
+    }
+    actualizarCampoOculto();
+});
+
+// Gráfico
+{% if grafico %}
+var grafico_data = {{ grafico|safe }};
+Plotly.newPlot('grafico-granulometrico', grafico_data.data, grafico_data.layout, {responsive: true});
+{% endif %}
+</script>
+{% endblock %}
