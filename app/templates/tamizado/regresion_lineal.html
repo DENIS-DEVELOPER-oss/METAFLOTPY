@@ -396,3 +396,529 @@ Plotly.newPlot('grafico-dispersion', grafico_dispersion.data, grafico_dispersion
 {% endif %}
 </script>
 {% endblock %}
+{% extends "base.html" %}
+
+{% block titulo %}Regresión Lineal - MetaFlotPy{% endblock %}
+
+{% block contenido %}
+<div class="container-fluid">
+    <!-- Header mejorado con gradiente -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="bg-gradient-info text-white p-4 rounded-4 shadow-lg">
+                <h1 class="display-6 fw-bold mb-2">
+                    <i class="bi bi-graph-up-arrow me-3"></i>Regresión Lineal
+                </h1>
+                <p class="lead mb-3">Ajuste de curva empírica para análisis granulométrico</p>
+                
+                <!-- Navegación entre modelos -->
+                <nav class="d-flex gap-2 flex-wrap">
+                    <a href="{{ url_for('tamizado.analisis_granulometrico') }}" class="btn btn-outline-light btn-sm">
+                        <i class="bi bi-graph-up"></i> Gates-Gaudin-Schuhmann
+                    </a>
+                    <a href="{{ url_for('tamizado.rosin_rammler') }}" class="btn btn-outline-light btn-sm">
+                        <i class="bi bi-graph-down"></i> Rosin-Rammler
+                    </a>
+                    <a href="{{ url_for('tamizado.regresion_lineal') }}" class="btn btn-light btn-sm active">
+                        <i class="bi bi-graph-up-arrow"></i> Regresión Lineal
+                    </a>
+                    <a href="{{ url_for('tamizado.tamizado_dinamico') }}" class="btn btn-outline-light btn-sm">
+                        <i class="bi bi-sliders"></i> Tamizado Dinámico
+                    </a>
+                </nav>
+            </div>
+        </div>
+    </div>
+
+    <!-- Formulario de entrada de datos -->
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card shadow-lg border-0 rounded-4">
+                <div class="card-header bg-gradient-warning text-dark rounded-top-4">
+                    <h5 class="mb-0"><i class="bi bi-clipboard-data-fill me-2"></i>Datos de Entrada</h5>
+                </div>
+                <div class="card-body">
+                    <form method="POST" id="formulario-regresion">
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="mb-3">
+                                    <label for="peso_total" class="form-label">Peso Total de Muestra (g)</label>
+                                    <input type="number" class="form-control" id="peso_total" name="peso_total" step="0.01" required>
+                                </div>
+                            </div>
+                        </div>
+
+                        <h6><i class="bi bi-table"></i> Datos de Mallas</h6>
+                        <div id="tabla-mallas">
+                            <table class="table table-bordered">
+                                <thead>
+                                    <tr>
+                                        <th>Abertura d (mm)</th>
+                                        <th>Peso Retenido (g)</th>
+                                        <th>Acción</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="filas-mallas">
+                                    <!-- Las filas se generan dinámicamente -->
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <div class="text-center mt-3">
+                            <button type="button" class="btn btn-secondary me-2" onclick="agregarFila()">
+                                <i class="bi bi-plus-circle"></i> Agregar Malla
+                            </button>
+                            <button type="submit" class="btn btn-warning text-dark fw-bold">
+                                <i class="bi bi-calculator"></i> Calcular Regresión Lineal
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card shadow-lg border-0 rounded-4">
+                <div class="card-header bg-gradient-dark text-white rounded-top-4">
+                    <h5 class="mb-0"><i class="bi bi-info-circle-fill me-2"></i>Regresión Lineal (Ajuste Empírico)</h5>
+                </div>
+                <div class="card-body">
+                    <h6><i class="bi bi-clipboard-data"></i> Datos de entrada:</h6>
+                    <ul class="small">
+                        <li><strong>x:</strong> Tamaño de partícula (en escala logarítmica o directa)</li>
+                        <li><strong>y:</strong> % acumulado pasante o retenido</li>
+                        <li>Se trabajan pares de datos (x<sub>i</sub>, y<sub>i</sub>)</li>
+                    </ul>
+
+                    <h6><i class="bi bi-calculator-fill text-warning"></i> Fórmula:</h6>
+                    <div class="formula-box bg-light p-3 rounded text-center mb-3">
+                        <strong>y = a × x + b</strong>
+                    </div>
+                    
+                    <div class="mt-2">
+                        <small><strong>Donde:</strong></small>
+                        <ul class="small">
+                            <li><strong>a:</strong> pendiente</li>
+                            <li><strong>b:</strong> intersección</li>
+                        </ul>
+                    </div>
+
+                    <h6><i class="bi bi-calculator"></i> Usa método de mínimos cuadrados:</h6>
+                    <div class="formula-box bg-light p-2 rounded mb-2">
+                        <small><strong>a = </strong>(n∑x<sub>i</sub>y<sub>i</sub> - ∑x<sub>i</sub>∑y<sub>i</sub>) / (n∑x<sub>i</sub>² - (∑x<sub>i</sub>)²)</small>
+                    </div>
+                    <div class="formula-box bg-light p-2 rounded">
+                        <small><strong>b = </strong>(∑y<sub>i</sub> - a∑x<sub>i</sub>) / n</small>
+                    </div>
+
+                    <h6 class="mt-3"><i class="bi bi-graph-up"></i> Gráfico recomendado:</h6>
+                    <ul class="small">
+                        <li><strong>Eje X:</strong> tamaño (log(d) o d)</li>
+                        <li><strong>Eje Y:</strong> % acumulado pasante</li>
+                        <li><strong>Tipo:</strong> Diagrama de dispersión con línea de tendencia</li>
+                    </ul>
+
+                    <h6><i class="bi bi-info-circle"></i> Interpretación:</h6>
+                    <ul class="small">
+                        <li>Ajusta modelos de forma general.</li>
+                        <li>Se puede aplicar sobre curvas empíricas.</li>
+                        <li><strong>R²</strong> (coeficiente de determinación) indica la calidad del ajuste.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tabla de resultados -->
+    {% if tabla_datos %}
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card shadow-lg border-0 rounded-4">
+                <div class="card-header bg-gradient-primary text-white rounded-top-4">
+                    <h5 class="mb-0"><i class="bi bi-table me-2"></i>Tabla de Datos para Regresión</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-striped table-hover">
+                            <thead class="table-dark">
+                                <tr>
+                                    <th>Abertura d (mm)</th>
+                                    <th>Peso Retenido (g)</th>
+                                    <th>% Retenido</th>
+                                    <th>% Retenido Acum.</th>
+                                    <th>% Pasante y</th>
+                                    <th>log(d) - x</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for fila in tabla_datos %}
+                                <tr>
+                                    <td>{{ "%.3f"|format(fila.abertura) }}</td>
+                                    <td>{{ "%.2f"|format(fila.peso_retenido) }}</td>
+                                    <td>{{ "%.2f"|format(fila.porcentaje_retenido) }}</td>
+                                    <td>{{ "%.2f"|format(fila.porcentaje_acumulado) }}</td>
+                                    <td>{{ "%.2f"|format(fila.porcentaje_pasante) }}</td>
+                                    <td>{{ "%.4f"|format(fila.log_d) }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Gráfico Principal -->
+    {% if grafico_principal %}
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card shadow-lg border-0 rounded-4">
+                <div class="card-header bg-gradient-success text-white rounded-top-4">
+                    <h5 class="mb-0"><i class="bi bi-graph-up me-2"></i>Distribución Granulométrica</h5>
+                </div>
+                <div class="card-body">
+                    <div id="grafico-principal"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Resultados de Regresión -->
+    {% if resultados_calculo %}
+    <div class="row mt-4">
+        <div class="col-md-8">
+            <div class="card shadow-lg border-0 rounded-4">
+                <div class="card-header bg-gradient-warning text-dark rounded-top-4">
+                    <h5><i class="bi bi-calculator"></i> Resultados de Regresión Lineal Empírica</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <table class="table table-sm">
+                                <tr>
+                                    <td><strong>Pendiente (a):</strong></td>
+                                    <td><span class="badge bg-primary fs-6">{{ "%.6f"|format(resultados_calculo.a) }}</span></td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Intersección (b):</strong></td>
+                                    <td><span class="badge bg-success fs-6">{{ "%.6f"|format(resultados_calculo.b) }}</span></td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Coeficiente R²:</strong></td>
+                                    <td><span class="badge bg-info fs-6">{{ "%.6f"|format(resultados_calculo.r2) }}</span></td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Ecuación:</strong></td>
+                                    <td><code>{{ resultados_calculo.ecuacion }}</code></td>
+                                </tr>
+                            </table>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <h6><i class="bi bi-calculator"></i> Cálculos de Mínimos Cuadrados:</h6>
+                            <table class="table table-sm">
+                                <tr><td>n (datos):</td><td>{{ resultados_calculo.n_datos }}</td></tr>
+                                <tr><td>∑x:</td><td>{{ "%.4f"|format(resultados_calculo.sum_x) }}</td></tr>
+                                <tr><td>∑y:</td><td>{{ "%.4f"|format(resultados_calculo.sum_y) }}</td></tr>
+                                <tr><td>∑xy:</td><td>{{ "%.4f"|format(resultados_calculo.sum_xy) }}</td></tr>
+                                <tr><td>∑x²:</td><td>{{ "%.4f"|format(resultados_calculo.sum_x2) }}</td></tr>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div class="alert alert-info mt-3">
+                        <h6><i class="bi bi-info-circle"></i> Interpretación del ajuste:</h6>
+                        {% if resultados_calculo.r2 > 0.95 %}
+                        <span class="badge bg-success">Excelente ajuste</span> (R² > 0.95)
+                        {% elif resultados_calculo.r2 > 0.90 %}
+                        <span class="badge bg-primary">Buen ajuste</span> (R² > 0.90)
+                        {% elif resultados_calculo.r2 > 0.80 %}
+                        <span class="badge bg-warning">Ajuste moderado</span> (R² > 0.80)
+                        {% else %}
+                        <span class="badge bg-danger">Ajuste pobre</span> (R² < 0.80)
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card shadow-lg border-0 rounded-4">
+                <div class="card-header bg-gradient-dark text-white rounded-top-4">
+                    <h5><i class="bi bi-graph-up-arrow"></i> Fórmulas Aplicadas</h5>
+                </div>
+                <div class="card-body">
+                    <h6>Método de Mínimos Cuadrados:</h6>
+                    
+                    <div class="formula-box bg-light p-2 rounded mb-2">
+                        <strong>a = </strong>(n∑xy - ∑x∑y) / (n∑x² - (∑x)²)
+                    </div>
+                    
+                    <div class="formula-box bg-light p-2 rounded mb-3">
+                        <strong>b = </strong>(∑y - a∑x) / n
+                    </div>
+
+                    <h6>Coeficiente de Determinación:</h6>
+                    <div class="formula-box bg-light p-2 rounded">
+                        <strong>R² = </strong>1 - (SS<sub>res</sub> / SS<sub>tot</sub>)
+                    </div>
+                    
+                    <small class="text-muted mt-2 d-block">
+                        <strong>SS<sub>res</sub>:</strong> Suma de cuadrados residuales<br>
+                        <strong>SS<sub>tot</sub>:</strong> Suma total de cuadrados
+                    </small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tabla detallada de regresión -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card shadow-lg border-0 rounded-4">
+                <div class="card-header bg-gradient-info text-white rounded-top-4">
+                    <h5><i class="bi bi-table"></i> Tabla Detallada de Regresión</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-sm table-striped">
+                            <thead class="table-dark">
+                                <tr>
+                                    <th>d<sub>i</sub> (mm)</th>
+                                    <th>y<sub>i</sub> (%Pasante)</th>
+                                    <th>x<sub>i</sub> = log(d<sub>i</sub>)</th>
+                                    <th>y<sub>calc</sub> = ax + b</th>
+                                    <th>Residuo (y<sub>i</sub> - y<sub>calc</sub>)</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for fila in resultados_calculo.tabla_regresion %}
+                                <tr>
+                                    <td>{{ "%.3f"|format(fila.abertura) }}</td>
+                                    <td>{{ "%.2f"|format(fila.porcentaje_pasante) }}</td>
+                                    <td>{{ "%.4f"|format(fila.log_d) }}</td>
+                                    <td>{{ "%.2f"|format(fila.y_calculado) }}</td>
+                                    <td class="{% if fila.residuo|abs < 2 %}text-success{% elif fila.residuo|abs < 5 %}text-warning{% else %}text-danger{% endif %}">
+                                        {{ "%.2f"|format(fila.residuo) }}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Gráfico de Dispersión -->
+    {% if grafico_regresion %}
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card shadow-lg border-0 rounded-4">
+                <div class="card-header bg-gradient-warning text-dark rounded-top-4">
+                    <h5 class="mb-0"><i class="bi bi-scatter-chart me-2"></i>Gráfico de Dispersión con Línea de Tendencia</h5>
+                </div>
+                <div class="card-body">
+                    <div id="grafico-regresion"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+    {% endif %}
+</div>
+
+<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+<script>
+// Función para agregar filas de mallas dinámicamente
+function agregarFila() {
+    const tbody = document.getElementById('filas-mallas');
+    const numFilas = tbody.children.length;
+
+    const fila = document.createElement('tr');
+    fila.innerHTML = `
+        <td>
+            <input type="number" class="form-control" name="abertura[]" step="0.001" placeholder="ej: 1.000" required>
+        </td>
+        <td>
+            <input type="number" class="form-control" name="peso_retenido[]" step="0.01" placeholder="ej: 25.50" required>
+        </td>
+        <td>
+            <button type="button" class="btn btn-sm btn-danger" onclick="eliminarFila(this)">
+                <i class="bi bi-trash"></i>
+            </button>
+        </td>
+    `;
+
+    tbody.appendChild(fila);
+}
+
+function eliminarFila(boton) {
+    boton.closest('tr').remove();
+}
+
+// Agregar algunas filas iniciales
+document.addEventListener('DOMContentLoaded', function() {
+    // Agregar 8 filas iniciales
+    for (let i = 0; i < 8; i++) {
+        agregarFila();
+    }
+
+    // Llenar con valores predeterminados comunes
+    const aberturas = [4.75, 2.36, 1.18, 0.6, 0.3, 0.15, 0.075, 0.037];
+    const inputs_abertura = document.querySelectorAll('input[name="abertura[]"]');
+
+    aberturas.forEach((abertura, index) => {
+        if (inputs_abertura[index]) {
+            inputs_abertura[index].value = abertura;
+        }
+    });
+});
+
+// Renderizar gráficos
+{% if grafico_principal %}
+var grafico_principal = {{ grafico_principal|safe }};
+Plotly.newPlot('grafico-principal', grafico_principal.data, grafico_principal.layout, {responsive: true});
+{% endif %}
+
+{% if grafico_regresion %}
+var grafico_regresion = {{ grafico_regresion|safe }};
+Plotly.newPlot('grafico-regresion', grafico_regresion.data, grafico_regresion.layout, {responsive: true});
+{% endif %}
+</script>
+
+<style>
+/* Gradientes personalizados */
+.bg-gradient-info {
+    background: linear-gradient(135deg, #667eea 0%, #f093fb 100%);
+}
+
+.bg-gradient-warning {
+    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+}
+
+.bg-gradient-success {
+    background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+}
+
+.bg-gradient-primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.bg-gradient-dark {
+    background: linear-gradient(135deg, #232526 0%, #414345 100%);
+}
+
+/* Efectos de hover para botones */
+.btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+    transition: all 0.3s ease;
+}
+
+/* Animaciones suaves para cards */
+.card {
+    transition: all 0.3s ease;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+}
+
+/* Bordes redondeados mejorados */
+.rounded-4 {
+    border-radius: 1rem !important;
+}
+
+.rounded-top-4 {
+    border-top-left-radius: 1rem !important;
+    border-top-right-radius: 1rem !important;
+}
+
+/* Efectos para formularios */
+.form-control:focus {
+    border-color: #f093fb;
+    box-shadow: 0 0 15px rgba(240, 147, 251, 0.2);
+    transform: scale(1.02);
+    transition: all 0.3s ease;
+}
+
+/* Mejoras para badges */
+.badge {
+    padding: 0.5rem 1rem;
+    font-size: 0.9rem;
+    border-radius: 50px;
+}
+
+/* Efectos para fórmulas */
+.formula-box {
+    font-family: 'Fira Code', 'Courier New', monospace;
+    font-weight: bold;
+    border: 2px solid #e9ecef;
+    background: linear-gradient(45deg, #f8f9fa, #ffffff);
+    position: relative;
+    overflow: hidden;
+}
+
+.formula-box::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(240, 147, 251, 0.1), transparent);
+    transition: left 0.5s;
+}
+
+.formula-box:hover::before {
+    left: 100%;
+}
+
+/* Animación para elementos destacados */
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+}
+
+.nav .btn.active {
+    animation: pulse 2s infinite;
+}
+
+/* Mejoras para tablas */
+.table thead th {
+    border: none;
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.85rem;
+    letter-spacing: 1px;
+}
+
+.table tbody tr:hover {
+    background-color: rgba(240, 147, 251, 0.1);
+    transform: scale(1.01);
+    transition: all 0.2s ease;
+}
+
+/* Iconos mejorados */
+.bi {
+    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
+}
+
+/* Efectos de profundidad */
+.shadow-lg {
+    box-shadow: 0 20px 40px rgba(0,0,0,0.1) !important;
+}
+
+/* Colores para residuos */
+.text-success { color: #28a745 !important; }
+.text-warning { color: #ffc107 !important; }
+.text-danger { color: #dc3545 !important; }
+</style>
+{% endblock %}
