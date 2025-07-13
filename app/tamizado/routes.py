@@ -36,6 +36,60 @@ def analisis_granulometrico():
                          grafico_gates=grafico_gates,
                          tabla_datos=tabla_datos)
 
+def crear_grafico_log_log(df, n, r2):
+    """Crear gráfico log-log para análisis granulométrico básico"""
+    try:
+        fig = go.Figure()
+
+        # Datos experimentales
+        fig.add_trace(go.Scatter(
+            x=df['abertura'],
+            y=df['porcentaje_pasante'],
+            mode='markers+lines',
+            name='Datos Experimentales',
+            marker=dict(size=8, color='blue'),
+            line=dict(color='blue', width=2, dash='dot')
+        ))
+
+        # Si hay regresión válida, mostrar línea de tendencia
+        if n is not None and r2 is not None:
+            # Generar línea de tendencia
+            df_validos = df[(df['porcentaje_pasante'] > 0) & (df['porcentaje_pasante'] < 100)]
+            if len(df_validos) >= 2:
+                x_trend = np.logspace(np.log10(df_validos['abertura'].min()), 
+                                    np.log10(df_validos['abertura'].max()), 50)
+                # Usar regresión para calcular línea de tendencia
+                log_x = np.log10(df_validos['abertura'])
+                log_y = np.log10(df_validos['porcentaje_pasante'])
+                slope, intercept = np.polyfit(log_x, log_y, 1)
+                y_trend = 10**(slope * np.log10(x_trend) + intercept)
+
+                fig.add_trace(go.Scatter(
+                    x=x_trend,
+                    y=y_trend,
+                    mode='lines',
+                    name=f'Regresión lineal (n = {n:.3f}, R² = {r2:.4f})',
+                    line=dict(color='red', width=3)
+                ))
+
+        fig.update_layout(
+            title='Análisis Granulométrico - Gráfico Log-Log<br>log(%Pi) = n × log(di)',
+            xaxis_title='Tamaño de partícula di (mm)',
+            yaxis_title='Porcentaje acumulado pasante %Pi (%)',
+            xaxis_type='log',
+            yaxis_type='log',
+            xaxis_showgrid=True,
+            yaxis_showgrid=True,
+            hovermode='closest',
+            template='plotly_white'
+        )
+
+        return json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
+
+    except Exception as e:
+        print(f"Error creando gráfico log-log: {e}")
+        return None
+
 def crear_tabla_granulometrica(aberturas, pesos_retenidos, peso_total):
     """Crear tabla base con cálculos granulométricos"""
     df = pd.DataFrame({
