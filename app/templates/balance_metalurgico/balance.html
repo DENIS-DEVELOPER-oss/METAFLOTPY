@@ -1,3 +1,4 @@
+
 {% extends "base.html" %}
 
 {% block titulo %}Balance Metalúrgico - MetaFlotPy{% endblock %}
@@ -7,71 +8,419 @@
     <div class="row">
         <div class="col-12">
             <h1><i class="bi bi-graph-up"></i> Balance Metalúrgico</h1>
-            <p class="lead">Cálculo de recuperaciones y leyes metalúrgicas</p>
+            <p class="lead">Cálculo de recuperaciones y leyes metalúrgicas para 1, 2 o 3 concentrados</p>
         </div>
     </div>
 
+    <!-- Formulario de entrada -->
     <div class="row">
         <div class="col-12">
-            <div class="alert alert-info">
-                <i class="bi bi-info-circle"></i>
-                <strong>Módulo en Desarrollo:</strong> Esta funcionalidad estará disponible próximamente.
+            <div class="card">
+                <div class="card-header">
+                    <h5><i class="bi bi-calculator"></i> Datos de Entrada</h5>
+                </div>
+                <div class="card-body">
+                    <form method="POST" id="formulario-balance-metalurgico">
+                        {{ formulario.hidden_tag() }}
+                        
+                        <!-- Selector de tipo de balance -->
+                        <div class="row mb-3">
+                            <div class="col-md-4">
+                                <label for="{{ formulario.tipo_balance.id }}" class="form-label">
+                                    <i class="bi bi-gear"></i> {{ formulario.tipo_balance.label.text }}
+                                </label>
+                                {{ formulario.tipo_balance(class="form-select", onchange="mostrarFormulario()") }}
+                            </div>
+                        </div>
+
+                        <!-- Formulario para 1 Concentrado -->
+                        <div id="form-1_concentrado" class="tipo-balance" style="display: none;">
+                            <h6 class="text-primary mb-3">Balance Metalúrgico - 1 Concentrado</h6>
+                            <p class="small text-muted">Fórmulas: F = C + T | F·f = C·c + T·t | R = (C·c)/(F·f) × 100</p>
+                            
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <h6>Datos de Masa</h6>
+                                    <div class="mb-2">
+                                        <label class="form-label">{{ formulario.f_masa_alimentacion.label.text }}</label>
+                                        {{ formulario.f_masa_alimentacion(class="form-control") }}
+                                    </div>
+                                    <div class="mb-2">
+                                        <label class="form-label">{{ formulario.c_masa_concentrado.label.text }}</label>
+                                        {{ formulario.c_masa_concentrado(class="form-control") }}
+                                    </div>
+                                    <div class="mb-2">
+                                        <label class="form-label">{{ formulario.t_masa_relave.label.text }}</label>
+                                        {{ formulario.t_masa_relave(class="form-control") }}
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <h6>Datos de Ley</h6>
+                                    <div class="mb-2">
+                                        <label class="form-label">{{ formulario.f_ley_alimentacion.label.text }}</label>
+                                        {{ formulario.f_ley_alimentacion(class="form-control") }}
+                                    </div>
+                                    <div class="mb-2">
+                                        <label class="form-label">{{ formulario.c_ley_concentrado.label.text }}</label>
+                                        {{ formulario.c_ley_concentrado(class="form-control") }}
+                                    </div>
+                                    <div class="mb-2">
+                                        <label class="form-label">{{ formulario.t_ley_relave.label.text }}</label>
+                                        {{ formulario.t_ley_relave(class="form-control") }}
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="alert alert-info small">
+                                        <h6><i class="bi bi-lightbulb"></i> Instrucciones:</h6>
+                                        <p class="mb-1">Ingrese al menos 2 valores de masa y 2 valores de ley.</p>
+                                        <p class="mb-0">El sistema calculará automáticamente los valores faltantes.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Formulario para 2 Concentrados -->
+                        <div id="form-2_concentrados" class="tipo-balance" style="display: none;">
+                            <h6 class="text-primary mb-3">Balance Metalúrgico - 2 Concentrados</h6>
+                            <p class="small text-muted">Fórmulas: F = C₁ + C₂ + T | F·f = C₁·c₁ + C₂·c₂ + T·t | R₁ = (C₁·c₁)/(F·f) × 100 | R₂ = (C₂·c₂)/(F·f) × 100</p>
+                            
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <h6>Datos de Masa</h6>
+                                    <div class="mb-2">
+                                        <label class="form-label">{{ formulario.f_masa_alimentacion.label.text }}</label>
+                                        {{ formulario.f_masa_alimentacion(class="form-control") }}
+                                    </div>
+                                    <div class="mb-2">
+                                        <label class="form-label">{{ formulario.c1_masa_concentrado1.label.text }}</label>
+                                        {{ formulario.c1_masa_concentrado1(class="form-control") }}
+                                    </div>
+                                    <div class="mb-2">
+                                        <label class="form-label">{{ formulario.c2_masa_concentrado2.label.text }}</label>
+                                        {{ formulario.c2_masa_concentrado2(class="form-control") }}
+                                    </div>
+                                    <div class="mb-2">
+                                        <label class="form-label">{{ formulario.t_masa_relave.label.text }}</label>
+                                        {{ formulario.t_masa_relave(class="form-control") }}
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <h6>Datos de Ley</h6>
+                                    <div class="mb-2">
+                                        <label class="form-label">{{ formulario.f_ley_alimentacion.label.text }}</label>
+                                        {{ formulario.f_ley_alimentacion(class="form-control") }}
+                                    </div>
+                                    <div class="mb-2">
+                                        <label class="form-label">{{ formulario.c1_ley_concentrado1.label.text }}</label>
+                                        {{ formulario.c1_ley_concentrado1(class="form-control") }}
+                                    </div>
+                                    <div class="mb-2">
+                                        <label class="form-label">{{ formulario.c2_ley_concentrado2.label.text }}</label>
+                                        {{ formulario.c2_ley_concentrado2(class="form-control") }}
+                                    </div>
+                                    <div class="mb-2">
+                                        <label class="form-label">{{ formulario.t_ley_relave.label.text }}</label>
+                                        {{ formulario.t_ley_relave(class="form-control") }}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Formulario para 3 Concentrados -->
+                        <div id="form-3_concentrados" class="tipo-balance" style="display: none;">
+                            <h6 class="text-primary mb-3">Balance Metalúrgico - 3 Concentrados</h6>
+                            <p class="small text-muted">Fórmulas: F = C₁ + C₂ + C₃ + T | F·f = C₁·c₁ + C₂·c₂ + C₃·c₃ + T·t | Rᵢ = (Cᵢ·cᵢ)/(F·f) × 100</p>
+                            
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <h6>Datos de Masa</h6>
+                                    <div class="mb-2">
+                                        <label class="form-label">{{ formulario.f_masa_alimentacion.label.text }}</label>
+                                        {{ formulario.f_masa_alimentacion(class="form-control") }}
+                                    </div>
+                                    <div class="mb-2">
+                                        <label class="form-label">{{ formulario.c1_masa_concentrado1.label.text }}</label>
+                                        {{ formulario.c1_masa_concentrado1(class="form-control") }}
+                                    </div>
+                                    <div class="mb-2">
+                                        <label class="form-label">{{ formulario.c2_masa_concentrado2.label.text }}</label>
+                                        {{ formulario.c2_masa_concentrado2(class="form-control") }}
+                                    </div>
+                                    <div class="mb-2">
+                                        <label class="form-label">{{ formulario.c3_masa_concentrado3.label.text }}</label>
+                                        {{ formulario.c3_masa_concentrado3(class="form-control") }}
+                                    </div>
+                                    <div class="mb-2">
+                                        <label class="form-label">{{ formulario.t_masa_relave.label.text }}</label>
+                                        {{ formulario.t_masa_relave(class="form-control") }}
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <h6>Datos de Ley</h6>
+                                    <div class="mb-2">
+                                        <label class="form-label">{{ formulario.f_ley_alimentacion.label.text }}</label>
+                                        {{ formulario.f_ley_alimentacion(class="form-control") }}
+                                    </div>
+                                    <div class="mb-2">
+                                        <label class="form-label">{{ formulario.c1_ley_concentrado1.label.text }}</label>
+                                        {{ formulario.c1_ley_concentrado1(class="form-control") }}
+                                    </div>
+                                    <div class="mb-2">
+                                        <label class="form-label">{{ formulario.c2_ley_concentrado2.label.text }}</label>
+                                        {{ formulario.c2_ley_concentrado2(class="form-control") }}
+                                    </div>
+                                    <div class="mb-2">
+                                        <label class="form-label">{{ formulario.c3_ley_concentrado3.label.text }}</label>
+                                        {{ formulario.c3_ley_concentrado3(class="form-control") }}
+                                    </div>
+                                    <div class="mb-2">
+                                        <label class="form-label">{{ formulario.t_ley_relave.label.text }}</label>
+                                        {{ formulario.t_ley_relave(class="form-control") }}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row mt-3">
+                            <div class="col-12">
+                                {{ formulario.calcular(class="btn btn-primary btn-lg") }}
+                            </div>
+                        </div>
+                    </form>
+                </div>
             </div>
         </div>
     </div>
 
-    {% if graficos %}
-                        <div class="mt-4">
-                            <h5 class="text-primary">
-                                <i class="bi bi-graph-up me-2"></i>Análisis Gráfico
-                            </h5>
+    <!-- Mensaje de error -->
+    {% if error_mensaje %}
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="alert alert-danger">
+                <h5><i class="bi bi-exclamation-triangle"></i> Error en los datos</h5>
+                <p>{{ error_mensaje }}</p>
+            </div>
+        </div>
+    </div>
+    {% endif %}
 
-                            <!-- Gráfico de Recuperaciones -->
+    <!-- Resultados -->
+    {% if resultados %}
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5><i class="bi bi-clipboard-data"></i> Resultados del Balance Metalúrgico</h5>
+                </div>
+                <div class="card-body">
+                    {% if resultados.tipo_balance == '1_concentrado' %}
+                    <!-- Resultados para 1 Concentrado -->
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6 class="text-primary">Balance de Masa</h6>
+                            <table class="table table-sm">
+                                <tr><td><strong>Alimentación (F):</strong></td><td>{{ resultados.F }} t</td></tr>
+                                <tr><td><strong>Concentrado (C):</strong></td><td>{{ resultados.C }} t</td></tr>
+                                <tr><td><strong>Relave (T):</strong></td><td>{{ resultados.T }} t</td></tr>
+                                <tr><td><strong>Balance verificado:</strong></td><td>
+                                    {% if resultados.balance_masa_ok %}
+                                        <span class="text-success">✓ Correcto</span>
+                                    {% else %}
+                                        <span class="text-warning">⚠ Revisar</span>
+                                    {% endif %}
+                                </td></tr>
+                            </table>
+                        </div>
+                        <div class="col-md-6">
+                            <h6 class="text-primary">Balance Metálico</h6>
+                            <table class="table table-sm">
+                                <tr><td><strong>Ley Alimentación (f):</strong></td><td>{{ resultados.f }}</td></tr>
+                                <tr><td><strong>Ley Concentrado (c):</strong></td><td>{{ resultados.c }}</td></tr>
+                                <tr><td><strong>Ley Relave (t):</strong></td><td>{{ resultados.t }}</td></tr>
+                                <tr><td><strong>Recuperación:</strong></td><td><span class="text-success fw-bold">{{ resultados.recuperacion }}%</span></td></tr>
+                            </table>
+                        </div>
+                    </div>
+
+                    {% elif resultados.tipo_balance == '2_concentrados' %}
+                    <!-- Resultados para 2 Concentrados -->
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6 class="text-primary">Balance de Masa</h6>
+                            <table class="table table-sm">
+                                <tr><td><strong>Alimentación (F):</strong></td><td>{{ resultados.F }} t</td></tr>
+                                <tr><td><strong>Concentrado 1 (C₁):</strong></td><td>{{ resultados.C1 }} t</td></tr>
+                                <tr><td><strong>Concentrado 2 (C₂):</strong></td><td>{{ resultados.C2 }} t</td></tr>
+                                <tr><td><strong>Relave (T):</strong></td><td>{{ resultados.T }} t</td></tr>
+                            </table>
+                        </div>
+                        <div class="col-md-6">
+                            <h6 class="text-primary">Recuperaciones</h6>
+                            <table class="table table-sm">
+                                <tr><td><strong>Recuperación 1 (R₁):</strong></td><td>{{ resultados.R1 }}%</td></tr>
+                                <tr><td><strong>Recuperación 2 (R₂):</strong></td><td>{{ resultados.R2 }}%</td></tr>
+                                <tr><td><strong>Recuperación Total:</strong></td><td><span class="text-success fw-bold">{{ resultados.R_total }}%</span></td></tr>
+                            </table>
+                        </div>
+                    </div>
+
+                    {% elif resultados.tipo_balance == '3_concentrados' %}
+                    <!-- Resultados para 3 Concentrados -->
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6 class="text-primary">Balance de Masa</h6>
+                            <table class="table table-sm">
+                                <tr><td><strong>Alimentación (F):</strong></td><td>{{ resultados.F }} t</td></tr>
+                                <tr><td><strong>Concentrado 1 (C₁):</strong></td><td>{{ resultados.C1 }} t</td></tr>
+                                <tr><td><strong>Concentrado 2 (C₂):</strong></td><td>{{ resultados.C2 }} t</td></tr>
+                                <tr><td><strong>Concentrado 3 (C₃):</strong></td><td>{{ resultados.C3 }} t</td></tr>
+                                <tr><td><strong>Relave (T):</strong></td><td>{{ resultados.T }} t</td></tr>
+                            </table>
+                        </div>
+                        <div class="col-md-6">
+                            <h6 class="text-primary">Recuperaciones</h6>
+                            <table class="table table-sm">
+                                <tr><td><strong>Recuperación 1 (R₁):</strong></td><td>{{ resultados.R1 }}%</td></tr>
+                                <tr><td><strong>Recuperación 2 (R₂):</strong></td><td>{{ resultados.R2 }}%</td></tr>
+                                <tr><td><strong>Recuperación 3 (R₃):</strong></td><td>{{ resultados.R3 }}%</td></tr>
+                                <tr><td><strong>Recuperación Total:</strong></td><td><span class="text-success fw-bold">{{ resultados.R_total }}%</span></td></tr>
+                            </table>
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <!-- Gráficos -->
+                    {% if graficos %}
+                    <div class="mt-4">
+                        <h5 class="text-primary">
+                            <i class="bi bi-graph-up me-2"></i>Análisis Gráfico
+                        </h5>
+
+                        <div class="row">
+                            <!-- Gráfico de Recuperaciones/Recuperación -->
                             {% if graficos.recuperacion %}
-                            <div class="mb-4">
-                                <h6>Recuperaciones del Proceso</h6>
+                            <div class="col-md-4">
+                                <h6>Recuperación Metalúrgica</h6>
                                 <div id="grafico-recuperacion" style="height: 400px;"></div>
                             </div>
                             {% endif %}
 
-                            <div class="row">
-                                <!-- Gráfico de Leyes -->
-                                {% if graficos.leyes %}
-                                <div class="col-md-6">
-                                    <h6>Distribución de Leyes</h6>
-                                    <div id="grafico-leyes" style="height: 400px;"></div>
-                                </div>
-                                {% endif %}
-
-                                <!-- Gráfico Circular del Balance -->
-                                {% if graficos.balance_circular %}
-                                <div class="col-md-6">
-                                    <h6>Balance Metalúrgico</h6>
-                                    <div id="grafico-balance-circular" style="height: 400px;"></div>
-                                </div>
-                                {% endif %}
+                            {% if graficos.recuperaciones %}
+                            <div class="col-md-4">
+                                <h6>Recuperaciones</h6>
+                                <div id="grafico-recuperaciones" style="height: 400px;"></div>
                             </div>
-                        </div>
-                        {% endif %}
+                            {% endif %}
 
+                            <!-- Gráfico de Leyes -->
+                            {% if graficos.leyes %}
+                            <div class="col-md-4">
+                                <h6>Distribución de Leyes</h6>
+                                <div id="grafico-leyes" style="height: 400px;"></div>
+                            </div>
+                            {% endif %}
+
+                            <!-- Diagrama de Flujo -->
+                            {% if graficos.diagrama_flujo %}
+                            <div class="col-md-4">
+                                <h6>Diagrama de Flujos</h6>
+                                <div id="grafico-diagrama-flujo" style="height: 400px;"></div>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
 </div>
 
-        <script>
-            document.addEventListener('DOMContentLoaded', function() {
-                {% if graficos.recuperacion %}
-                var graficoRecuperacion = {{ graficos.recuperacion|safe }};
-                Plotly.newPlot('grafico-recuperacion', graficoRecuperacion.data, graficoRecuperacion.layout);
-                {% endif %}
+<script>
+// Función para mostrar/ocultar formularios según el tipo de balance seleccionado
+function mostrarFormulario() {
+    try {
+        // Ocultar todos los formularios
+        const formularios = document.querySelectorAll('.tipo-balance');
+        formularios.forEach(form => {
+            if (form) {
+                form.style.display = 'none';
+            }
+        });
+        
+        // Mostrar el formulario seleccionado
+        const selectElement = document.getElementById('tipo_balance');
+        if (selectElement) {
+            const tipoSeleccionado = selectElement.value;
+            const formularioActivo = document.getElementById('form-' + tipoSeleccionado);
+            if (formularioActivo) {
+                formularioActivo.style.display = 'block';
+            }
+        }
+    } catch(e) {
+        console.error('Error al mostrar formulario:', e);
+    }
+}
 
-                {% if graficos.leyes %}
-                var graficoLeyes = {{ graficos.leyes|safe }};
-                Plotly.newPlot('grafico-leyes', graficoLeyes.data, graficoLeyes.layout);
-                {% endif %}
+// Mostrar formulario inicial al cargar la página
+document.addEventListener('DOMContentLoaded', function() {
+    try {
+        mostrarFormulario();
+        console.log("Balance Metalúrgico inicializado correctamente");
+    } catch(e) {
+        console.error('Error al inicializar Balance Metalúrgico:', e);
+    }
+});
+</script>
 
-                {% if graficos.balance_circular %}
-                var graficoBalance = {{ graficos.balance_circular|safe }};
-                Plotly.newPlot('grafico-balance-circular', graficoBalance.data, graficoBalance.layout);
-                {% endif %}
-            });
-        </script>
+{% if graficos %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    {% if graficos.recuperacion %}
+    try {
+        var grafico_recuperacion = {{ graficos.recuperacion|safe }};
+        if (document.getElementById('grafico-recuperacion')) {
+            Plotly.newPlot('grafico-recuperacion', grafico_recuperacion.data, grafico_recuperacion.layout);
+        }
+    } catch(e) {
+        console.error('Error al cargar gráfico de recuperación:', e);
+    }
+    {% endif %}
+
+    {% if graficos.recuperaciones %}
+    try {
+        var grafico_recuperaciones = {{ graficos.recuperaciones|safe }};
+        if (document.getElementById('grafico-recuperaciones')) {
+            Plotly.newPlot('grafico-recuperaciones', grafico_recuperaciones.data, grafico_recuperaciones.layout);
+        }
+    } catch(e) {
+        console.error('Error al cargar gráfico de recuperaciones:', e);
+    }
+    {% endif %}
+
+    {% if graficos.leyes %}
+    try {
+        var grafico_leyes = {{ graficos.leyes|safe }};
+        if (document.getElementById('grafico-leyes')) {
+            Plotly.newPlot('grafico-leyes', grafico_leyes.data, grafico_leyes.layout);
+        }
+    } catch(e) {
+        console.error('Error al cargar gráfico de leyes:', e);
+    }
+    {% endif %}
+
+    {% if graficos.diagrama_flujo %}
+    try {
+        var grafico_diagrama_flujo = {{ graficos.diagrama_flujo|safe }};
+        if (document.getElementById('grafico-diagrama-flujo')) {
+            Plotly.newPlot('grafico-diagrama-flujo', grafico_diagrama_flujo.data, grafico_diagrama_flujo.layout);
+        }
+    } catch(e) {
+        console.error('Error al cargar diagrama de flujo:', e);
+    }
+    {% endif %}
+});
+</script>
+{% endif %}
 {% endblock %}
