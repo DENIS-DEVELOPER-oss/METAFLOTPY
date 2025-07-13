@@ -11,8 +11,13 @@ import math
 
 bp_tamizado = Blueprint('tamizado', __name__)
 
-@bp_tamizado.route('/', methods=['GET', 'POST'])
+@bp_tamizado.route('/')
 def analisis_granulometrico():
+    """Página principal del módulo de análisis de tamaño de partícula"""
+    return render_template('tamizado/index.html')
+
+@bp_tamizado.route('/gates-gaudin-schuhmann', methods=['GET', 'POST'])
+def gates_gaudin_schuhmann():
     formulario = FormularioTamizado()
     resultados = None
     grafico_json = None
@@ -49,7 +54,7 @@ def analisis_granulometrico():
         except Exception as e:
             flash(f'Error en el cálculo: {str(e)}', 'error')
 
-    return render_template('tamizado/analisis.html', 
+    return render_template('tamizado/gates_gaudin_schuhmann.html', 
                          formulario=formulario, 
                          resultados=resultados,
                          grafico=grafico_json)

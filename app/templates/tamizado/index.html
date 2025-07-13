@@ -1,0 +1,229 @@
+
+{% extends "base.html" %}
+
+{% block titulo %}Análisis de Tamaño de Partícula - MetaFlotPy{% endblock %}
+
+{% block contenido %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <h1><i class="bi bi-grid"></i> Análisis de Tamaño de Partícula</h1>
+            <p class="lead">Seleccione el método de análisis granulométrico que desea utilizar</p>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- 1. Gates-Gaudin-Schuhmann -->
+        <div class="col-lg-4 mb-4">
+            <div class="card h-100">
+                <div class="card-header bg-primary text-white">
+                    <h5><i class="bi bi-1-circle"></i> Gates-Gaudin-Schuhmann (GGS)</h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <h6><i class="bi bi-database"></i> Datos de entrada:</h6>
+                        <ul class="small">
+                            <li><strong>d:</strong> Tamaño de partícula (mm o μm)</li>
+                            <li><strong>d<sub>max</sub>:</strong> Tamaño máximo de partícula en la muestra</li>
+                            <li><strong>P(d):</strong> Porcentaje acumulado pasante para d</li>
+                            <li><strong>n:</strong> Exponente de distribución (calculado por regresión)</li>
+                        </ul>
+                    </div>
+
+                    <div class="mb-3">
+                        <h6><i class="bi bi-calculator"></i> Fórmula:</h6>
+                        <div class="formula-box bg-light p-3 rounded text-center">
+                            <strong>P(d) = (d/d<sub>max</sub>)<sup>n</sup> × 100</strong>
+                        </div>
+                        <div class="mt-2">
+                            <small><strong>Donde:</strong></small>
+                            <ul class="small">
+                                <li><strong>P(d):</strong> % acumulado pasante</li>
+                                <li><strong>d:</strong> tamaño de partícula</li>
+                                <li><strong>d<sub>max</sub>:</strong> tamaño máximo</li>
+                                <li><strong>n:</strong> pendiente obtenida por regresión log-log</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <h6><i class="bi bi-graph-up"></i> Gráfico recomendado:</h6>
+                        <ul class="small">
+                            <li><strong>Eje X:</strong> log(d)</li>
+                            <li><strong>Eje Y:</strong> log(P(d))</li>
+                            <li><strong>Tipo:</strong> Gráfico log-log (línea recta si el modelo es válido)</li>
+                        </ul>
+                    </div>
+
+                    <div class="mb-3">
+                        <h6><i class="bi bi-info-circle"></i> Interpretación:</h6>
+                        <ul class="small">
+                            <li>Se ajusta bien para materiales de molienda gruesa.</li>
+                            <li>La pendiente <strong>n</strong> define la uniformidad de la molienda.</li>
+                            <li>Una línea recta en log-log valida el modelo.</li>
+                        </ul>
+                    </div>
+
+                    <div class="text-center">
+                        <a href="{{ url_for('tamizado.gates_gaudin_schuhmann') }}" class="btn btn-primary">
+                            <i class="bi bi-calculator"></i> Usar Gates-Gaudin-Schuhmann
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 2. Rosin-Rammler -->
+        <div class="col-lg-4 mb-4">
+            <div class="card h-100">
+                <div class="card-header bg-success text-white">
+                    <h5><i class="bi bi-2-circle"></i> Rosin-Rammler</h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <h6><i class="bi bi-database"></i> Datos de entrada:</h6>
+                        <ul class="small">
+                            <li><strong>d:</strong> Tamaño de partícula</li>
+                            <li><strong>d<sub>0</sub>:</strong> Tamaño característico (cuando el 36.8% de partículas son mayores)</li>
+                            <li><strong>n:</strong> parámetro de distribución</li>
+                            <li><strong>R(d):</strong> % acumulado retenido para d</li>
+                        </ul>
+                    </div>
+
+                    <div class="mb-3">
+                        <h6><i class="bi bi-calculator"></i> Fórmula:</h6>
+                        <div class="formula-box bg-light p-3 rounded text-center">
+                            <strong>R(d) = 100 × e<sup>-(d/d₀)<sup>n</sup></sup></strong>
+                        </div>
+                        <div class="formula-box bg-light p-2 rounded text-center mt-2">
+                            <small><strong>ln[-ln(R(d)/100)] = n × ln(d) - n × ln(d₀)</strong></small>
+                        </div>
+                        <div class="mt-2">
+                            <small><strong>Donde:</strong></small>
+                            <ul class="small">
+                                <li><strong>R(d):</strong> % acumulado retenido</li>
+                                <li><strong>d:</strong> tamaño de partícula</li>
+                                <li><strong>d₀:</strong> tamaño característico</li>
+                                <li><strong>n:</strong> pendiente de la recta (parámetro de forma)</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <h6><i class="bi bi-graph-up"></i> Gráfico recomendado:</h6>
+                        <ul class="small">
+                            <li><strong>Eje X:</strong> ln(d)</li>
+                            <li><strong>Eje Y:</strong> ln[-ln(R(d)/100)]</li>
+                            <li><strong>Tipo:</strong> Semilog (línea recta valida el modelo)</li>
+                        </ul>
+                    </div>
+
+                    <div class="mb-3">
+                        <h6><i class="bi bi-info-circle"></i> Interpretación:</h6>
+                        <ul class="small">
+                            <li>Utilizado para análisis de polvos finos o molienda fina.</li>
+                            <li><strong>n</strong> define el grado de dispersión.</li>
+                            <li><strong>d₀</strong> representa el centro de la distribución.</li>
+                        </ul>
+                    </div>
+
+                    <div class="text-center">
+                        <a href="{{ url_for('tamizado.rosin_rammler') }}" class="btn btn-success">
+                            <i class="bi bi-calculator"></i> Usar Rosin-Rammler
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 3. Regresión Lineal -->
+        <div class="col-lg-4 mb-4">
+            <div class="card h-100">
+                <div class="card-header bg-warning text-dark">
+                    <h5><i class="bi bi-3-circle"></i> Regresión Lineal (Ajuste de curva empírica)</h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <h6><i class="bi bi-database"></i> Datos de entrada:</h6>
+                        <ul class="small">
+                            <li><strong>x:</strong> Tamaño de partícula (en escala logarítmica o directa)</li>
+                            <li><strong>y:</strong> % acumulado pasante o retenido</li>
+                            <li>Se trabajan pares de datos (x<sub>i</sub>, y<sub>i</sub>)</li>
+                        </ul>
+                    </div>
+
+                    <div class="mb-3">
+                        <h6><i class="bi bi-calculator"></i> Fórmula:</h6>
+                        <div class="formula-box bg-light p-3 rounded text-center">
+                            <strong>y = a × x + b</strong>
+                        </div>
+                        <div class="mt-2">
+                            <small><strong>Donde:</strong></small>
+                            <ul class="small">
+                                <li><strong>a:</strong> pendiente</li>
+                                <li><strong>b:</strong> intersección</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <h6><i class="bi bi-calculator"></i> Usa método de mínimos cuadrados:</h6>
+                        <div class="formula-box bg-light p-2 rounded">
+                            <small><strong>a = </strong>(n∑x<sub>i</sub>y<sub>i</sub> - ∑x<sub>i</sub>∑y<sub>i</sub>) / (n∑x<sub>i</sub>² - (∑x<sub>i</sub>)²)</small>
+                        </div>
+                        <div class="formula-box bg-light p-2 rounded mt-2">
+                            <small><strong>b = </strong>(∑y<sub>i</sub> - a∑x<sub>i</sub>) / n</small>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <h6><i class="bi bi-graph-up"></i> Gráfico recomendado:</h6>
+                        <ul class="small">
+                            <li><strong>Eje X:</strong> tamaño (log(d) o d)</li>
+                            <li><strong>Eje Y:</strong> % acumulado pasante</li>
+                            <li><strong>Tipo:</strong> Diagrama de dispersión con línea de tendencia</li>
+                        </ul>
+                    </div>
+
+                    <div class="mb-3">
+                        <h6><i class="bi bi-info-circle"></i> Interpretación:</h6>
+                        <ul class="small">
+                            <li>Ajusta modelos de forma general.</li>
+                            <li>Se puede aplicar sobre curvas empíricas.</li>
+                            <li><strong>R²</strong> (coeficiente de determinación) indica la calidad del ajuste.</li>
+                        </ul>
+                    </div>
+
+                    <div class="text-center">
+                        <a href="{{ url_for('tamizado.regresion_lineal') }}" class="btn btn-warning text-dark">
+                            <i class="bi bi-calculator"></i> Usar Regresión Lineal
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.formula-box {
+    font-family: 'Courier New', monospace;
+    font-weight: bold;
+    border: 1px solid #ddd;
+}
+
+.card {
+    transition: transform 0.2s;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.btn {
+    border-radius: 25px;
+    padding: 10px 20px;
+}
+</style>
+{% endblock %}
