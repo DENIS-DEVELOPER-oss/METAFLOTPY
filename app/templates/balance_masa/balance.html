@@ -3,253 +3,179 @@
 {% block titulo %}Balance de Masa - MetaFlotPy{% endblock %}
 
 {% block contenido %}
-<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-    <h1 class="h2"><i class="bi bi-diagram-3"></i> Balance de Masa de Circuito de Molienda</h1>
-</div>
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <h1><i class="bi bi-diagram-3"></i> Balance de Masa de Circuito de Molienda</h1>
+            <p class="lead">Cálculo de flujos másicos y carga circulante en circuitos cerrados</p>
+        </div>
+    </div>
 
-<!-- Selector de Tipo de Circuito -->
-<div class="row mb-4">
-    <div class="col-12">
-        <div class="card">
-            <div class="card-header">
-                <h5><i class="bi bi-list-ul"></i> Seleccionar Tipo de Circuito</h5>
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h5><i class="bi bi-calculator"></i> Datos de Entrada</h5>
+                </div>
+                <div class="card-body">
+                    <form method="POST">
+                        {{ formulario.hidden_tag() }}
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    {{ formulario.tipo_circuito.label(class="form-label") }}
+                                    {{ formulario.tipo_circuito(class="form-select") }}
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    {{ formulario.alimentacion_fresca.label(class="form-label") }}
+                                    {{ formulario.alimentacion_fresca(class="form-control", step="0.01") }}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    {{ formulario.razon_carga_circulante.label(class="form-label") }}
+                                    {{ formulario.razon_carga_circulante(class="form-control", step="0.01") }}
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    {{ formulario.eficiencia_clasificador.label(class="form-label") }}
+                                    {{ formulario.eficiencia_clasificador(class="form-control", step="0.1") }}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="text-center">
+                            {{ formulario.calcular(class="btn btn-primary btn-lg") }}
+                        </div>
+                    </form>
+                </div>
             </div>
-            <div class="card-body">
-                <div class="row">
-                    <div class="col-md-6 col-lg-3 mb-3">
-                        <div class="card circuit-card" onclick="selectCircuit('directo')">
-                            <div class="card-body text-center">
-                                <i class="bi bi-arrow-right-circle text-primary fs-2"></i>
-                                <h6 class="mt-2">Circuito cerrado directo</h6>
-                                <p class="small text-muted">Clasificador en serie con el molino</p>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-6 col-lg-3 mb-3">
-                        <div class="card circuit-card" onclick="selectCircuit('inverso')">
-                            <div class="card-body text-center">
-                                <i class="bi bi-arrow-left-circle text-success fs-2"></i>
-                                <h6 class="mt-2">Circuito cerrado inverso</h6>
-                                <p class="small text-muted">Alimentación directa al clasificador</p>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-6 col-lg-3 mb-3">
-                        <div class="card circuit-card" onclick="selectCircuit('sabc1')">
-                            <div class="card-body text-center">
-                                <i class="bi bi-gear-fill text-warning fs-2"></i>
-                                <h6 class="mt-2">Circuito SABC-1</h6>
-                                <p class="small text-muted">Semi-autógeno + molino de bolas</p>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-6 col-lg-3 mb-3">
-                        <div class="card circuit-card" onclick="selectCircuit('sabc2')">
-                            <div class="card-body text-center">
-                                <i class="bi bi-gear text-info fs-2"></i>
-                                <h6 class="mt-2">Circuito SABC-2</h6>
-                                <p class="small text-muted">Semi-autógeno + 2 molinos de bolas</p>
-                            </div>
-                        </div>
-                    </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5><i class="bi bi-info-circle"></i> Información</h5>
+                </div>
+                <div class="card-body">
+                    <h6>Tipos de Circuito:</h6>
+                    <ul class="small">
+                        <li><strong>Directo:</strong> Material grueso retorna al molino</li>
+                        <li><strong>Inverso:</strong> Material fino es el producto</li>
+                        <li><strong>SABC-1:</strong> Semi-autógeno con bolas etapa 1</li>
+                        <li><strong>SABC-2:</strong> Semi-autógeno con bolas etapa 2</li>
+                    </ul>
+
+                    <h6>Parámetros:</h6>
+                    <ul class="small">
+                        <li><strong>Carga Circulante:</strong> Material que recircula</li>
+                        <li><strong>Eficiencia:</strong> % de separación del clasificador</li>
+                    </ul>
                 </div>
             </div>
         </div>
     </div>
-</div>
 
-<!-- Formulario de Cálculo -->
-<div class="row" id="calculation-section" style="display: none;">
-    <div class="col-md-4">
-        <div class="card">
-            <div class="card-header">
-                <h5>Parámetros de Entrada</h5>
-                <small class="text-muted" id="circuit-type-label"></small>
-            </div>
-            <div class="card-body">
-                <form method="POST">
-                    {{ formulario.hidden_tag() }}
-
-                    <input type="hidden" id="tipo_circuito" name="tipo_circuito" value="">
-
-                    <div class="mb-3">
-                        {{ formulario.alimentacion_fresca.label(class="form-label") }}
-                        {{ formulario.alimentacion_fresca(class="form-control") }}
-                    </div>
-
-                    <div class="mb-3">
-                        {{ formulario.razon_carga_circulante.label(class="form-label") }}
-                        {{ formulario.razon_carga_circulante(class="form-control") }}
-                    </div>
-
-                    <div class="mb-3">
-                        {{ formulario.eficiencia_clasificador.label(class="form-label") }}
-                        {{ formulario.eficiencia_clasificador(class="form-control") }}
-                    </div>
-
-                    <div class="d-grid">
-                        {{ formulario.calcular(class="btn btn-primary") }}
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-
-    <div class="col-md-8">
-        {% if resultados %}
-        <div class="card mb-3">
-            <div class="card-header">
-                <h5>Resultados del Balance</h5>
-            </div>
-            <div class="card-body">
-                <div class="row">
-                    <div class="col-md-6">
-                        <h6>Flujos Principales:</h6>
-                        <ul class="list-group list-group-flush">
-                            <li class="list-group-item d-flex justify-content-between">
-                                <strong>Alimentación Fresca:</strong>
-                                <span>{{ resultados.alimentacion_fresca }} t/h</span>
-                            </li>
-                            <li class="list-group-item d-flex justify-content-between">
-                                <strong>Carga Circulante:</strong>
-                                <span>{{ resultados.carga_circulante }} t/h</span>
-                            </li>
-                            <li class="list-group-item d-flex justify-content-between">
-                                <strong>Alimentación al Molino:</strong>
-                                <span>{{ resultados.alimentacion_molino }} t/h</span>
-                            </li>
-                        </ul>
-                    </div>
-                    <div class="col-md-6">
-                        <h6>Productos del Clasificador:</h6>
-                        <ul class="list-group list-group-flush">
-                            <li class="list-group-item d-flex justify-content-between">
-                                <strong>Descarga (gruesos):</strong>
-                                <span>{{ resultados.descarga_clasificador }} t/h</span>
-                            </li>
-                            <li class="list-group-item d-flex justify-content-between">
-                                <strong>Rebose (finos):</strong>
-                                <span>{{ resultados.rebose_clasificador }} t/h</span>
-                            </li>
-                            <li class="list-group-item d-flex justify-content-between">
-                                <strong>Eficiencia:</strong>
-                                <span>{{ resultados.eficiencia_clasificador }}%</span>
-                            </li>
-                        </ul>
-                    </div>
+    {% if resultados %}
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5><i class="bi bi-clipboard-data"></i> Resultados del Balance</h5>
                 </div>
-                {% if graficos %}
-                        <div class="mt-4">
-                            <h5 class="text-primary">
-                                <i class="bi bi-graph-up me-2"></i>Análisis Gráfico
-                            </h5>
-
-                            <!-- Gráfico de Flujos -->
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <table class="table table-striped">
+                                <tr>
+                                    <th>Parámetro</th>
+                                    <th>Valor</th>
+                                    <th>Unidad</th>
+                                </tr>
+                                <tr>
+                                    <td>Alimentación al Molino</td>
+                                    <td>{{ "%.2f"|format(resultados.alimentacion_molino) }}</td>
+                                    <td>t/h</td>
+                                </tr>
+                                <tr>
+                                    <td>Carga Circulante</td>
+                                    <td>{{ "%.2f"|format(resultados.carga_circulante) }}</td>
+                                    <td>t/h</td>
+                                </tr>
+                                <tr>
+                                    <td>Producto Final</td>
+                                    <td>{{ "%.2f"|format(resultados.producto_final) }}</td>
+                                    <td>t/h</td>
+                                </tr>
+                                <tr>
+                                    <td>Razón de Circuito</td>
+                                    <td>{{ "%.2f"|format(resultados.razon_circuito) }}</td>
+                                    <td>-</td>
+                                </tr>
+                            </table>
+                        </div>
+                        <div class="col-md-6">
                             {% if graficos.flujos %}
-                            <div class="mb-4">
-                                <h6>Diagrama de Flujos del Circuito</h6>
-                                <div id="grafico-flujos" style="height: 500px;"></div>
-                            </div>
+                            <div id="grafico-flujos"></div>
                             {% endif %}
-
-                            <div class="row">
-                                <!-- Gráfico de Eficiencias -->
-                                {% if graficos.eficiencias %}
-                                <div class="col-md-6">
-                                    <h6>Eficiencia del Clasificador</h6>
-                                    <div id="grafico-eficiencias" style="height: 400px;"></div>
-                                </div>
-                                {% endif %}
-
-                                <!-- Gráfico de Distribución -->
-                                {% if graficos.distribucion %}
-                                <div class="col-md-6">
-                                    <h6>Distribución de Alimentación</h6>
-                                    <div id="grafico-distribucion" style="height: 400px;"></div>
-                                </div>
-                                {% endif %}
-                            </div>
                         </div>
-                        {% endif %}
+                    </div>
+                </div>
             </div>
         </div>
-        {% endif %}
     </div>
+
+    {% if graficos.eficiencias %}
+    <div class="row mt-4">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5>Diagrama de Eficiencias</h5>
+                </div>
+                <div class="card-body">
+                    <div id="grafico-eficiencias"></div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5>Distribución de Flujos</h5>
+                </div>
+                <div class="card-body">
+                    <div id="grafico-distribucion"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+    {% endif %}
 </div>
-{% endblock %}
 
-{% block scripts %}
-<style>
-.circuit-card {
-    cursor: pointer;
-    transition: all 0.3s ease;
-    border: 2px solid #e9ecef;
-}
-
-.circuit-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-    border-color: #007bff;
-}
-
-.circuit-card.selected {
-    border-color: #007bff;
-    background-color: #f8f9fa;
-}
-
-.circuit-card .card-body {
-    padding: 1.5rem;
-}
-</style>
-
+{% if graficos %}
 <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
-        <script>
-            function selectCircuit(type) {
-    // Remover selección anterior
-    document.querySelectorAll('.circuit-card').forEach(card => {
-        card.classList.remove('selected');
-    });
+<script>
+    {% if graficos.flujos %}
+    var grafico_flujos = {{ graficos.flujos|safe }};
+    Plotly.newPlot('grafico-flujos', grafico_flujos.data, grafico_flujos.layout);
+    {% endif %}
 
-    // Seleccionar nueva tarjeta
-    event.currentTarget.classList.add('selected');
+    {% if graficos.eficiencias %}
+    var grafico_eficiencias = {{ graficos.eficiencias|safe }};
+    Plotly.newPlot('grafico-eficiencias', grafico_eficiencias.data, grafico_eficiencias.layout);
+    {% endif %}
 
-    // Actualizar tipo de circuito
-    document.getElementById('tipo_circuito').value = type;
-
-    // Actualizar etiqueta
-    const labels = {
-        'directo': 'Circuito Cerrado Directo',
-        'inverso': 'Circuito Cerrado Inverso', 
-        'sabc1': 'Circuito SABC-1',
-        'sabc2': 'Circuito SABC-2'
-    };
-    document.getElementById('circuit-type-label').textContent = labels[type];
-
-    // Mostrar sección de cálculo
-    document.getElementById('calculation-section').style.display = 'block';
-
-    // Scroll suave hacia la sección de cálculo
-    document.getElementById('calculation-section').scrollIntoView({ 
-        behavior: 'smooth' 
-    });
-}
-
-document.addEventListener('DOMContentLoaded', function() {
-                // Mostrar gráficos si existen
-                {% if graficos.flujos %}
-                var graficoFlujos = {{ graficos.flujos|safe }};
-                Plotly.newPlot('grafico-flujos', graficoFlujos.data, graficoFlujos.layout);
-                {% endif %}
-
-                {% if graficos.eficiencias %}
-                var graficoEficiencias = {{ graficos.eficiencias|safe }};
-                Plotly.newPlot('grafico-eficiencias', graficoEficiencias.data, graficoEficiencias.layout);
-                {% endif %}
-
-                {% if graficos.distribucion %}
-                var graficoDistribucion = {{ graficos.distribucion|safe }};
-                Plotly.newPlot('grafico-distribucion', graficoDistribucion.data, graficoDistribucion.layout);
-                {% endif %}
-            });
+    {% if graficos.distribucion %}
+    var grafico_distribucion = {{ graficos.distribucion|safe }};
+    Plotly.newPlot('grafico-distribucion', grafico_distribucion.data, grafico_distribucion.layout);
+    {% endif %}
 </script>
+{% endif %}
 {% endblock %}
