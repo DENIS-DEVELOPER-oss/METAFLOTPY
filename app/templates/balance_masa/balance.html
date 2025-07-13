@@ -1,3 +1,4 @@
+
 {% extends "base.html" %}
 
 {% block titulo %}Balance de Masa - MetaFlotPy{% endblock %}
@@ -7,7 +8,7 @@
     <div class="row">
         <div class="col-12">
             <h1><i class="bi bi-diagram-3"></i> Balance de Masa de Circuito de Molienda</h1>
-            <p class="lead">Cálculo de flujos másicos y carga circulante en circuitos cerrados</p>
+            <p class="lead">Cálculo de flujos másicos y carga circulante en diferentes tipos de circuitos</p>
         </div>
     </div>
 
@@ -18,40 +19,160 @@
                     <h5><i class="bi bi-calculator"></i> Datos de Entrada</h5>
                 </div>
                 <div class="card-body">
-                    <form method="POST">
+                    <form method="POST" id="formulario-balance">
                         {{ formulario.hidden_tag() }}
 
-                        <div class="row">
-                            <div class="col-md-6">
+                        <!-- Selector de tipo de circuito -->
+                        <div class="row mb-4">
+                            <div class="col-12">
                                 <div class="mb-3">
-                                    {{ formulario.tipo_circuito.label(class="form-label") }}
-                                    {{ formulario.tipo_circuito(class="form-select") }}
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="mb-3">
-                                    {{ formulario.alimentacion_fresca.label(class="form-label") }}
-                                    {{ formulario.alimentacion_fresca(class="form-control", step="0.01") }}
+                                    {{ formulario.tipo_circuito.label(class="form-label fw-bold") }}
+                                    {{ formulario.tipo_circuito(class="form-select", onchange="mostrarFormulario()") }}
                                 </div>
                             </div>
                         </div>
 
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="mb-3">
-                                    {{ formulario.razon_carga_circulante.label(class="form-label") }}
-                                    {{ formulario.razon_carga_circulante(class="form-control", step="0.01") }}
-                                </div>
+                        <!-- Formulario Circuito Directo -->
+                        <div id="form-directo" class="tipo-circuito" style="display: none;">
+                            <h6 class="text-primary"><i class="bi bi-1-circle"></i> Circuito Cerrado Directo</h6>
+                            <div class="alert alert-info">
+                                <strong>Fórmula:</strong> F = P + R<br>
+                                <strong>Carga Circulante:</strong> CC = (R/P) × 100
                             </div>
-                            <div class="col-md-6">
-                                <div class="mb-3">
-                                    {{ formulario.eficiencia_clasificador.label(class="form-label") }}
-                                    {{ formulario.eficiencia_clasificador(class="form-control", step="0.1") }}
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <div class="mb-3">
+                                        {{ formulario.f_alimentacion.label(class="form-label") }}
+                                        {{ formulario.f_alimentacion(class="form-control", step="0.01") }}
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="mb-3">
+                                        {{ formulario.p_producto.label(class="form-label") }}
+                                        {{ formulario.p_producto(class="form-control", step="0.01") }}
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="mb-3">
+                                        {{ formulario.r_rechazo.label(class="form-label") }}
+                                        {{ formulario.r_rechazo(class="form-control", step="0.01") }}
+                                    </div>
                                 </div>
                             </div>
                         </div>
 
-                        <div class="text-center">
+                        <!-- Formulario Circuito Inverso -->
+                        <div id="form-inverso" class="tipo-circuito" style="display: none;">
+                            <h6 class="text-primary"><i class="bi bi-2-circle"></i> Circuito Cerrado Inverso</h6>
+                            <div class="alert alert-info">
+                                <strong>Fórmula:</strong> F + R = P<br>
+                                <strong>Carga Circulante:</strong> CC = (R/F) × 100
+                            </div>
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <div class="mb-3">
+                                        {{ formulario.f_alimentacion_inv.label(class="form-label") }}
+                                        {{ formulario.f_alimentacion_inv(class="form-control", step="0.01") }}
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="mb-3">
+                                        {{ formulario.r_rechazo_inv.label(class="form-label") }}
+                                        {{ formulario.r_rechazo_inv(class="form-control", step="0.01") }}
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="mb-3">
+                                        {{ formulario.p_producto_inv.label(class="form-label") }}
+                                        {{ formulario.p_producto_inv(class="form-control", step="0.01") }}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Formulario Circuito SABC-1 -->
+                        <div id="form-sabc1" class="tipo-circuito" style="display: none;">
+                            <h6 class="text-primary"><i class="bi bi-3-circle"></i> Circuito SABC-1</h6>
+                            <div class="alert alert-info">
+                                <strong>Balance global:</strong> F = P + R<br>
+                                <strong>Sub-balance SAG:</strong> F = S<br>
+                                <strong>Sub-balance molino bolas:</strong> S + R = B y B = P + R
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        {{ formulario.f_mineral_sabc1.label(class="form-label") }}
+                                        {{ formulario.f_mineral_sabc1(class="form-control", step="0.01") }}
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        {{ formulario.s_producto_sag.label(class="form-label") }}
+                                        {{ formulario.s_producto_sag(class="form-control", step="0.01") }}
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <div class="mb-3">
+                                        {{ formulario.b_producto_bolas.label(class="form-label") }}
+                                        {{ formulario.b_producto_bolas(class="form-control", step="0.01") }}
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="mb-3">
+                                        {{ formulario.p_producto_final_sabc1.label(class="form-label") }}
+                                        {{ formulario.p_producto_final_sabc1(class="form-control", step="0.01") }}
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="mb-3">
+                                        {{ formulario.r_carga_circulante_sabc1.label(class="form-label") }}
+                                        {{ formulario.r_carga_circulante_sabc1(class="form-control", step="0.01") }}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Formulario Circuito SABC-2 -->
+                        <div id="form-sabc2" class="tipo-circuito" style="display: none;">
+                            <h6 class="text-primary"><i class="bi bi-4-circle"></i> Circuito SABC-2</h6>
+                            <div class="alert alert-info">
+                                <strong>Balance SAG:</strong> F = S<br>
+                                <strong>Balance Bolas + Clasificador:</strong> S + R = P + R ⇒ P = S<br>
+                                <strong>Carga circulante:</strong> CC = (R/P) × 100
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        {{ formulario.f_mineral_sabc2.label(class="form-label") }}
+                                        {{ formulario.f_mineral_sabc2(class="form-control", step="0.01") }}
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        {{ formulario.s_producto_sag_sabc2.label(class="form-label") }}
+                                        {{ formulario.s_producto_sag_sabc2(class="form-control", step="0.01") }}
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        {{ formulario.r_rechazo_sabc2.label(class="form-label") }}
+                                        {{ formulario.r_rechazo_sabc2(class="form-control", step="0.01") }}
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        {{ formulario.p_producto_final_sabc2.label(class="form-label") }}
+                                        {{ formulario.p_producto_final_sabc2(class="form-control", step="0.01") }}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="text-center mt-4">
                             {{ formulario.calcular(class="btn btn-primary btn-lg") }}
                         </div>
                     </form>
@@ -67,16 +188,19 @@
                 <div class="card-body">
                     <h6>Tipos de Circuito:</h6>
                     <ul class="small">
-                        <li><strong>Directo:</strong> Material grueso retorna al molino</li>
-                        <li><strong>Inverso:</strong> Material fino es el producto</li>
-                        <li><strong>SABC-1:</strong> Semi-autógeno con bolas etapa 1</li>
-                        <li><strong>SABC-2:</strong> Semi-autógeno con bolas etapa 2</li>
+                        <li><strong>Directo:</strong> Material grueso retorna al molino (F = P + R)</li>
+                        <li><strong>Inverso:</strong> Rechazo alimenta directamente clasificación (F + R = P)</li>
+                        <li><strong>SABC-1:</strong> SAG + molino bolas + clasificador en serie</li>
+                        <li><strong>SABC-2:</strong> SAG + molino bolas + clasificador balanceado</li>
                     </ul>
 
-                    <h6>Parámetros:</h6>
+                    <h6>Interpretación:</h6>
                     <ul class="small">
-                        <li><strong>Carga Circulante:</strong> Material que recircula</li>
-                        <li><strong>Eficiencia:</strong> % de separación del clasificador</li>
+                        <li><strong>F:</strong> Alimentación fresca</li>
+                        <li><strong>P:</strong> Producto final</li>
+                        <li><strong>R:</strong> Carga circulante/rechazo</li>
+                        <li><strong>S:</strong> Producto SAG</li>
+                        <li><strong>B:</strong> Producto molino bolas</li>
                     </ul>
                 </div>
             </div>
@@ -93,33 +217,41 @@
                 <div class="card-body">
                     <div class="row">
                         <div class="col-md-6">
+                            {% if resultados.tipo_circuito == 'directo' %}
                             <table class="table table-striped">
-                                <tr>
-                                    <th>Parámetro</th>
-                                    <th>Valor</th>
-                                    <th>Unidad</th>
-                                </tr>
-                                <tr>
-                                    <td>Alimentación al Molino</td>
-                                    <td>{{ "%.2f"|format(resultados.alimentacion_molino) }}</td>
-                                    <td>t/h</td>
-                                </tr>
-                                <tr>
-                                    <td>Carga Circulante</td>
-                                    <td>{{ "%.2f"|format(resultados.carga_circulante) }}</td>
-                                    <td>t/h</td>
-                                </tr>
-                                <tr>
-                                    <td>Producto Final</td>
-                                    <td>{{ "%.2f"|format(resultados.producto_final) }}</td>
-                                    <td>t/h</td>
-                                </tr>
-                                <tr>
-                                    <td>Razón de Circuito</td>
-                                    <td>{{ "%.2f"|format(resultados.razon_circuito) }}</td>
-                                    <td>-</td>
-                                </tr>
+                                <tr><th>Parámetro</th><th>Valor</th><th>Unidad</th></tr>
+                                <tr><td>Alimentación (F)</td><td>{{ "%.2f"|format(resultados.f_alimentacion) }}</td><td>t/h</td></tr>
+                                <tr><td>Producto (P)</td><td>{{ "%.2f"|format(resultados.p_producto) }}</td><td>t/h</td></tr>
+                                <tr><td>Rechazo (R)</td><td>{{ "%.2f"|format(resultados.r_rechazo) }}</td><td>t/h</td></tr>
+                                <tr><td>Carga Circulante</td><td>{{ "%.1f"|format(resultados.carga_circulante_pct) }}</td><td>%</td></tr>
                             </table>
+                            {% elif resultados.tipo_circuito == 'inverso' %}
+                            <table class="table table-striped">
+                                <tr><th>Parámetro</th><th>Valor</th><th>Unidad</th></tr>
+                                <tr><td>Alimentación (F)</td><td>{{ "%.2f"|format(resultados.f_alimentacion) }}</td><td>t/h</td></tr>
+                                <tr><td>Rechazo (R)</td><td>{{ "%.2f"|format(resultados.r_rechazo) }}</td><td>t/h</td></tr>
+                                <tr><td>Producto (P)</td><td>{{ "%.2f"|format(resultados.p_producto) }}</td><td>t/h</td></tr>
+                                <tr><td>Carga Circulante</td><td>{{ "%.1f"|format(resultados.carga_circulante_pct) }}</td><td>%</td></tr>
+                            </table>
+                            {% elif resultados.tipo_circuito == 'sabc1' %}
+                            <table class="table table-striped">
+                                <tr><th>Parámetro</th><th>Valor</th><th>Unidad</th></tr>
+                                <tr><td>Mineral Nuevo (F)</td><td>{{ "%.2f"|format(resultados.f_mineral) }}</td><td>t/h</td></tr>
+                                <tr><td>Producto SAG (S)</td><td>{{ "%.2f"|format(resultados.s_producto_sag) }}</td><td>t/h</td></tr>
+                                <tr><td>Producto Bolas (B)</td><td>{{ "%.2f"|format(resultados.b_producto_bolas) }}</td><td>t/h</td></tr>
+                                <tr><td>Producto Final (P)</td><td>{{ "%.2f"|format(resultados.p_producto_final) }}</td><td>t/h</td></tr>
+                                <tr><td>Carga Circulante (R)</td><td>{{ "%.2f"|format(resultados.r_carga_circulante) }}</td><td>t/h</td></tr>
+                            </table>
+                            {% elif resultados.tipo_circuito == 'sabc2' %}
+                            <table class="table table-striped">
+                                <tr><th>Parámetro</th><th>Valor</th><th>Unidad</th></tr>
+                                <tr><td>Mineral Nuevo (F)</td><td>{{ "%.2f"|format(resultados.f_mineral) }}</td><td>t/h</td></tr>
+                                <tr><td>Producto SAG (S)</td><td>{{ "%.2f"|format(resultados.s_producto_sag) }}</td><td>t/h</td></tr>
+                                <tr><td>Rechazo (R)</td><td>{{ "%.2f"|format(resultados.r_rechazo) }}</td><td>t/h</td></tr>
+                                <tr><td>Producto Final (P)</td><td>{{ "%.2f"|format(resultados.p_producto_final) }}</td><td>t/h</td></tr>
+                                <tr><td>Carga Circulante</td><td>{{ "%.1f"|format(resultados.carga_circulante_pct) }}</td><td>%</td></tr>
+                            </table>
+                            {% endif %}
                         </div>
                         <div class="col-md-6">
                             {% if graficos.flujos %}
@@ -132,32 +264,56 @@
         </div>
     </div>
 
-    {% if graficos.eficiencias %}
+    {% if graficos.eficiencias or graficos.distribucion %}
     <div class="row mt-4">
+        {% if graficos.eficiencias %}
         <div class="col-md-6">
             <div class="card">
                 <div class="card-header">
-                    <h5>Diagrama de Eficiencias</h5>
+                    <h5>Carga Circulante</h5>
                 </div>
                 <div class="card-body">
                     <div id="grafico-eficiencias"></div>
                 </div>
             </div>
         </div>
+        {% endif %}
+        {% if graficos.distribucion %}
         <div class="col-md-6">
             <div class="card">
                 <div class="card-header">
-                    <h5>Distribución de Flujos</h5>
+                    <h5>Verificación del Balance</h5>
                 </div>
                 <div class="card-body">
                     <div id="grafico-distribucion"></div>
                 </div>
             </div>
         </div>
+        {% endif %}
     </div>
     {% endif %}
     {% endif %}
 </div>
+
+<script>
+function mostrarFormulario() {
+    // Ocultar todos los formularios
+    const formularios = document.querySelectorAll('.tipo-circuito');
+    formularios.forEach(form => form.style.display = 'none');
+    
+    // Mostrar el formulario seleccionado
+    const tipoSeleccionado = document.getElementById('tipo_circuito').value;
+    const formularioActivo = document.getElementById('form-' + tipoSeleccionado);
+    if (formularioActivo) {
+        formularioActivo.style.display = 'block';
+    }
+}
+
+// Mostrar formulario inicial al cargar la página
+document.addEventListener('DOMContentLoaded', function() {
+    mostrarFormulario();
+});
+</script>
 
 {% if graficos %}
 <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
