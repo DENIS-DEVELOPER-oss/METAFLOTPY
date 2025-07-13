@@ -1,15 +1,12 @@
 {% extends "base.html" %}
-```
-```html
-{% block titulo %}Análisis Granulométrico - MetaFlotPy{% endblock %}
-```
-```html
+```{% block titulo %}Análisis Granulométrico - MetaFlotPy{% endblock %}
+
 {% block contenido %}
 <div class="container-fluid">
     <div class="row">
         <div class="col-12">
             <h1><i class="bi bi-grid"></i> Análisis de Tamaño de Partícula</h1>
-            <p class="lead">Análisis granulométrico y curvas de distribución de tamaños</p>
+            <p class="lead">Análisis granulométrico con modelo Gates-Gaudin-Schuhmann</p>
         </div>
     </div>
 
@@ -23,20 +20,10 @@
                 <div class="card-body">
                     <form method="POST" id="formulario-tamizado">
                         <div class="row">
-                            <div class="col-md-6">
+                            <div class="col-md-12">
                                 <div class="mb-3">
                                     <label for="peso_total" class="form-label">Peso Total de Muestra (g)</label>
                                     <input type="number" class="form-control" id="peso_total" name="peso_total" step="0.01" required>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="mb-3">
-                                    <label for="modelo" class="form-label">Modelo de Análisis</label>
-                                    <select class="form-select" id="modelo" name="modelo" required>
-                                        <option value="gates">Gates-Gaudin-Schuhmann</option>
-                                        <option value="rosin">Rosin-Rammler</option>
-                                        <option value="regresion">Regresión Lineal</option>
-                                    </select>
                                 </div>
                             </div>
                         </div>
@@ -46,7 +33,7 @@
                             <table class="table table-bordered">
                                 <thead>
                                     <tr>
-                                        <th>Abertura (mm)</th>
+                                        <th>Abertura d (mm)</th>
                                         <th>Peso Retenido (g)</th>
                                         <th>Acción</th>
                                     </tr>
@@ -62,7 +49,7 @@
                                 <i class="bi bi-plus-circle"></i> Agregar Malla
                             </button>
                             <button type="submit" class="btn btn-primary">
-                                <i class="bi bi-calculator"></i> Calcular Análisis
+                                <i class="bi bi-calculator"></i> Calcular Análisis Gates-Gaudin-Schuhmann
                             </button>
                         </div>
                     </form>
@@ -73,94 +60,35 @@
         <div class="col-md-4">
             <div class="card">
                 <div class="card-header">
-                    <h5><i class="bi bi-info-circle"></i> Modelos Disponibles</h5>
+                    <h5><i class="bi bi-info-circle"></i> Gates-Gaudin-Schuhmann (GGS)</h5>
                 </div>
                 <div class="card-body">
-                    <div class="accordion" id="modelosAccordion">
-                        <!-- Gates-Gaudin-Schuhmann -->
-                        <div class="accordion-item">
-                            <h2 class="accordion-header">
-                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#gates-info">
-                                    <i class="bi bi-diamond me-2"></i> Gates-Gaudin-Schuhmann
-                                </button>
-                            </h2>
-                            <div id="gates-info" class="accordion-collapse collapse" data-bs-parent="#modelosAccordion">
-                                <div class="accordion-body">
-                                    <h6><i class="bi bi-clipboard-data"></i> Datos de entrada:</h6>
-                                    <ul class="small">
-                                        <li><strong>d</strong>: Tamaño de partícula (μm o mm)</li>
-                                        <li><strong>d<sub>máx</sub></strong>: Tamaño máximo (μm o mm)</li>
-                                        <li><strong>P(d)</strong>: % acumulado pasante para d (dato a calcular)</li>
-                                        <li><strong>n</strong>: Exponente de distribución</li>
-                                    </ul>
+                    <h6><i class="bi bi-clipboard-data"></i> Datos de entrada:</h6>
+                    <ul class="small">
+                        <li><strong>d</strong>: Tamaño de partícula (μm o mm)</li>
+                        <li><strong>d<sub>máx</sub></strong>: Tamaño máximo (μm o mm)</li>
+                        <li><strong>P(d)</strong>: % acumulado pasante para d (dato a calcular)</li>
+                        <li><strong>n</strong>: Exponente de distribución</li>
+                    </ul>
 
-                                    <h6><i class="bi bi-calculator-fill text-primary"></i> Fórmula:</h6>
-                                    <div class="bg-light p-2 border rounded text-center">
-                                        <strong>P(d) = (d/d<sub>máx</sub>)<sup>n</sup> × 100</strong>
-                                    </div>
-
-                                    <h6 class="mt-2"><i class="bi bi-graph-up"></i> Gráfico recomendado:</h6>
-                                    <ul class="small">
-                                        <li>Eje X: Tamaño de partícula log(d)</li>
-                                        <li>Eje Y: % acumulado pasante log(P(d))</li>
-                                        <li>Tipo: Gráfico log-log (línea recta si el modelo se ajusta bien)</li>
-                                    </ul>
-
-                                    <h6><i class="bi bi-lightbulb"></i> Interpretación:</h6>
-                                    <ul class="small">
-                                        <li>Se usa principalmente para materiales con distribución gruesa.</li>
-                                        <li>Si se ajusta linealmente en el log-log, el modelo es adecuado.</li>
-                                        <li>El exponente <strong>n</strong> indica la uniformidad: menor <strong>n</strong> → distribución más gruesa.</li>
-                                    </ul>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Rosin-Rammler -->
-                        <div class="accordion-item">
-                            <h2 class="accordion-header">
-                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#rosin-info">
-                                    <i class="bi bi-activity me-2"></i> Rosin-Rammler
-                                </button>
-                            </h2>
-                            <div id="rosin-info" class="accordion-collapse collapse" data-bs-parent="#modelosAccordion">
-                                <div class="accordion-body">
-                                    <h6><i class="bi bi-clipboard-data"></i> Datos de entrada:</h6>
-                                    <ul class="small">
-                                        <li><strong>d</strong>: Tamaño de partícula (μm o mm)</li>
-                                        <li><strong>d<sub>0</sub></strong>: Tamaño característico donde el 36.8% de las partículas son más grandes</li>
-                                        <li><strong>n</strong>: Parámetro de distribución</li>
-                                        <li><strong>R(d)</strong>: % retenido acumulado (dato a calcular)</li>
-                                    </ul>
-
-                                    <h6><i class="bi bi-calculator-fill text-danger"></i> Fórmula:</h6>
-                                    <div class="bg-light p-2 border rounded text-center">
-                                        <div><strong>R(d) = 100 × e<sup>-(d/d₀)ⁿ</sup></strong></div>
-                                        <div class="mt-2 small">O también: ln[-ln(R(d)/100)] = n × ln(d) - n × ln(d₀)</div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Regresión Lineal -->
-                        <div class="accordion-item">
-                            <h2 class="accordion-header">
-                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#regresion-info">
-                                    <i class="bi bi-graph-down me-2"></i> Regresión Lineal
-                                </button>
-                            </h2>
-                            <div id="regresion-info" class="accordion-collapse collapse" data-bs-parent="#modelosAccordion">
-                                <div class="accordion-body">
-                                    <p class="small">Análisis de correlación lineal entre el logaritmo del tamaño de partícula y el porcentaje pasante.</p>
-                                    <h6><i class="bi bi-calculator-fill text-success"></i> Fórmula:</h6>
-                                    <div class="bg-light p-2 border rounded text-center">
-                                        <strong>y = mx + b</strong><br>
-                                        <small>donde y = % pasante, x = log(tamaño)</small>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+                    <h6><i class="bi bi-calculator-fill text-primary"></i> Fórmula:</h6>
+                    <div class="bg-light p-3 border rounded text-center">
+                        <strong>P(d) = (d/d<sub>máx</sub>)<sup>n</sup> × 100</strong>
                     </div>
+
+                    <h6 class="mt-3"><i class="bi bi-graph-up"></i> Gráfico recomendado:</h6>
+                    <ul class="small">
+                        <li>Eje X: Tamaño de partícula log(d)</li>
+                        <li>Eje Y: % acumulado pasante log(P(d))</li>
+                        <li>Tipo: Gráfico log-log (línea recta si el modelo se ajusta bien)</li>
+                    </ul>
+
+                    <h6><i class="bi bi-lightbulb"></i> Interpretación:</h6>
+                    <ul class="small">
+                        <li>Se usa principalmente para materiales con distribución gruesa.</li>
+                        <li>Si se ajusta linealmente en el log-log, el modelo es adecuado.</li>
+                        <li>El exponente <strong>n</strong> indica la uniformidad: menor <strong>n</strong> → distribución más gruesa.</li>
+                    </ul>
                 </div>
             </div>
         </div>
@@ -179,11 +107,11 @@
                         <table class="table table-striped table-hover">
                             <thead class="table-dark">
                                 <tr>
-                                    <th>Abertura (mm)</th>
+                                    <th>Abertura d (mm)</th>
                                     <th>Peso Retenido (g)</th>
                                     <th>% Retenido</th>
                                     <th>% Retenido Acum.</th>
-                                    <th>% Pasante</th>
+                                    <th>% Pasante P(d)</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -205,110 +133,70 @@
     </div>
     {% endif %}
 
-    <!-- Resultados y gráficos de modelos -->
-    {% if resultados_gates or resultados_rosin or resultados_regresion %}
+    <!-- Resultados Gates-Gaudin-Schuhmann -->
+    {% if resultados_gates %}
     <div class="row mt-4">
-        <!-- Resultados Gates -->
-        {% if resultados_gates %}
-        <div class="col-md-6 mb-4">
+        <div class="col-12">
             <div class="card">
                 <div class="card-header bg-primary text-white">
-                    <h5><i class="bi bi-diamond"></i> Resultados Gates-Gaudin-Schuhmann</h5>
+                    <h5><i class="bi bi-diamond"></i> Resultados del Modelo Gates-Gaudin-Schuhmann</h5>
                 </div>
                 <div class="card-body">
-                    <table class="table table-sm">
-                        <tr>
-                            <td><strong>Tamaño máximo (k):</strong></td>
-                            <td>{{ "%.3f"|format(resultados_gates.k) }} mm</td>
-                        </tr>
-                        <tr>
-                            <td><strong>Módulo de distribución (m):</strong></td>
-                            <td>{{ "%.3f"|format(resultados_gates.m) }}</td>
-                        </tr>
-                        <tr>
-                            <td><strong>Coeficiente R²:</strong></td>
-                            <td>{{ "%.4f"|format(resultados_gates.r2) }}</td>
-                        </tr>
-                        <tr>
-                            <td><strong>Ecuación:</strong></td>
-                            <td>{{ resultados_gates.ecuacion }}</td>
-                        </tr>
-                    </table>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <table class="table table-sm">
+                                <tr>
+                                    <td><strong>Tamaño máximo (d<sub>máx</sub>):</strong></td>
+                                    <td>{{ "%.3f"|format(resultados_gates.d_max) }} mm</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Exponente de distribución (n):</strong></td>
+                                    <td>{{ "%.3f"|format(resultados_gates.n) }}</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Coeficiente de determinación (R²):</strong></td>
+                                    <td>{{ "%.4f"|format(resultados_gates.r2) }}</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Ecuación del modelo:</strong></td>
+                                    <td><code>{{ resultados_gates.ecuacion }}</code></td>
+                                </tr>
+                            </table>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="alert alert-info">
+                                <h6><i class="bi bi-info-circle"></i> Interpretación:</h6>
+                                <ul class="mb-0 small">
+                                    {% if resultados_gates.r2 > 0.95 %}
+                                    <li><strong>Excelente ajuste</strong> (R² > 0.95): El modelo describe muy bien la distribución.</li>
+                                    {% elif resultados_gates.r2 > 0.90 %}
+                                    <li><strong>Buen ajuste</strong> (R² > 0.90): El modelo es apropiado para esta distribución.</li>
+                                    {% elif resultados_gates.r2 > 0.80 %}
+                                    <li><strong>Ajuste moderado</strong> (R² > 0.80): El modelo puede ser útil con precaución.</li>
+                                    {% else %}
+                                    <li><strong>Ajuste pobre</strong> (R² < 0.80): El modelo no es adecuado para esta distribución.</li>
+                                    {% endif %}
+
+                                    {% if resultados_gates.n < 0.5 %}
+                                    <li><strong>Distribución muy gruesa</strong> (n < 0.5): Pocas partículas finas.</li>
+                                    {% elif resultados_gates.n < 1.0 %}
+                                    <li><strong>Distribución gruesa</strong> (0.5 < n < 1.0): Predominan partículas grandes.</li>
+                                    {% else %}
+                                    <li><strong>Distribución uniforme</strong> (n ≥ 1.0): Buena distribución de tamaños.</li>
+                                    {% endif %}
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
                     {% if grafico_gates %}
-                    <div id="grafico-gates"></div>
+                    <div class="mt-3">
+                        <div id="grafico-gates"></div>
+                    </div>
                     {% endif %}
                 </div>
             </div>
         </div>
-        {% endif %}
-
-        <!-- Resultados Rosin -->
-        {% if resultados_rosin %}
-        <div class="col-md-6 mb-4">
-            <div class="card">
-                <div class="card-header bg-danger text-white">
-                    <h5><i class="bi bi-activity"></i> Resultados Rosin-Rammler</h5>
-                </div>
-                <div class="card-body">
-                    <table class="table table-sm">
-                        <tr>
-                            <td><strong>Tamaño característico (x₀):</strong></td>
-                            <td>{{ "%.3f"|format(resultados_rosin.x0) }} mm</td>
-                        </tr>
-                        <tr>
-                            <td><strong>Parámetro de distribución (n):</strong></td>
-                            <td>{{ "%.3f"|format(resultados_rosin.n) }}</td>
-                        </tr>
-                        <tr>
-                            <td><strong>Coeficiente R²:</strong></td>
-                            <td>{{ "%.4f"|format(resultados_rosin.r2) }}</td>
-                        </tr>
-                        <tr>
-                            <td><strong>Ecuación:</strong></td>
-                            <td>{{ resultados_rosin.ecuacion }}</td>
-                        </tr>
-                    </table>
-                    {% if grafico_rosin %}
-                    <div id="grafico-rosin"></div>
-                    {% endif %}
-                </div>
-            </div>
-        </div>
-        {% endif %}
-
-        <!-- Resultados Regresión -->
-        {% if resultados_regresion %}
-        <div class="col-md-6 mb-4">
-            <div class="card">
-                <div class="card-header bg-success text-white">
-                    <h5><i class="bi bi-graph-down"></i> Resultados Regresión Lineal</h5>
-                </div>
-                <div class="card-body">
-                    <table class="table table-sm">
-                        <tr>
-                            <td><strong>Pendiente:</strong></td>
-                            <td>{{ "%.4f"|format(resultados_regresion.pendiente) }}</td>
-                        </tr>
-                        <tr>
-                            <td><strong>Intercepto:</strong></td>
-                            <td>{{ "%.4f"|format(resultados_regresion.intercepto) }}</td>
-                        </tr>
-                        <tr>
-                            <td><strong>Coeficiente R²:</strong></td>
-                            <td>{{ "%.4f"|format(resultados_regresion.r2) }}</td>
-                        </tr>
-                        <tr>
-                            <td><strong>Ecuación:</strong></td>
-                            <td>{{ resultados_regresion.ecuacion }}</td>
-                        </tr>
-                    </table>
-                    {% if grafico_regresion %}
-                    <div id="grafico-regresion"></div>
-                    {% endif %}
-                </div>
-            </div>
-        </div>
-        {% endif %}
     </div>
     {% endif %}
 </div>
@@ -360,24 +248,10 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 
-// Renderizar gráficos
+// Renderizar gráfico Gates-Gaudin-Schuhmann
 {% if grafico_gates %}
 var grafico_gates = {{ grafico_gates|safe }};
 Plotly.newPlot('grafico-gates', grafico_gates.data, grafico_gates.layout, {responsive: true});
 {% endif %}
-
-{% if grafico_rosin %}
-var grafico_rosin = {{ grafico_rosin|safe }};
-Plotly.newPlot('grafico-rosin', grafico_rosin.data, grafico_rosin.layout, {responsive: true});
-{% endif %}
-
-{% if grafico_regresion %}
-var grafico_regresion = {{ grafico_regresion|safe }};
-Plotly.newPlot('grafico-regresion', grafico_regresion.data, grafico_regresion.layout, {responsive: true});
-{% endif %}
 </script>
 {% endblock %}
-```
-
-```html
-</replit_final_file>
