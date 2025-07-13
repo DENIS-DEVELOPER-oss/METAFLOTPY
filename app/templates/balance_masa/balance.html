@@ -174,11 +174,11 @@
 
                         <div class="text-center mt-4">
                             {{ formulario.calcular(class="btn btn-primary btn-lg") }}
-                            <div class="mt-2">
-                                <small class="text-muted">
-                                    <i class="bi bi-info-circle"></i> 
-                                    Ingrese al menos 2 valores para calcular automáticamente el tercero
-                                </small>
+                            <div class="mt-3">
+                                <div class="alert alert-warning d-inline-block">
+                                    <i class="bi bi-exclamation-triangle"></i> 
+                                    <strong>Importante:</strong> Ingrese exactamente 2 valores conocidos. El tercer valor se calculará automáticamente usando las ecuaciones de balance de masa.
+                                </div>
                             </div>
                         </div>
                     </form>
@@ -189,25 +189,35 @@
         <div class="col-md-4">
             <div class="card">
                 <div class="card-header">
-                    <h5><i class="bi bi-info-circle"></i> Información</h5>
+                    <h5><i class="bi bi-info-circle"></i> Información y Guía</h5>
                 </div>
                 <div class="card-body">
-                    <h6>Tipos de Circuito:</h6>
-                    <ul class="small">
-                        <li><strong>Directo:</strong> Material grueso retorna al molino (F = P + R)</li>
-                        <li><strong>Inverso:</strong> Rechazo alimenta directamente clasificación (F + R = P)</li>
+                    <h6 class="text-primary">Tipos de Circuito:</h6>
+                    <ul class="small mb-3">
+                        <li><strong>Directo:</strong> Material grueso retorna al molino<br>
+                            <em>Ecuación: F = P + R</em></li>
+                        <li><strong>Inverso:</strong> Rechazo alimenta directamente clasificación<br>
+                            <em>Ecuación: F + R = P</em></li>
                         <li><strong>SABC-1:</strong> SAG + molino bolas + clasificador en serie</li>
                         <li><strong>SABC-2:</strong> SAG + molino bolas + clasificador balanceado</li>
                     </ul>
 
-                    <h6>Interpretación:</h6>
-                    <ul class="small">
-                        <li><strong>F:</strong> Alimentación fresca</li>
-                        <li><strong>P:</strong> Producto final</li>
-                        <li><strong>R:</strong> Carga circulante/rechazo</li>
-                        <li><strong>S:</strong> Producto SAG</li>
-                        <li><strong>B:</strong> Producto molino bolas</li>
+                    <h6 class="text-primary">Nomenclatura:</h6>
+                    <ul class="small mb-3">
+                        <li><strong>F:</strong> Alimentación fresca (t/h)</li>
+                        <li><strong>P:</strong> Producto final (t/h)</li>
+                        <li><strong>R:</strong> Carga circulante/rechazo (t/h)</li>
+                        <li><strong>S:</strong> Producto SAG (t/h)</li>
+                        <li><strong>B:</strong> Producto molino bolas (t/h)</li>
                     </ul>
+
+                    <div class="alert alert-success small">
+                        <h6><i class="bi bi-lightbulb"></i> Ejemplo de uso:</h6>
+                        <p class="mb-1"><strong>Circuito Directo:</strong></p>
+                        <p class="mb-0">Si F = 100 t/h y P = 80 t/h<br>
+                        Entonces R = 20 t/h<br>
+                        Carga Circulante = 25%</p>
+                    </div>
                 </div>
             </div>
         </div>
@@ -224,21 +234,60 @@
                     <div class="row">
                         <div class="col-md-6">
                             {% if resultados.tipo_circuito == 'directo' %}
+                            <h6 class="text-primary mb-3">Resultados - Circuito Directo</h6>
                             <table class="table table-striped">
-                                <tr><th>Parámetro</th><th>Valor</th><th>Unidad</th></tr>
-                                <tr><td>Alimentación (F)</td><td>{{ "%.2f"|format(resultados.f_alimentacion) }}</td><td>t/h</td></tr>
-                                <tr><td>Producto (P)</td><td>{{ "%.2f"|format(resultados.p_producto) }}</td><td>t/h</td></tr>
-                                <tr><td>Rechazo (R)</td><td>{{ "%.2f"|format(resultados.r_rechazo) }}</td><td>t/h</td></tr>
-                                <tr><td>Carga Circulante</td><td>{{ "%.1f"|format(resultados.carga_circulante_pct) }}</td><td>%</td></tr>
+                                <thead class="table-dark">
+                                    <tr><th>Parámetro</th><th>Valor</th><th>Unidad</th></tr>
+                                </thead>
+                                <tbody>
+                                    <tr class="table-info"><td><strong>Alimentación (F)</strong></td><td>{{ "%.2f"|format(resultados.f_alimentacion) }}</td><td>t/h</td></tr>
+                                    <tr class="table-success"><td><strong>Producto (P)</strong></td><td>{{ "%.2f"|format(resultados.p_producto) }}</td><td>t/h</td></tr>
+                                    <tr class="table-warning"><td><strong>Rechazo (R)</strong></td><td>{{ "%.2f"|format(resultados.r_rechazo) }}</td><td>t/h</td></tr>
+                                    <tr class="table-primary"><td><strong>Carga Circulante</strong></td><td>{{ "%.1f"|format(resultados.carga_circulante_pct) }}</td><td>%</td></tr>
+                                    <tr class="{{ 'table-success' if resultados.balance_verificado else 'table-danger' }}">
+                                        <td><strong>Balance</strong></td>
+                                        <td>{{ "Correcto" if resultados.balance_verificado else "Error" }}</td>
+                                        <td>{{ "✓" if resultados.balance_verificado else "✗" }}</td>
+                                    </tr>
+                                </tbody>
                             </table>
+                            
+                            <div class="alert alert-info mt-3">
+                                <h6><i class="bi bi-lightbulb"></i> Interpretación:</h6>
+                                <ul class="mb-0">
+                                    <li>{{ resultados.interpretacion.balance }}</li>
+                                    <li>{{ resultados.interpretacion.carga_circulante }}</li>
+                                    <li>{{ resultados.interpretacion.eficiencia }}</li>
+                                </ul>
+                            </div>
+                            
                             {% elif resultados.tipo_circuito == 'inverso' %}
+                            <h6 class="text-primary mb-3">Resultados - Circuito Inverso</h6>
                             <table class="table table-striped">
-                                <tr><th>Parámetro</th><th>Valor</th><th>Unidad</th></tr>
-                                <tr><td>Alimentación (F)</td><td>{{ "%.2f"|format(resultados.f_alimentacion) }}</td><td>t/h</td></tr>
-                                <tr><td>Rechazo (R)</td><td>{{ "%.2f"|format(resultados.r_rechazo) }}</td><td>t/h</td></tr>
-                                <tr><td>Producto (P)</td><td>{{ "%.2f"|format(resultados.p_producto) }}</td><td>t/h</td></tr>
-                                <tr><td>Carga Circulante</td><td>{{ "%.1f"|format(resultados.carga_circulante_pct) }}</td><td>%</td></tr>
+                                <thead class="table-dark">
+                                    <tr><th>Parámetro</th><th>Valor</th><th>Unidad</th></tr>
+                                </thead>
+                                <tbody>
+                                    <tr class="table-info"><td><strong>Alimentación (F)</strong></td><td>{{ "%.2f"|format(resultados.f_alimentacion) }}</td><td>t/h</td></tr>
+                                    <tr class="table-warning"><td><strong>Rechazo (R)</strong></td><td>{{ "%.2f"|format(resultados.r_rechazo) }}</td><td>t/h</td></tr>
+                                    <tr class="table-success"><td><strong>Producto (P)</strong></td><td>{{ "%.2f"|format(resultados.p_producto) }}</td><td>t/h</td></tr>
+                                    <tr class="table-primary"><td><strong>Carga Circulante</strong></td><td>{{ "%.1f"|format(resultados.carga_circulante_pct) }}</td><td>%</td></tr>
+                                    <tr class="{{ 'table-success' if resultados.balance_verificado else 'table-danger' }}">
+                                        <td><strong>Balance</strong></td>
+                                        <td>{{ "Correcto" if resultados.balance_verificado else "Error" }}</td>
+                                        <td>{{ "✓" if resultados.balance_verificado else "✗" }}</td>
+                                    </tr>
+                                </tbody>
                             </table>
+                            
+                            <div class="alert alert-info mt-3">
+                                <h6><i class="bi bi-lightbulb"></i> Interpretación:</h6>
+                                <ul class="mb-0">
+                                    <li>{{ resultados.interpretacion.balance }}</li>
+                                    <li>{{ resultados.interpretacion.carga_circulante }}</li>
+                                    <li>{{ resultados.interpretacion.eficiencia }}</li>
+                                </ul>
+                            </div>
                             {% elif resultados.tipo_circuito == 'sabc1' %}
                             <table class="table table-striped">
                                 <tr><th>Parámetro</th><th>Valor</th><th>Unidad</th></tr>

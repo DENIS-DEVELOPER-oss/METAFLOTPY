@@ -42,37 +42,42 @@ def calcular_balance_masa(formulario):
 def calcular_circuito_directo(formulario):
     """Circuito Cerrado Directo: F = P + R"""
     # Obtener valores del formulario
-    f = formulario.f_alimentacion.data or 0
-    p = formulario.p_producto.data or 0
-    r = formulario.r_rechazo.data or 0
+    f = formulario.f_alimentacion.data
+    p = formulario.p_producto.data
+    r = formulario.r_rechazo.data
     
-    # Contar cuántos valores se han ingresado
-    valores_ingresados = sum([1 for x in [f, p, r] if x > 0])
+    # Contar cuántos valores válidos se han ingresado
+    valores_validos = []
+    if f is not None and f > 0:
+        valores_validos.append(('f', f))
+    if p is not None and p > 0:
+        valores_validos.append(('p', p))
+    if r is not None and r > 0:
+        valores_validos.append(('r', r))
     
-    # Si se tienen al menos 2 valores, calcular el tercero
-    if valores_ingresados >= 2:
-        if f > 0 and p > 0 and r == 0:
-            r = f - p
-        elif f > 0 and r > 0 and p == 0:
-            p = f - r
-        elif p > 0 and r > 0 and f == 0:
-            f = p + r
+    # Necesitamos al menos 2 valores para calcular el tercero
+    if len(valores_validos) >= 2:
+        # Calcular el valor faltante usando F = P + R
+        if f is None or f == 0:
+            f = p + r if p and r else 0
+        elif p is None or p == 0:
+            p = f - r if f and r else 0
+        elif r is None or r == 0:
+            r = f - p if f and p else 0
     else:
-        # Usar valores ejemplo si no hay suficientes datos
-        f = f or 100.0
-        p = p or 80.0
-        r = f - p
+        return None  # No hay suficientes datos
     
-    # Validar que los valores sean positivos
-    f = max(0, f)
-    p = max(0, p)
-    r = max(0, r)
+    # Validar que los valores sean positivos y coherentes
+    f = max(0, f) if f else 0
+    p = max(0, p) if p else 0
+    r = max(0, r) if r else 0
     
     # Calcular carga circulante CC = (R/P) * 100
     carga_circulante_pct = (r / p) * 100 if p > 0 else 0
     
     # Verificar balance F = P + R
     balance_verificado = abs(f - (p + r)) < 0.1
+    error_balance = abs(f - (p + r))
     
     return {
         'tipo_circuito': 'directo',
@@ -80,43 +85,54 @@ def calcular_circuito_directo(formulario):
         'p_producto': round(p, 2),
         'r_rechazo': round(r, 2),
         'carga_circulante_pct': round(carga_circulante_pct, 1),
-        'balance_verificado': balance_verificado
+        'balance_verificado': balance_verificado,
+        'error_balance': round(error_balance, 3),
+        'interpretacion': {
+            'balance': 'El balance de masa F = P + R está cumplido' if balance_verificado else f'Error en balance: {error_balance:.3f} t/h',
+            'carga_circulante': f'La carga circulante es {carga_circulante_pct:.1f}%, lo que indica {"alta" if carga_circulante_pct > 300 else "moderada" if carga_circulante_pct > 150 else "baja"} recirculación',
+            'eficiencia': f'Por cada tonelada de producto final se recirculan {carga_circulante_pct/100:.2f} toneladas'
+        }
     }
 
 def calcular_circuito_inverso(formulario):
     """Circuito Cerrado Inverso: F + R = P"""
     # Obtener valores del formulario
-    f = formulario.f_alimentacion_inv.data or 0
-    r = formulario.r_rechazo_inv.data or 0
-    p = formulario.p_producto_inv.data or 0
+    f = formulario.f_alimentacion_inv.data
+    r = formulario.r_rechazo_inv.data
+    p = formulario.p_producto_inv.data
     
-    # Contar cuántos valores se han ingresado
-    valores_ingresados = sum([1 for x in [f, r, p] if x > 0])
+    # Contar cuántos valores válidos se han ingresado
+    valores_validos = []
+    if f is not None and f > 0:
+        valores_validos.append(('f', f))
+    if r is not None and r > 0:
+        valores_validos.append(('r', r))
+    if p is not None and p > 0:
+        valores_validos.append(('p', p))
     
-    # Si se tienen al menos 2 valores, calcular el tercero
-    if valores_ingresados >= 2:
-        if f > 0 and r > 0 and p == 0:
-            p = f + r
-        elif f > 0 and p > 0 and r == 0:
-            r = p - f
-        elif r > 0 and p > 0 and f == 0:
-            f = p - r
+    # Necesitamos al menos 2 valores para calcular el tercero
+    if len(valores_validos) >= 2:
+        # Calcular el valor faltante usando F + R = P
+        if f is None or f == 0:
+            f = p - r if p and r else 0
+        elif r is None or r == 0:
+            r = p - f if p and f else 0
+        elif p is None or p == 0:
+            p = f + r if f and r else 0
     else:
-        # Usar valores ejemplo si no hay suficientes datos
-        f = f or 100.0
-        r = r or 20.0
-        p = f + r
+        return None  # No hay suficientes datos
     
     # Validar que los valores sean positivos
-    f = max(0, f)
-    r = max(0, r)
-    p = max(0, p)
+    f = max(0, f) if f else 0
+    r = max(0, r) if r else 0
+    p = max(0, p) if p else 0
     
     # Calcular carga circulante CC = (R/F) * 100
     carga_circulante_pct = (r / f) * 100 if f > 0 else 0
     
     # Verificar balance F + R = P
     balance_verificado = abs((f + r) - p) < 0.1
+    error_balance = abs((f + r) - p)
     
     return {
         'tipo_circuito': 'inverso',
@@ -124,7 +140,13 @@ def calcular_circuito_inverso(formulario):
         'r_rechazo': round(r, 2),
         'p_producto': round(p, 2),
         'carga_circulante_pct': round(carga_circulante_pct, 1),
-        'balance_verificado': balance_verificado
+        'balance_verificado': balance_verificado,
+        'error_balance': round(error_balance, 3),
+        'interpretacion': {
+            'balance': 'El balance de masa F + R = P está cumplido' if balance_verificado else f'Error en balance: {error_balance:.3f} t/h',
+            'carga_circulante': f'La carga circulante es {carga_circulante_pct:.1f}% respecto a la alimentación fresca',
+            'eficiencia': f'Por cada tonelada de alimentación fresca se recirculan {carga_circulante_pct/100:.2f} toneladas'
+        }
     }
 
 def calcular_circuito_sabc1(formulario):
@@ -221,43 +243,50 @@ def crear_diagrama_flujo(resultados):
     if tipo_circuito == 'directo':
         categorias = ['Alimentación (F)', 'Producto (P)', 'Rechazo (R)']
         valores = [resultados['f_alimentacion'], resultados['p_producto'], resultados['r_rechazo']]
-        titulo = 'Circuito Cerrado Directo - Flujos'
+        titulo = 'Circuito Cerrado Directo - Balance de Flujos (F = P + R)'
+        colores = ['#17a2b8', '#28a745', '#ffc107']  # Azul, verde, amarillo
         
     elif tipo_circuito == 'inverso':
         categorias = ['Alimentación (F)', 'Rechazo (R)', 'Producto (P)']
         valores = [resultados['f_alimentacion'], resultados['r_rechazo'], resultados['p_producto']]
-        titulo = 'Circuito Cerrado Inverso - Flujos'
+        titulo = 'Circuito Cerrado Inverso - Balance de Flujos (F + R = P)'
+        colores = ['#17a2b8', '#ffc107', '#28a745']  # Azul, amarillo, verde
         
     elif tipo_circuito == 'sabc1':
         categorias = ['Mineral (F)', 'SAG (S)', 'Bolas (B)', 'Producto (P)', 'Circulante (R)']
         valores = [resultados['f_mineral'], resultados['s_producto_sag'], 
                   resultados['b_producto_bolas'], resultados['p_producto_final'], 
                   resultados['r_carga_circulante']]
-        titulo = 'Circuito SABC-1 - Flujos'
+        titulo = 'Circuito SABC-1 - Flujos Másicos'
+        colores = ['#17a2b8', '#6f42c1', '#fd7e14', '#28a745', '#ffc107']
         
     elif tipo_circuito == 'sabc2':
         categorias = ['Mineral (F)', 'SAG (S)', 'Rechazo (R)', 'Producto (P)']
         valores = [resultados['f_mineral'], resultados['s_producto_sag'], 
                   resultados['r_rechazo'], resultados['p_producto_final']]
-        titulo = 'Circuito SABC-2 - Flujos'
+        titulo = 'Circuito SABC-2 - Flujos Másicos'
+        colores = ['#17a2b8', '#6f42c1', '#ffc107', '#28a745']
     
-    colores = ['#1f77b4', '#ff7f0e', '#2ca02c', '#d62728', '#9467bd'][:len(categorias)]
-    
+    # Crear barras con diferentes colores y etiquetas
     fig.add_trace(go.Bar(
         x=categorias,
         y=valores,
         name='Flujos (t/h)',
         marker_color=colores,
-        text=[f'{v:.1f} t/h' for v in valores],
-        textposition='auto'
+        text=[f'{v:.2f}' for v in valores],
+        textposition='auto',
+        textfont=dict(size=12, color='white'),
+        hovertemplate='<b>%{x}</b><br>Flujo: %{y:.2f} t/h<extra></extra>'
     ))
     
     fig.update_layout(
-        title=titulo,
-        xaxis_title='Flujos del Circuito',
-        yaxis_title='Toneladas por Hora (t/h)',
+        title=dict(text=titulo, x=0.5, font=dict(size=16)),
+        xaxis_title='Corrientes del Circuito',
+        yaxis_title='Flujo Másico (t/h)',
         showlegend=False,
-        height=500
+        height=400,
+        template='plotly_white',
+        margin=dict(t=60, b=80, l=80, r=40)
     )
     
     return json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
